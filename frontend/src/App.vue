@@ -1,24 +1,25 @@
 <template>
   <div id="app">
-    <router-view />
+    <DefaultLayout v-if="!isAdminRoute">
+      <router-view />
+    </DefaultLayout>
+    <router-view v-else />
+    <UiToaster />
   </div>
 </template>
 
 <script setup lang="ts">
-// App root component
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { UiToaster } from '@/components/ui'
+
+const route = useRoute()
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 </script>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  min-height: 100vh;
 }
 </style>

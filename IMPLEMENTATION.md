@@ -578,16 +578,16 @@ export class Product {
 
 ### Checklist
 
-- [ ] Product entity & migration đã tạo
-- [ ] Category entity & migration đã tạo
-- [ ] Product module backend đã hoàn thiện
-- [ ] Category module backend đã hoàn thiện
-- [ ] API endpoints đã test
-- [ ] Frontend product listing đã implement
-- [ ] Frontend product detail đã implement
-- [ ] Search & filter đã hoạt động
-- [ ] Image upload/display đã setup
-- [ ] Pagination đã implement
+- [x] Product entity & migration đã tạo
+- [x] Category entity & migration đã tạo
+- [x] Product module backend đã hoàn thiện
+- [x] Category module backend đã hoàn thiện
+- [x] API endpoints đã test
+- [x] Frontend product listing đã implement (CategoryView + ProductGrid, sort, pagination)
+- [x] Frontend product detail đã implement (ProductView: gallery, info, add-to-cart, related)
+- [x] Search & filter đã hoạt động (sort trên trang danh mục)
+- [ ] Image upload/display đã setup (admin phase)
+- [x] Pagination đã implement
 
 ---
 
@@ -675,17 +675,17 @@ export const useCartStore = defineStore('cart', {
 
 ### Checklist
 
-- [ ] Cart store đã hoàn thiện
-- [ ] Wishlist store đã hoàn thiện
-- [ ] localStorage persistence đã hoạt động
-- [ ] Cart page đã implement
-- [ ] Wishlist page đã implement
-- [ ] Cart/Wishlist icons trong header
-- [ ] Add to cart từ product page
-- [ ] Add to wishlist từ product page
-- [ ] Update quantity trong cart
-- [ ] Remove items đã hoạt động
-- [ ] Total calculation đã chính xác
+- [x] Cart store đã hoàn thiện
+- [x] Wishlist store đã hoàn thiện
+- [x] localStorage persistence đã hoạt động
+- [x] Cart page đã implement (CartItem.vue, list, qty, remove, tổng, nút Thanh toán → /contact)
+- [x] Wishlist page đã implement (grid, xóa, Thêm vào giỏ, Xem sản phẩm)
+- [x] Cart/Wishlist icons trong header (DefaultLayout, badge count)
+- [x] Add to cart từ product page
+- [x] Add to wishlist từ product page
+- [x] Update quantity trong cart
+- [x] Remove items đã hoạt động
+- [x] Total calculation đã chính xác
 
 ---
 
@@ -800,13 +800,13 @@ VITE_ZALO_URL=https://zalo.me/...
 
 ### Checklist
 
-- [ ] Inquiry entity & migration đã tạo
-- [ ] Inquiry module backend đã hoàn thiện
-- [ ] API endpoint POST /inquiries đã test
-- [ ] Contact form đã implement
-- [ ] Form validation đã hoạt động
-- [ ] Integration với cart đã làm
-- [ ] Social media buttons đã tích hợp
+- [x] Inquiry entity & migration đã tạo (Prisma model Inquiry)
+- [x] Inquiry module backend đã hoàn thiện (DTO, service, controller POST /inquiries)
+- [x] API endpoint POST /inquiries đã test
+- [x] Contact form đã implement (gọi API, validation, loading/success/error)
+- [x] Form validation đã hoạt động (backend class-validator)
+- [x] Integration với cart đã làm (from=cart → hiển thị tóm tắt giỏ, gửi productIds + source)
+- [x] Social media buttons đã tích hợp (Facebook Messenger, Zalo qua VITE_FACEBOOK_URL, VITE_ZALO_URL)
 - [ ] Email notification (optional) đã setup
 - [ ] Rate limiting cho inquiry endpoint
 - [ ] Spam protection (captcha optional)
@@ -918,18 +918,18 @@ export class CmsPage {
 
 ### Checklist
 
-- [ ] Auth module backend đã tạo
-- [ ] JWT authentication đã hoạt động
-- [ ] Admin guards đã implement
-- [ ] CMS module backend đã tạo
-- [ ] Admin login page đã implement
-- [ ] Admin dashboard đã tạo
-- [ ] Product management đã hoàn thiện
-- [ ] Category management đã hoàn thiện
-- [ ] Inquiry management đã hoàn thiện
-- [ ] CMS editor đã implement
-- [ ] Image upload đã hoạt động
-- [ ] Admin routes protection đã setup
+- [x] Auth module backend đã tạo (JWT, login, me, JwtAuthGuard)
+- [x] JWT authentication đã hoạt động
+- [x] Admin guards đã implement (JwtAuthGuard trên admin endpoints)
+- [x] CMS module backend đã tạo (GET page/:slug public, CRUD admin)
+- [x] Admin login page đã implement
+- [x] Admin dashboard đã tạo (stats, recent inquiries)
+- [x] Product management đã hoàn thiện (list, create, edit, delete)
+- [x] Category management đã hoàn thiện (list, add/edit modal, delete)
+- [x] Inquiry management đã hoàn thiện (list, filter, update status)
+- [x] CMS editor đã implement (list, form create/edit)
+- [ ] Image upload đã hoạt động (admin dùng URL ảnh)
+- [x] Admin routes protection đã setup (router guard, token)
 
 ---
 

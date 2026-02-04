@@ -36,4 +36,9 @@ export const productService = {
   async getProduct(slug: string): Promise<Product> {
     return apiClient.get(`/products/${slug}`)
   },
+
+  async getRelatedProducts(slug: string, limit = 4): Promise<Product[]> {
+    const data = await apiClient.get(`/products/${slug}/related`, { params: { limit } })
+    return Array.isArray(data) ? data : []
+  },
 }

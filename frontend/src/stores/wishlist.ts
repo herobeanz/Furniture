@@ -6,6 +6,7 @@ export interface WishlistItem {
   name: string
   price: number
   image?: string
+  slug?: string
 }
 
 export const useWishlistStore = defineStore('wishlist', () => {
