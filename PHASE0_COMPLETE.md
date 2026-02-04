@@ -2,29 +2,24 @@
 
 ## Tóm tắt công việc đã thực hiện
 
-### ✅ 1. Docker Setup
-- [x] Tạo `docker-compose.yml` với PostgreSQL 14 và Redis 7
-- [x] Cấu hình health checks cho containers
-- [x] Setup volumes và networks
-
-### ✅ 2. Git Repository
+### ✅ 1. Git Repository
 - [x] Khởi tạo Git repository
 - [x] Tạo `.gitignore` cho toàn bộ project
 - [x] Tạo `.gitattributes` cho line endings
 
-### ✅ 3. Backend Project (NestJS)
+### ✅ 2. Backend Project (NestJS)
 - [x] Khởi tạo NestJS project với TypeScript
 - [x] Cài đặt dependencies với yarn
 - [x] Tạo `.env.example` với các biến môi trường cần thiết
 
-### ✅ 4. Frontend Project (Vue 3 + Vite)
+### ✅ 3. Frontend Project (Vue 3 + Vite)
 - [x] Khởi tạo Vue 3 + Vite project với TypeScript
 - [x] Cài đặt dependencies với yarn (Vue Router, Pinia, Axios)
 - [x] Tạo cấu trúc thư mục src/ với assets, components, views, stores, services, utils, types
 - [x] Setup Vue Router và Pinia
 - [x] Tạo `.env.example` với các biến môi trường cần thiết
 
-### ✅ 5. Database Schema Design
+### ✅ 4. Database Schema Design
 - [x] Tạo file `DATABASE_SCHEMA.md` với:
   - Schema cho tất cả tables (categories, products, inquiries, cms_pages, admins)
   - Redis keys structure
@@ -68,7 +63,6 @@ Furniture/
 │   ├── package.json
 │   └── yarn.lock
 │
-├── docker-compose.yml         # Docker services (PostgreSQL + Redis)
 ├── .gitignore
 ├── .gitattributes
 ├── README.md
@@ -84,10 +78,7 @@ Furniture/
 
 ### Để bắt đầu development:
 
-1. **Start Docker services:**
-   ```bash
-   docker-compose up -d
-   ```
+1. **Cài đặt và chạy PostgreSQL local** (tạo user/database theo SETUP.md).
 
 2. **Setup Backend:**
    ```bash
@@ -97,7 +88,7 @@ Furniture/
    yarn start:dev
    ```
 
-3. **Setup Frontend:**
+2. **Setup Frontend:**
    ```bash
    cd frontend
    cp .env.example .env  # hoặc Copy-Item .env.example .env (PowerShell)
@@ -122,7 +113,6 @@ Các công việc chính:
 
 - [x] Node.js v18+ đã cài đặt
 - [x] Yarn đã cài đặt
-- [x] Docker Compose đã setup
 - [x] Backend project đã khởi tạo
 - [x] Frontend project đã khởi tạo
 - [x] Git repository đã setup

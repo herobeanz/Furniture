@@ -25,10 +25,14 @@ apiClient.interceptors.request.use(
   }
 )
 
-// Response interceptor
+// Response interceptor: unwrap standardized { success, data, timestamp }
 apiClient.interceptors.response.use(
   (response) => {
-    return response.data
+    const data = response.data
+    if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+      return data.data
+    }
+    return data
   },
   (error) => {
     // Handle errors

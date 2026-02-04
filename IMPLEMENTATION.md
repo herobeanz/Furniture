@@ -58,15 +58,8 @@ npm install -g yarn
 
 **Database**
 ```bash
-# PostgreSQL (v14+)
-# Redis (v7+)
-# Hoặc sử dụng Docker Compose
-```
-
-**Docker Setup (khuyến nghị)**
-```bash
-# Tạo docker-compose.yml cho dev environment
-docker-compose up -d postgres redis
+# PostgreSQL (v14+) - cài đặt local
+# Redis (v7+) - cài đặt local (optional cho cache)
 ```
 
 #### 0.2. Khởi tạo dự án
@@ -154,8 +147,6 @@ VITE_ZALO_URL=https://zalo.me/...
 - [ ] Git repository đã setup
 - [ ] Database schema đã thiết kế
 - [ ] Environment variables đã cấu hình
-- [ ] Docker Compose (optional) đã setup
-
 ---
 
 ## Giai đoạn 1: Backend Foundation
@@ -1143,34 +1134,19 @@ yarn add -D vite-bundle-visualizer
 # - Deploy (staging/production)
 ```
 
-**Docker Setup**
-```dockerfile
-# Dockerfile cho backend
-# Dockerfile cho frontend
-# docker-compose.prod.yml
-```
-
 #### 8.4. Deployment
 
 **Backend Deployment**
-- VPS (DigitalOcean, AWS EC2)
-- Hoặc Platform (Railway, Render, Heroku)
-- Environment variables setup
-- Database migration
+- Chạy local hoặc VPS (Node.js, env vars, database migration)
 
 **Frontend Deployment**
-- Vercel, Netlify (recommended cho Vite)
-- Hoặc VPS với Nginx
-- Build command: `yarn build` (output: `dist/`)
-- Serve static files từ `dist/` folder
+- Build: `yarn build` (output: `dist/`), serve static từ `dist/`
 
 **Database**
-- Managed PostgreSQL (AWS RDS, DigitalOcean)
-- Hoặc self-hosted
+- PostgreSQL (local hoặc managed service)
 
 **Redis**
-- Managed Redis (Upstash, Redis Cloud)
-- Hoặc self-hosted
+- Redis (local hoặc managed service, optional)
 
 #### 8.5. Monitoring & Logging
 
@@ -1207,7 +1183,6 @@ yarn add -D vite-bundle-visualizer
 - [ ] Frontend component tests đã viết
 - [ ] E2E tests đã viết
 - [ ] CI/CD pipeline đã setup
-- [ ] Docker containers đã tạo
 - [ ] Backend đã deploy
 - [ ] Frontend đã deploy
 - [ ] Database migration đã chạy

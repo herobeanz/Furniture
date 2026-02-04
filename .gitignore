@@ -49,9 +49,6 @@ Thumbs.db
 *.sublime-workspace
 *.code-workspace
 
-# Docker
-.dockerignore
-
 # Uploads
 uploads/
 public/uploads/
@@ -64,9 +61,6 @@ public/uploads/
 tmp/
 temp/
 *.tmp
-
-# AWS
-.aws/
 
 # Misc
 .cache/

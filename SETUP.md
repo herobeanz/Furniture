@@ -1,15 +1,15 @@
 # 🚀 Setup Guide - Phase 0
 
-Hướng dẫn setup môi trường phát triển cho dự án Furniture E-commerce.
+Hướng dẫn setup môi trường phát triển cho dự án Furniture E-commerce (chạy local).
 
 ---
 
 ## Yêu cầu hệ thống
 
-- **Node.js**: v18+ 
+- **Node.js**: v18+
 - **Yarn**: v1.22+ (hoặc npm)
-- **Docker**: v20+ (khuyến nghị)
-- **Docker Compose**: v2+ (khuyến nghị)
+- **PostgreSQL**: v14+ (cài đặt local)
+- **Redis**: v7+ (cài đặt local, optional cho cache)
 - **Git**: v2.30+
 
 ---
@@ -35,41 +35,32 @@ node --version  # Cần >= 18
 npm install -g yarn
 ```
 
-### Docker (khuyến nghị)
+### PostgreSQL (local)
 
-```bash
-# Kiểm tra Docker
-docker --version
-docker-compose --version
+- **Windows:** tải installer từ [postgresql.org](https://www.postgresql.org/download/windows/) hoặc dùng [PostgreSQL portable](https://www.enterprisedb.com/download-postgresql-binaries).
+- **macOS:** `brew install postgresql@14` rồi `brew services start postgresql@14`.
+- **Linux:** `sudo apt install postgresql postgresql-contrib` (Ubuntu/Debian) hoặc tương đương.
+
+Tạo database và user (trong `psql` hoặc pgAdmin):
+
+```sql
+CREATE USER furniture_user WITH PASSWORD 'furniture_password';
+CREATE DATABASE furniture_db OWNER furniture_user;
 ```
+
+**Kết nối mặc định:** `localhost:5432`, user `furniture_user`, database `furniture_db`. Chỉnh trong `.env` nếu bạn dùng user/password/port khác.
+
+### Redis (optional – dùng sau cho cache)
+
+- **Windows:** [Redis for Windows](https://github.com/microsoftarchive/redis/releases) hoặc WSL.
+- **macOS:** `brew install redis` → `brew services start redis`.
+- **Linux:** `sudo apt install redis-server`.
+
+Mặc định Redis: `localhost:6379`. Có thể bỏ qua nếu chưa dùng cache.
 
 ---
 
-## Bước 3: Setup Database với Docker
-
-```bash
-# Start PostgreSQL và Redis
-docker-compose up -d
-
-# Kiểm tra containers đang chạy
-docker-compose ps
-
-# Xem logs
-docker-compose logs -f
-```
-
-**Database Connection:**
-- PostgreSQL: `localhost:5432`
-- Username: `furniture_user`
-- Password: `furniture_password`
-- Database: `furniture_db`
-
-**Redis Connection:**
-- Redis: `localhost:6379`
-
----
-
-## Bước 4: Setup Backend
+## Bước 3: Setup Backend
 
 ```bash
 cd backend
@@ -84,22 +75,25 @@ Copy-Item .env.example .env
 # Linux/Mac:
 # cp .env.example .env
 
-# Chỉnh sửa .env với thông tin phù hợp
-# (Database URL đã được cấu hình sẵn cho Docker)
+# Chỉnh .env: DATABASE_URL đúng với PostgreSQL local của bạn
+# Ví dụ: postgresql://furniture_user:furniture_password@localhost:5432/furniture_db
 
 # Chạy Prisma migration (tạo bảng trong PostgreSQL)
 yarn prisma:generate
 yarn prisma:migrate
 
+# (Optional) Seed dữ liệu test
+yarn prisma:seed
+
 # Chạy development server
 yarn start:dev
 ```
 
-Backend sẽ chạy tại: `http://localhost:3000`
+Backend chạy tại: `http://localhost:3000`
 
 ---
 
-## Bước 5: Setup Frontend
+## Bước 4: Setup Frontend
 
 ```bash
 cd frontend
@@ -114,37 +108,28 @@ Copy-Item .env.example .env
 # Linux/Mac:
 # cp .env.example .env
 
-# Chỉnh sửa .env với thông tin phù hợp
-# (API URL đã được cấu hình sẵn)
+# Chỉnh .env nếu cần (VITE_API_BASE_URL trỏ tới backend)
 
 # Chạy development server
 yarn dev
 ```
 
-Frontend sẽ chạy tại: `http://localhost:5173`
+Frontend chạy tại: `http://localhost:5173`
 
 ---
 
-## Bước 6: Kiểm tra
+## Bước 5: Kiểm tra
 
-1. **Backend Health Check:**
-   ```bash
-   curl http://localhost:3000/health
-   # Hoặc mở browser: http://localhost:3000
-   ```
+1. **Backend**
+   - Mở: `http://localhost:3000` (hoặc endpoint health nếu có).
+   - Kiểm tra không lỗi kết nối database.
 
-2. **Frontend:**
-   - Mở browser: `http://localhost:5173`
-   - Kiểm tra console không có lỗi
+2. **Frontend**
+   - Mở: `http://localhost:5173`
+   - Kiểm tra console không lỗi, API gọi được.
 
-3. **Database:**
-   ```bash
-   # Kết nối PostgreSQL
-   docker exec -it furniture_postgres psql -U furniture_user -d furniture_db
-   
-   # Kiểm tra tables
-   \dt
-   ```
+3. **Database**
+   - Dùng pgAdmin, DBeaver hoặc `psql -U furniture_user -d furniture_db` để xem bảng đã được tạo (sau khi chạy `yarn prisma:migrate`).
 
 ---
 
@@ -152,85 +137,55 @@ Frontend sẽ chạy tại: `http://localhost:5173`
 
 ```
 Furniture/
-├── backend/          # NestJS Backend
+├── backend/
+│   ├── src/
+│   ├── prisma/
+│   ├── .env
+│   └── package.json
+├── frontend/
 │   ├── src/
 │   ├── .env
 │   └── package.json
-├── frontend/         # Vue 3 + Vite Frontend
-│   ├── src/
-│   ├── .env
-│   └── package.json
-├── docker-compose.yml
 ├── .gitignore
 ├── README.md
 ├── IMPLEMENTATION.md
-└── DATABASE_SCHEMA.md
+├── DATABASE_SCHEMA.md
+├── SETUP.md
+└── PHASE0_COMPLETE.md
 ```
 
 ---
 
 ## Troubleshooting
 
-### Docker containers không start
-
-```bash
-# Kiểm tra ports đã được sử dụng chưa
-netstat -ano | findstr :5432  # Windows
-lsof -i :5432                  # Mac/Linux
-
-# Xóa containers và volumes cũ
-docker-compose down -v
-
-# Start lại
-docker-compose up -d
-```
-
 ### Backend không kết nối được database
 
-- Kiểm tra Docker containers đang chạy: `docker-compose ps`
-- Kiểm tra `.env` file có đúng DATABASE_URL không
-- Kiểm tra logs: `docker-compose logs postgres`
+- Kiểm tra PostgreSQL đã chạy (service / process).
+- Kiểm tra `.env`: `DATABASE_URL` đúng user, password, port, tên database.
+- Thử kết nối bằng `psql` hoặc pgAdmin với cùng thông tin.
 
-### Frontend không kết nối được API
+### Frontend không gọi được API
 
-- Kiểm tra Backend đang chạy tại `http://localhost:3000`
-- Kiểm tra `.env` file có đúng `VITE_API_BASE_URL` không
-- Kiểm tra CORS settings trong Backend
+- Kiểm tra backend đang chạy tại `http://localhost:3000`.
+- Kiểm tra `.env` frontend: `VITE_API_BASE_URL` trỏ đúng backend.
+- Kiểm tra CORS trên backend cho phép origin frontend.
+
+### Lỗi migration Prisma
+
+- Đảm bảo database đã tạo và user có quyền.
+- Chạy lại: `yarn prisma:generate` rồi `yarn prisma:migrate`.
 
 ---
 
 ## Next Steps
 
 Sau khi setup xong Phase 0, tiếp tục với:
+
 - **Phase 1**: Backend Foundation
 - **Phase 2**: Frontend Foundation
 
-Xem chi tiết trong `IMPLEMENTATION.md`
+Chi tiết trong `IMPLEMENTATION.md`.
 
 ---
 
-## Lệnh hữu ích
-
-```bash
-# Docker
-docker-compose up -d          # Start services
-docker-compose down           # Stop services
-docker-compose logs -f        # View logs
-docker-compose ps             # Check status
-
-# Backend
-cd backend
-yarn start:dev               # Development mode
-yarn build                   # Build production
-yarn start:prod              # Production mode
-
-# Frontend
-cd frontend
-yarn dev                     # Development mode
-yarn build                   # Build production
-yarn preview                 # Preview production build
-```
-
----
-
-**Chúc bạn setup thành công! 🎉**
+**Chúc bạn setup thành công.**
