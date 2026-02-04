@@ -1,0 +1,133 @@
+// Prisma schema - Furniture E-commerce
+// Ref: DATABASE_SCHEMA.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Categories (nested support via parentId)
+// ---------------------------------------------------------------------------
+model Category {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String     @db.VarChar(255)
+  slug        String     @unique @db.VarChar(255)
+  description String?    @db.Text
+  imageUrl    String?    @map("image_url") @db.VarChar(500)
+  parentId    String?    @map("parent_id") @db.Uuid
+  orderIndex  Int        @default(0) @map("order_index")
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([orderIndex])
+  @@map("categories")
+}
+
+// ---------------------------------------------------------------------------
+// Products
+// ---------------------------------------------------------------------------
+model Product {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String    @db.VarChar(255)
+  slug             String    @unique @db.VarChar(255)
+  description      String?   @db.Text
+  shortDescription String?   @map("short_description") @db.VarChar(500)
+  price            Decimal   @db.Decimal(10, 2)
+  comparePrice     Decimal?  @map("compare_price") @db.Decimal(10, 2)
+  sku              String?   @unique @db.VarChar(100)
+  categoryId       String?   @map("category_id") @db.Uuid
+  images           String[]  @db.Text
+  status           String    @default("active") @db.VarChar(50) // active, inactive, draft
+  stockQuantity    Int       @default(0) @map("stock_quantity")
+  weight           Decimal?  @db.Decimal(8, 2)
+  dimensions       String?   @db.VarChar(100)
+  material         String?   @db.VarChar(255)
+  color            String?   @db.VarChar(100)
+  metaTitle        String?   @map("meta_title") @db.VarChar(255)
+  metaDescription  String?   @map("meta_description") @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@index([sku])
+  @@index([price])
+  @@map("products")
+}
+
+// ---------------------------------------------------------------------------
+// Inquiries (customer leads)
+// ---------------------------------------------------------------------------
+model Inquiry {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @db.VarChar(255)
+  phone       String   @db.VarChar(20)
+  email       String?  @db.VarChar(255)
+  message     String   @db.Text
+  productIds  String[] @map("product_ids") @db.Uuid
+  status      String   @default("pending") @db.VarChar(50) // pending, contacted, completed, cancelled
+  anonymousId String?  @map("anonymous_id") @db.VarChar(255)
+  source      String?  @db.VarChar(100)
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([anonymousId])
+  @@map("inquiries")
+}
+
+// ---------------------------------------------------------------------------
+// CMS Pages (About, Privacy, Terms, etc.)
+// ---------------------------------------------------------------------------
+model CmsPage {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String   @unique @db.VarChar(255)
+  title          String   @db.VarChar(255)
+  content        String   @db.Text
+  metaTitle      String?  @map("meta_title") @db.VarChar(255)
+  metaDescription String? @map("meta_description") @db.Text
+  isPublished   Boolean  @default(true) @map("is_published")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isPublished])
+  @@map("cms_pages")
+}
+
+// ---------------------------------------------------------------------------
+// Admins (optional - for admin panel)
+// ---------------------------------------------------------------------------
+model Admin {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String    @unique @db.VarChar(100)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  fullName     String?   @map("full_name") @db.VarChar(255)
+  role         String    @default("admin") @db.VarChar(50) // admin, super_admin
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([username])
+  @@index([email])
+  @@map("admins")
+}
