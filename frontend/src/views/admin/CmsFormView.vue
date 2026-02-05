@@ -17,9 +17,33 @@
       </div>
       <div class="form-group">
         <label>
-          <input v-model="form.isPublished" type="checkbox" />
-          Xuất bản
+          <input v-model="form.isActive" type="checkbox" />
+          Kích hoạt
         </label>
+      </div>
+      <div class="form-group">
+        <label for="thumbnail">Ảnh đại diện (URL)</label>
+        <input id="thumbnail" v-model="form.thumbnail" type="url" />
+      </div>
+      <div class="form-group">
+        <label for="pageType">Loại trang</label>
+        <input id="pageType" v-model="form.pageType" />
+      </div>
+      <div class="form-group">
+        <label for="metaKeywords">Meta Keywords</label>
+        <input id="metaKeywords" v-model="form.metaKeywords" />
+      </div>
+      <div class="form-group">
+        <label for="publishedAt">Ngày xuất bản</label>
+        <input id="publishedAt" v-model="form.publishedAt" type="datetime-local" />
+      </div>
+      <div class="form-group">
+        <label for="seoTitle">SEO Title</label>
+        <input id="seoTitle" v-model="form.seoTitle" />
+      </div>
+      <div class="form-group">
+        <label for="seoDescription">SEO Description</label>
+        <textarea id="seoDescription" v-model="form.seoDescription" rows="2"></textarea>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
       <div class="form-actions">
@@ -39,14 +63,21 @@ import apiClient from '@/services/api.client'
 
 const route = useRoute()
 const router = useRouter()
-const id = route.params.id as string
-const isEdit = id && id !== 'new'
+const idParam = route.params.id as string
+const id = idParam && idParam !== 'new' ? Number(idParam) : null
+const isEdit = !!id
 
 const form = reactive({
   slug: '',
   title: '',
   content: '',
-  isPublished: true,
+  thumbnail: '',
+  isActive: true,
+  seoTitle: '',
+  seoDescription: '',
+  pageType: '',
+  metaKeywords: '',
+  publishedAt: '',
 })
 
 const loading = ref(!!isEdit)
@@ -60,10 +91,16 @@ onMounted(async () => {
   }
   try {
     const p = await apiClient.get(`/cms/${id}`) as any
-    form.slug = p.slug
-    form.title = p.title
+    form.slug = p.slug || ''
+    form.title = p.title || ''
     form.content = p.content ?? ''
-    form.isPublished = p.isPublished ?? true
+    form.thumbnail = p.thumbnail || ''
+    form.isActive = p.isActive ?? true
+    form.seoTitle = p.seoTitle || ''
+    form.seoDescription = p.seoDescription || ''
+    form.pageType = p.pageType || ''
+    form.metaKeywords = p.metaKeywords || ''
+    form.publishedAt = p.publishedAt ? new Date(p.publishedAt).toISOString().slice(0, 16) : ''
   } catch (e) {
     console.error(e)
   } finally {
@@ -75,8 +112,12 @@ async function onSubmit() {
   saving.value = true
   error.value = ''
   try {
-    if (isEdit) {
-      await apiClient.put(`/cms/${id}`, form)
+    const payload = {
+      ...form,
+      publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : undefined,
+    }
+    if (isEdit && id) {
+      await apiClient.put(`/cms/${id}`, payload)
     } else {
       await apiClient.post('/cms', form)
     }

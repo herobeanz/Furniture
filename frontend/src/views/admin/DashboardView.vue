@@ -62,13 +62,13 @@ function formatDate(s: string) {
 onMounted(async () => {
   try {
     const [productsRes, categoriesRes, inquiriesRes, cmsRes] = await Promise.all([
-      apiClient.get('/products', { params: { limit: 1 } }),
-      apiClient.get('/categories'),
-      apiClient.get('/inquiries', { params: { limit: 5 } }),
-      apiClient.get('/cms'),
+      apiClient.get('/products/list/all').catch(() => []),
+      apiClient.get('/categories/list/all').catch(() => []),
+      apiClient.get('/inquiries', { params: { limit: 5 } }).catch(() => ({ data: [], total: 0 })),
+      apiClient.get('/cms').catch(() => []),
     ])
     stats.value = {
-      products: (productsRes as any).total ?? 0,
+      products: Array.isArray(productsRes) ? (productsRes as any[]).length : 0,
       categories: Array.isArray(categoriesRes) ? (categoriesRes as any[]).length : 0,
       inquiries: (inquiriesRes as any).total ?? 0,
       cms: Array.isArray(cmsRes) ? (cmsRes as any[]).length : 0,

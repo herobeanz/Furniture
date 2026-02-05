@@ -64,7 +64,7 @@
         <div v-else-if="flashProducts.length === 0" class="empty">Chưa có sản phẩm.</div>
         <div v-else class="product-grid four-cols">
           <article v-for="p in flashProducts" :key="p.id" class="product-card flash-card">
-            <RouterLink :to="'/product/' + p.slug" class="product-image-wrap">
+            <RouterLink :to="getProductPath(p)" class="product-image-wrap">
               <img v-if="p.images?.length" :src="p.images[0]" :alt="p.name" />
               <div v-else class="no-image">Ảnh</div>
               <span class="flash-countdown-tag" v-if="countdownText">{{ countdownText }}</span>

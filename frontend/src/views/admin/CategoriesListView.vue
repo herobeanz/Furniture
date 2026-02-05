@@ -32,6 +32,13 @@
         <h3>{{ editId ? 'Sửa danh mục' : 'Thêm danh mục' }}</h3>
         <form @submit.prevent="saveCategory">
           <div class="form-group">
+            <label>Phòng *</label>
+            <select v-model.number="form.roomId" required>
+              <option value="0">Chọn phòng</option>
+              <option v-for="r in rooms" :key="r.id" :value="r.id">{{ r.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label>Tên *</label>
             <input v-model="form.name" required />
           </div>
@@ -42,6 +49,20 @@
           <div class="form-group">
             <label>Mô tả</label>
             <textarea v-model="form.description" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Ảnh đại diện (URL)</label>
+            <input v-model="form.thumbnail" type="url" />
+          </div>
+          <div class="form-group">
+            <label>Thứ tự</label>
+            <input v-model.number="form.orderIndex" type="number" min="0" />
+          </div>
+          <div class="form-group">
+            <label>
+              <input v-model="form.isActive" type="checkbox" />
+              Hiển thị
+            </label>
           </div>
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Lưu</button>
@@ -61,11 +82,18 @@ const items = ref<any[]>([])
 const loading = ref(true)
 const showForm = ref(false)
 const editId = ref('')
+const rooms = ref<any[]>([])
 
 const form = reactive({
+  roomId: 0,
   name: '',
   slug: '',
   description: '',
+  thumbnail: '',
+  orderIndex: 0,
+  isActive: true,
+  seoTitle: '',
+  seoDescription: '',
 })
 
 async function fetchList() {
@@ -78,17 +106,38 @@ async function fetchList() {
   }
 }
 
+async function fetchRooms() {
+  try {
+    const res = await apiClient.get('/rooms')
+    rooms.value = Array.isArray(res) ? res : []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 watch([editId, showForm], async ([id, show]) => {
   if (!show) return
   if (id) {
     const c = await apiClient.get(`/categories/by-id/${id}`) as any
-    form.name = c.name
-    form.slug = c.slug
+    form.roomId = c.roomId || 0
+    form.name = c.name || ''
+    form.slug = c.slug || ''
     form.description = c.description ?? ''
+    form.thumbnail = c.thumbnail ?? ''
+    form.orderIndex = c.orderIndex || 0
+    form.isActive = c.isActive ?? true
+    form.seoTitle = c.seoTitle ?? ''
+    form.seoDescription = c.seoDescription ?? ''
   } else {
+    form.roomId = 0
     form.name = ''
     form.slug = ''
     form.description = ''
+    form.thumbnail = ''
+    form.orderIndex = 0
+    form.isActive = true
+    form.seoTitle = ''
+    form.seoDescription = ''
   }
 })
 
@@ -107,17 +156,21 @@ async function saveCategory() {
   }
 }
 
-async function remove(id: string) {
+async function remove(id: number) {
   if (!confirm('Xóa danh mục này?')) return
   try {
     await apiClient.delete(`/categories/${id}`)
     items.value = items.value.filter((x) => x.id !== id)
   } catch (e) {
     console.error(e)
+    alert('Xóa thất bại.')
   }
 }
 
-onMounted(fetchList)
+onMounted(() => {
+  fetchList()
+  fetchRooms()
+})
 </script>
 
 <style scoped>

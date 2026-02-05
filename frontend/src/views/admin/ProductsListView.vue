@@ -51,13 +51,14 @@ async function fetchList() {
   }
 }
 
-async function remove(id: string) {
+async function remove(id: number) {
   if (!confirm('Xóa sản phẩm này?')) return
   try {
     await apiClient.delete(`/products/${id}`)
     items.value = items.value.filter((x) => x.id !== id)
   } catch (e) {
     console.error(e)
+    alert('Xóa thất bại.')
   }
 }
 

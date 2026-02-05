@@ -49,8 +49,9 @@ import { heroService } from '@/services/hero.service'
 
 const route = useRoute()
 const router = useRouter()
-const id = route.params.id as string
-const isEdit = id && id !== 'new'
+const idParam = route.params.id as string
+const id = idParam && idParam !== 'new' ? Number(idParam) : null
+const isEdit = !!id
 
 const form = reactive({
   title: '',
@@ -71,7 +72,7 @@ onMounted(async () => {
     return
   }
   try {
-    const h = await heroService.getById(id)
+    const h = await heroService.getById(id!)
     form.title = h.title
     form.link = h.link
     form.imageUrl = h.imageUrl ?? ''
@@ -89,7 +90,7 @@ async function onSubmit() {
   error.value = ''
   imgError.value = false
   try {
-    if (isEdit) {
+    if (isEdit && id) {
       await heroService.update(id, {
         title: form.title,
         link: form.link,

@@ -56,7 +56,8 @@ import { useRoute, RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
 
 const route = useRoute()
-const id = computed(() => route.params.id as string)
+const idParam = computed(() => route.params.id as string)
+const id = computed(() => idParam.value && idParam.value !== 'new' ? Number(idParam.value) : null)
 const isEdit = computed(() => !!id.value)
 const saving = ref(false)
 
@@ -72,7 +73,7 @@ const form = reactive({
 })
 
 onMounted(async () => {
-  if (isEdit.value) {
+  if (isEdit.value && id.value) {
     try {
       const r = await apiClient.get(`/rooms/by-id/${id.value}`) as any
       form.name = r.name || ''
@@ -92,7 +93,7 @@ onMounted(async () => {
 async function save() {
   saving.value = true
   try {
-    if (isEdit.value) {
+    if (isEdit.value && id.value) {
       await apiClient.patch(`/rooms/${id.value}`, form)
     } else {
       await apiClient.post('/rooms', form)

@@ -19,7 +19,7 @@
         <tr v-for="p in items" :key="p.id">
           <td>{{ p.slug }}</td>
           <td>{{ p.title }}</td>
-          <td>{{ p.isPublished ? 'Có' : 'Không' }}</td>
+          <td>{{ p.isActive ? 'Có' : 'Không' }}</td>
           <td>
             <RouterLink :to="'/admin/cms/' + p.id" class="link">Sửa</RouterLink>
             <a :href="pageUrl(p.slug)" target="_blank" rel="noopener" class="link">Xem</a>
@@ -40,7 +40,7 @@ const loading = ref(true)
 
 function pageUrl(slug: string) {
   const base = window.location.origin + import.meta.env.BASE_URL
-  return `${base.replace(/\/$/, '')}/page/${slug}`
+  return `${base.replace(/\/$/, '')}/trang/${slug}`
 }
 
 onMounted(async () => {

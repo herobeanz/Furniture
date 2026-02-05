@@ -50,14 +50,15 @@ onMounted(async () => {
   }
 })
 
-function confirmRemove(r: any) {
+async function confirmRemove(r: any) {
   if (!confirm(`Xóa phòng "${r.name}"?`)) return
-  apiClient.delete(`/rooms/${r.id}`).then(() => {
+  try {
+    await apiClient.delete(`/rooms/${r.id}`)
     items.value = items.value.filter((x) => x.id !== r.id)
-  }).catch((e) => {
+  } catch (e) {
     console.error(e)
     alert('Xóa thất bại.')
-  })
+  }
 }
 </script>
 

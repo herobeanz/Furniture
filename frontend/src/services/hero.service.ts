@@ -1,7 +1,7 @@
 import apiClient from './api.client'
 
 export interface HeroItem {
-  id: string
+  id: number
   title: string
   link: string
   imageUrl?: string
@@ -22,7 +22,7 @@ export const heroService = {
     return apiClient.get('/hero/list/all')
   },
 
-  async getById(id: string): Promise<HeroItem> {
+  async getById(id: number): Promise<HeroItem> {
     return apiClient.get(`/hero/by-id/${id}`)
   },
 
@@ -30,11 +30,11 @@ export const heroService = {
     return apiClient.post('/hero', data)
   },
 
-  async update(id: string, data: Partial<{ title: string; link: string; imageUrl: string; orderIndex: number; isActive: boolean }>): Promise<HeroItem> {
+  async update(id: number, data: Partial<{ title: string; link: string; imageUrl: string; orderIndex: number; isActive: boolean }>): Promise<HeroItem> {
     return apiClient.patch(`/hero/${id}`, data)
   },
 
-  async remove(id: string): Promise<{ deleted: boolean }> {
+  async remove(id: number): Promise<{ deleted: boolean }> {
     return apiClient.delete(`/hero/${id}`)
   },
 }

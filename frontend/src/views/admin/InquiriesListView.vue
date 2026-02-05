@@ -79,13 +79,14 @@ async function fetchList() {
   }
 }
 
-async function updateStatus(id: string, status: string) {
+async function updateStatus(id: number, status: string) {
   try {
     await apiClient.patch(`/inquiries/${id}/status`, { status })
     const item = items.value.find((x) => x.id === id)
     if (item) item.status = status
   } catch (e) {
     console.error(e)
+    alert('Cập nhật thất bại.')
   }
 }
 
