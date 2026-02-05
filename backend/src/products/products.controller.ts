@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -50,7 +51,7 @@ export class ProductsController {
 
   @Get('by-id/:id')
   @UseGuards(JwtAuthGuard)
-  getById(@Param('id') id: string) {
+  getById(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findById(id);
   }
 
@@ -67,13 +68,13 @@ export class ProductsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
     return this.productsService.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
   }
 }

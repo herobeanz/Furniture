@@ -1,15 +1,28 @@
 import apiClient from './api.client'
 
 export interface Product {
-  id: string
+  id: number
   name: string
   slug: string
+  sku: string
   description: string
+  shortDescription?: string
   price: number
-  comparePrice?: number
+  salePrice?: number
+  thumbnail?: string
   images: string[]
-  categoryId?: string
+  categoryId: number
   status: string
+  material?: string
+  dimensions?: string
+  color?: string
+  warranty?: string
+  isActive: boolean
+  isFeatured: boolean
+  isHot: boolean
+  seoTitle?: string
+  seoDescription?: string
+  breadcrumb?: { name: string; slug: string }[]
 }
 
 export interface ProductListResponse {

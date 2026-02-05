@@ -9,16 +9,7 @@ const routes: RouteRecordRaw[] = [
     name: 'home',
     component: () => import('../views/HomeView.vue'),
   },
-  {
-    path: '/category/:slug',
-    name: 'category',
-    component: () => import('../views/CategoryView.vue'),
-  },
-  {
-    path: '/product/:slug',
-    name: 'product',
-    component: () => import('../views/ProductView.vue'),
-  },
+  // Static routes - must be before dynamic routes
   {
     path: '/wishlist',
     name: 'wishlist',
@@ -30,14 +21,55 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/CartView.vue'),
   },
   {
-    path: '/contact',
+    path: '/blog',
+    name: 'blog',
+    component: () => import('../views/BlogView.vue'),
+  },
+  {
+    path: '/lien-he',
     name: 'contact',
     component: () => import('../views/ContactView.vue'),
   },
+  // Redirect old /contact to /lien-he
   {
-    path: '/page/:slug',
+    path: '/contact',
+    redirect: '/lien-he',
+  },
+  // Inquiry Form: /san-pham/:slug/lien-he
+  {
+    path: '/san-pham/:slug/lien-he',
+    name: 'product-inquiry',
+    component: () => import('../views/ContactView.vue'),
+  },
+  // Collection: /bo-suu-tap/...
+  {
+    path: '/bo-suu-tap/:slug',
+    name: 'collection',
+    component: () => import('../views/CategoryView.vue'),
+  },
+  // CMS Page: /trang/...
+  {
+    path: '/trang/:slug',
     name: 'cms-page',
     component: () => import('../views/CmsPageView.vue'),
+  },
+  // Product: /phongngu/giuong/giuong-ngu-... (must be before category)
+  {
+    path: '/:roomSlug/:categorySlug/:productSlug',
+    name: 'product',
+    component: () => import('../views/ProductView.vue'),
+  },
+  // Category: /phongngu/giuong
+  {
+    path: '/:roomSlug/:categorySlug',
+    name: 'category',
+    component: () => import('../views/CategoryView.vue'),
+  },
+  // Room: /phongngu (must be last to catch all room slugs)
+  {
+    path: '/:roomSlug',
+    name: 'room',
+    component: () => import('../views/CategoryView.vue'),
   },
   {
     path: '/admin',
@@ -74,24 +106,69 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/admin/ProductFormView.vue'),
       },
       {
+        path: 'rooms',
+        name: 'admin-rooms',
+        component: () => import('../views/admin/RoomsListView.vue'),
+      },
+      {
+        path: 'rooms/new',
+        name: 'admin-room-new',
+        component: () => import('../views/admin/RoomFormView.vue'),
+      },
+      {
+        path: 'rooms/:id',
+        name: 'admin-room-edit',
+        component: () => import('../views/admin/RoomFormView.vue'),
+      },
+      {
         path: 'categories',
         name: 'admin-categories',
         component: () => import('../views/admin/CategoriesListView.vue'),
       },
       {
-        path: 'cms',
-        name: 'admin-cms',
+        path: 'categories/new',
+        name: 'admin-category-new',
+        component: () => import('../views/admin/CategoryFormView.vue'),
+      },
+      {
+        path: 'categories/:id',
+        name: 'admin-category-edit',
+        component: () => import('../views/admin/CategoryFormView.vue'),
+      },
+      {
+        path: 'collections',
+        name: 'admin-collections',
+        component: () => import('../views/admin/CollectionsListView.vue'),
+      },
+      {
+        path: 'collections/new',
+        name: 'admin-collection-new',
+        component: () => import('../views/admin/CollectionFormView.vue'),
+      },
+      {
+        path: 'collections/:id',
+        name: 'admin-collection-edit',
+        component: () => import('../views/admin/CollectionFormView.vue'),
+      },
+      {
+        path: 'cms-pages',
+        name: 'admin-cms-pages',
         component: () => import('../views/admin/CmsListView.vue'),
       },
       {
-        path: 'cms/new',
-        name: 'admin-cms-new',
+        path: 'cms-pages/new',
+        name: 'admin-cms-page-new',
         component: () => import('../views/admin/CmsFormView.vue'),
       },
       {
-        path: 'cms/:id',
-        name: 'admin-cms-edit',
+        path: 'cms-pages/:id',
+        name: 'admin-cms-page-edit',
         component: () => import('../views/admin/CmsFormView.vue'),
+      },
+      {
+        path: 'reports',
+        name: 'admin-reports',
+        component: () => import('../views/admin/ReportsView.vue'),
       },
     ],
   },

@@ -7,7 +7,8 @@
         <RouterLink to="/admin/inquiries">Yêu cầu</RouterLink>
         <RouterLink to="/admin/products">Sản phẩm</RouterLink>
         <RouterLink to="/admin/categories">Danh mục</RouterLink>
-        <RouterLink to="/admin/cms">CMS</RouterLink>
+        <RouterLink to="/admin/rooms">Phòng</RouterLink>
+        <RouterLink to="/admin/cms-pages">CMS</RouterLink>
       </nav>
       <div class="sidebar-footer">
         <RouterLink to="/">← Về site</RouterLink>

@@ -1,17 +1,32 @@
 <template>
   <div class="landing">
-    <!-- Hero 2x2 Category Grid -->
-    <section class="hero-grid">
+    <!-- Hero 2x2 Grid (từ Admin > Hero, hoặc fallback 4 phòng từ danh mục) -->
+    <section class="hero-grid" v-if="heroTiles.length > 0">
       <RouterLink
-        v-for="(item, i) in heroCategories"
+        v-for="(item, i) in heroTiles"
         :key="item.id"
-        :to="'/category/' + item.slug"
+        :to="item.link"
+        class="hero-tile"
+        :class="'hero-tile-' + (i + 1)"
+      >
+        <div class="hero-tile-bg" :style="heroTileBg(item)"></div>
+        <span class="hero-tile-btn">{{ item.title }}</span>
+      </RouterLink>
+    </section>
+    <section class="hero-grid hero-fallback" v-else-if="heroFallbackTiles.length > 0">
+      <RouterLink
+        v-for="(item, i) in heroFallbackTiles"
+        :key="item.id"
+        :to="'/' + item.slug"
         class="hero-tile"
         :class="'hero-tile-' + (i + 1)"
       >
         <div class="hero-tile-bg" :style="tileBg(item, i)"></div>
         <span class="hero-tile-btn">{{ item.name }}</span>
       </RouterLink>
+    </section>
+    <section class="hero-placeholder" v-else>
+      <p>Chưa cấu hình Hero. Vào <RouterLink to="/admin/hero">Admin → Hero</RouterLink> để thêm ô hiển thị trang chủ.</p>
     </section>
 
     <!-- Value props - 4 items -->
@@ -53,12 +68,12 @@
               <img v-if="p.images?.length" :src="p.images[0]" :alt="p.name" />
               <div v-else class="no-image">Ảnh</div>
               <span class="flash-countdown-tag" v-if="countdownText">{{ countdownText }}</span>
-              <span v-if="p.comparePrice" class="product-sale-tag">Sale</span>
+              <span v-if="p.salePrice" class="product-sale-tag">Sale</span>
             </RouterLink>
             <div class="product-info">
-              <RouterLink :to="'/product/' + p.slug" class="product-name">{{ p.name }}</RouterLink>
+              <RouterLink :to="getProductPath(p)" class="product-name">{{ p.name }}</RouterLink>
               <div class="product-prices">
-                <span v-if="p.comparePrice" class="price-old">{{ formatPrice(p.comparePrice) }}</span>
+                <span v-if="p.salePrice" class="price-old">{{ formatPrice(p.salePrice) }}</span>
                 <span class="price-current">{{ formatPrice(p.price) }}</span>
               </div>
               <div class="product-actions">
@@ -71,22 +86,12 @@
       </div>
     </section>
 
-    <!-- Promo 2x2 Banners -->
-    <section class="promo-section">
-      <div class="container promo-2x2">
-        <RouterLink v-for="item in promoBanners" :key="item.slug" :to="'/category/' + item.slug" class="promo-banner">
-          <div class="promo-banner-bg" :style="promoBg()"></div>
-          <span class="promo-banner-text">{{ item.name }}</span>
-        </RouterLink>
-      </div>
-    </section>
-
     <!-- Shop By Department -->
     <section class="dept-section">
       <div class="container">
         <h2 class="section-title">Mua theo danh mục</h2>
         <div class="dept-tiles">
-          <RouterLink v-for="c in allDeptCategories" :key="c.id" :to="'/category/' + c.slug" class="dept-tile">
+          <RouterLink v-for="c in allDeptCategories" :key="c.id" :to="'/' + c.slug" class="dept-tile">
             <div class="dept-tile-img" :style="tileBg(c, 0)"></div>
             <span>{{ c.name }}</span>
           </RouterLink>
@@ -120,13 +125,14 @@
         <div v-if="tabProductsLoading" class="loading">Đang tải...</div>
         <div v-else-if="tabProducts.length" class="product-grid four-cols">
           <article v-for="(p, idx) in tabProducts" :key="p.id" class="product-card">
-            <RouterLink :to="'/product/' + p.slug" class="product-image-wrap">
+            <RouterLink :to="getProductPath(p)" class="product-image-wrap">
               <img v-if="p.images?.length" :src="p.images[0]" :alt="p.name" />
+              <img v-else-if="p.thumbnail" :src="p.thumbnail" :alt="p.name" />
               <div v-else class="no-image">Ảnh</div>
               <span v-if="idx < 2" class="product-hot-tag">HOT</span>
             </RouterLink>
             <div class="product-info">
-              <RouterLink :to="'/product/' + p.slug" class="product-name">{{ p.name }}</RouterLink>
+              <RouterLink :to="getProductPath(p)" class="product-name">{{ p.name }}</RouterLink>
               <p class="product-prices">
                 <span class="price-current">{{ formatPrice(p.price) }}</span>
               </p>
@@ -188,15 +194,16 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { categoryService, type Category } from '../services/category.service'
+import { roomService, type Room } from '../services/room.service'
 import { productService, type Product } from '../services/product.service'
+import { heroService, type HeroItem } from '../services/hero.service'
 import { useCartStore } from '../stores/cart'
 import { useWishlistStore } from '../stores/wishlist'
 
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 
-const categories = ref<Category[]>([])
+const rooms = ref<Room[]>([])
 const products = ref<Product[]>([])
 const loading = ref(true)
 const tabProducts = ref<Product[]>([])
@@ -204,31 +211,25 @@ const tabProductsLoading = ref(false)
 const activeTab = ref('')
 const newsletterEmail = ref('')
 
-const rootCategories = computed(() => categories.value.filter((c) => !c.parentId))
+// Rooms (Phòng) - thay thế categories
+const rootCategories = computed(() => rooms.value)
 
-const heroCategories = computed(() => {
-  const roots = rootCategories.value
-  if (roots.length >= 4) return roots.slice(0, 4)
-  const children = categories.value.filter((c) => c.parentId === roots[0]?.id)
-  return [...roots, ...children].slice(0, 4)
+/** Hero tiles từ API (Admin > Hero). Khi có ít nhất 1 item thì dùng, không thì fallback rooms. */
+const heroTiles = ref<HeroItem[]>([])
+const HERO_ROOM_SLUGS = ['phong-khach', 'phong-ngu', 'phong-bep', 'phong-tho'] as const
+const heroFallbackTiles = computed(() => {
+  const bySlug = new Map(rooms.value.map((r) => [r.slug, r]))
+  return HERO_ROOM_SLUGS.map((slug) => bySlug.get(slug)).filter(Boolean) as Room[]
 })
 
-const allDeptCategories = computed(() => {
-  const roots = rootCategories.value
-  const result: Category[] = []
-  roots.forEach((r) => {
-    result.push(r)
-    result.push(...categories.value.filter((c) => c.parentId === r.id))
-  })
-  return result
-})
+function heroTileBg(item: HeroItem) {
+  if (item.imageUrl) return { backgroundImage: `url(${item.imageUrl})` }
+  return { background: 'linear-gradient(135deg, #e8e8e8 0%, #f0f0f0 100%)' }
+}
 
-const promoBanners = computed(() => {
-  const r = rootCategories.value
-  if (r.length >= 4) return r.slice(0, 4)
-  const extra = categories.value.find((c) => c.parentId === r[0]?.id)
-  return extra ? [...r, extra] : r
-})
+// allDeptCategories: chỉ hiển thị Categories (Hero/Phòng)
+const allDeptCategories = computed(() => rootCategories.value)
+
 
 const flashProducts = computed(() => products.value.slice(0, 4))
 
@@ -264,15 +265,25 @@ function formatPrice(n: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n)
 }
 
-function tileBg(cat: Category, _i: number) {
-  const firstProduct = products.value.find((p) => p.categoryId === cat.id)
-  const img = firstProduct?.images?.[0]
+function tileBg(room: Room, _i: number) {
+  const img = room.thumbnail
   if (img) return { backgroundImage: `url(${img})` }
+  // Tạm thời lấy product đầu tiên có sẵn
+  const firstProduct = products.value[0]
+  const productImg = firstProduct?.images?.[0] || firstProduct?.thumbnail
+  if (productImg) return { backgroundImage: `url(${productImg})` }
   return { background: 'linear-gradient(135deg, #e8e8e8 0%, #f0f0f0 100%)' }
 }
 
-function promoBg() {
-  return { background: 'linear-gradient(135deg, #f0f0f0 0%, #e5e5e5 100%)' }
+function getProductPath(product: Product): string {
+  // If product has breadcrumb, use it to build path
+  if (product.breadcrumb && product.breadcrumb.length >= 3) {
+    const room = product.breadcrumb[0]
+    const category = product.breadcrumb[1]
+    return `/${room.slug}/${category.slug}/${product.slug}`
+  }
+  // Fallback: try to get from current route or use simple path
+  return `/san-pham/${product.slug}`
 }
 
 function addToCart(p: Product) {
@@ -281,7 +292,7 @@ function addToCart(p: Product) {
     name: p.name,
     price: p.price,
     quantity: 1,
-    image: p.images?.[0],
+    image: p.images?.[0] || p.thumbnail,
     slug: p.slug,
   })
 }
@@ -291,7 +302,7 @@ function toggleWishlist(p: Product) {
     id: p.id,
     name: p.name,
     price: p.price,
-    image: p.images?.[0],
+    image: p.images?.[0] || p.thumbnail,
     slug: p.slug,
   })
 }
@@ -305,8 +316,17 @@ async function loadTabProducts() {
   if (!activeTab.value) return
   tabProductsLoading.value = true
   try {
-    const res = await categoryService.getCategoryProducts(activeTab.value, { limit: 8 })
-    tabProducts.value = res.data || []
+    // Get categories in the room, then get products from first category
+    const categories = await roomService.getRoomCategories(activeTab.value)
+    if (categories.length > 0) {
+      const res = await productService.getProducts({ 
+        category: categories[0].slug,
+        limit: 8 
+      })
+      tabProducts.value = res.data || []
+    } else {
+      tabProducts.value = []
+    }
   } catch {
     tabProducts.value = []
   } finally {
@@ -316,12 +336,14 @@ async function loadTabProducts() {
 
 onMounted(async () => {
   try {
-    const [cats, res] = await Promise.all([
-      categoryService.getCategories(),
+    const [roomsData, res, heroList] = await Promise.all([
+      roomService.getRooms(),
       productService.getProducts({ limit: 12 }),
+      heroService.getActiveList().catch(() => []),
     ])
-    categories.value = cats
+    rooms.value = roomsData
     products.value = res.data || []
+    heroTiles.value = Array.isArray(heroList) ? heroList : []
     if (rootCategories.value.length && !activeTab.value) activeTab.value = rootCategories.value[0]?.slug ?? ''
   } catch (e) {
     console.error(e)
@@ -353,13 +375,14 @@ onUnmounted(() => {
   padding-bottom: 0;
 }
 
-/* Hero 2x2 */
+/* Hero 2x2 - Phần lớn nhất: 4 phòng (Phòng khách, Phòng ngủ, Phòng bếp, Phòng thờ) */
 .hero-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   gap: 0;
-  min-height: 70vh;
+  min-height: 85vh;
+  max-height: 90vh;
 }
 .hero-tile {
   position: relative;
@@ -393,6 +416,19 @@ onUnmounted(() => {
 }
 .hero-tile:hover .hero-tile-btn {
   transform: scale(1.05);
+}
+.hero-placeholder {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+  padding: 2rem;
+  text-align: center;
+}
+.hero-placeholder a {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 /* Value */
@@ -813,7 +849,7 @@ onUnmounted(() => {
 }
 @media (max-width: 768px) {
   .hero-grid {
-    min-height: 50vh;
+    min-height: 65vh;
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, 1fr);
   }

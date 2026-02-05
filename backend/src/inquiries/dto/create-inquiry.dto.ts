@@ -2,13 +2,18 @@ import {
   IsString,
   IsEmail,
   IsOptional,
-  IsArray,
-  IsUUID,
+  IsInt,
+  IsEnum,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { InquirySource } from '@prisma/client';
 
 export class CreateInquiryDto {
+  @IsOptional()
+  @IsInt()
+  productId?: number;
+
   @IsString()
   @MinLength(1, { message: 'Họ tên không được để trống' })
   @MaxLength(255)
@@ -28,18 +33,6 @@ export class CreateInquiryDto {
   @MinLength(1, { message: 'Nội dung không được để trống' })
   message: string;
 
-  @IsOptional()
-  @IsArray()
-  @IsUUID('4', { each: true })
-  productIds?: string[];
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  anonymousId?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  source?: string;
+  @IsEnum(InquirySource)
+  source: InquirySource;
 }

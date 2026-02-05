@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InquiryStatus } from '@prisma/client';
 import type { CreateInquiryDto } from './dto/create-inquiry.dto';
 
 @Injectable()
@@ -7,16 +8,33 @@ export class InquiriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateInquiryDto) {
+    if (dto.productId) {
+      const product = await this.prisma.product.findUnique({
+        where: { id: dto.productId },
+      });
+      if (!product) {
+        throw new NotFoundException(`Product not found: ${dto.productId}`);
+      }
+    }
+
     const inquiry = await this.prisma.inquiry.create({
       data: {
         name: dto.name.trim(),
         phone: dto.phone.trim(),
         email: dto.email?.trim() || null,
         message: dto.message.trim(),
-        productIds: dto.productIds ?? [],
-        status: 'pending',
-        anonymousId: dto.anonymousId ?? null,
-        source: dto.source ?? null,
+        product_id: dto.productId ?? null,
+        source: dto.source,
+        status: 'new',
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
     });
     return {
@@ -25,19 +43,31 @@ export class InquiriesService {
       phone: inquiry.phone,
       email: inquiry.email,
       message: inquiry.message,
+      productId: (inquiry as any).product_id ?? (inquiry as any).productId,
+      product: (inquiry as any).product,
       status: inquiry.status,
-      createdAt: inquiry.createdAt,
+      source: inquiry.source,
+      createdAt: (inquiry as any).created_at ?? (inquiry as any).createdAt,
     };
   }
 
-  async findAll(page = 1, limit = 20, status?: string) {
+  async findAll(page = 1, limit = 20, status?: InquiryStatus) {
     const where = status ? { status } : {};
     const [data, total] = await Promise.all([
       this.prisma.inquiry.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
       }),
       this.prisma.inquiry.count({ where }),
     ]);
@@ -48,10 +78,13 @@ export class InquiriesService {
         phone: i.phone,
         email: i.email,
         message: i.message,
-        productIds: i.productIds,
+        productId: (i as any).product_id ?? (i as any).productId,
+        product: (i as any).product,
         status: i.status,
         source: i.source,
-        createdAt: i.createdAt,
+        adminNotes: (i as any).admin_notes ?? (i as any).adminNotes,
+        respondedAt: (i as any).responded_at ?? (i as any).respondedAt,
+        createdAt: (i as any).created_at ?? (i as any).createdAt,
       })),
       total,
       page,
@@ -59,10 +92,13 @@ export class InquiriesService {
     };
   }
 
-  async updateStatus(id: string, status: string) {
+  async updateStatus(id: number, status: InquiryStatus) {
     const inquiry = await this.prisma.inquiry.update({
       where: { id },
-      data: { status },
+      data: {
+        status,
+        responded_at: status === 'done' ? new Date() : undefined,
+      },
     });
     return { id: inquiry.id, status: inquiry.status };
   }

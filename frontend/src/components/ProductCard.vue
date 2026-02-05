@@ -1,15 +1,16 @@
 <template>
   <article class="product-card">
-    <RouterLink :to="'/product/' + product.slug" class="product-card-image">
+    <RouterLink :to="getProductPath(product)" class="product-card-image">
       <img v-if="product.images?.length" :src="product.images[0]" :alt="product.name" />
+      <img v-else-if="product.thumbnail" :src="product.thumbnail" :alt="product.name" />
       <div v-else class="no-image">Ảnh</div>
-      <span v-if="showSaleTag && product.comparePrice" class="tag sale">Sale</span>
+      <span v-if="showSaleTag && product.salePrice" class="tag sale">Sale</span>
       <span v-if="showHotTag" class="tag hot">HOT</span>
     </RouterLink>
     <div class="product-card-info">
-      <RouterLink :to="'/product/' + product.slug" class="product-card-name">{{ product.name }}</RouterLink>
+      <RouterLink :to="getProductPath(product)" class="product-card-name">{{ product.name }}</RouterLink>
       <div class="product-card-prices">
-        <span v-if="product.comparePrice" class="price-old">{{ formatPrice(product.comparePrice) }}</span>
+        <span v-if="product.salePrice" class="price-old">{{ formatPrice(product.salePrice) }}</span>
         <span class="price-current">{{ formatPrice(product.price) }}</span>
       </div>
       <div class="product-card-actions">
@@ -30,6 +31,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import type { Product } from '@/services/product.service'
 import { formatPrice } from '@/utils/format'
 import { useWishlistStore } from '@/stores/wishlist'
@@ -50,6 +52,25 @@ defineEmits<{
 
 const wishlistStore = useWishlistStore()
 const inWishlist = computed(() => wishlistStore.isInWishlist(props.product.id))
+
+function getProductPath(product: Product): string {
+  // If product has breadcrumb, use it to build path
+  if (product.breadcrumb && product.breadcrumb.length >= 3) {
+    const room = product.breadcrumb[0]
+    const category = product.breadcrumb[1]
+    return `/${room.slug}/${category.slug}/${product.slug}`
+  }
+  // Fallback: try to construct from current route if available
+  // This is a temporary fallback - ideally all products should have breadcrumb
+  const route = useRoute()
+  const roomSlug = route.params.roomSlug as string
+  const categorySlug = route.params.categorySlug as string
+  if (roomSlug && categorySlug) {
+    return `/${roomSlug}/${categorySlug}/${product.slug}`
+  }
+  // Last resort: use simple path (will show 404 but better than breaking)
+  return `/${product.slug}`
+}
 </script>
 
 <style scoped>

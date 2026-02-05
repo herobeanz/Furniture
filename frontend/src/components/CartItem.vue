@@ -37,7 +37,7 @@ const emit = defineEmits<{
   updateQuantity: [quantity: number]
 }>()
 
-const productLink = computed(() => '/product/' + (props.item.slug || props.item.id))
+const productLink = computed(() => '/san-pham/' + (props.item.slug || props.item.id))
 </script>
 
 <style scoped>

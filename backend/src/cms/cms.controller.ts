@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CmsService } from './cms.service';
 import { CreateCmsPageDto } from './dto/create-cms-page.dto';
@@ -36,19 +37,19 @@ export class CmsController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findById(@Param('id') id: string) {
+  findById(@Param('id', ParseIntPipe) id: number) {
     return this.cmsService.findById(id);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() dto: UpdateCmsPageDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCmsPageDto) {
     return this.cmsService.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.cmsService.remove(id);
   }
 }

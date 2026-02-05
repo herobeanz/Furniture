@@ -7,11 +7,13 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SharedModule } from './shared/shared.module';
 import { RedisModule } from './shared/modules/redis.module';
 import { HealthModule } from './health/health.module';
+import { RoomsModule } from './rooms/rooms.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { InquiriesModule } from './inquiries/inquiries.module';
 import { AuthModule } from './auth/auth.module';
 import { CmsModule } from './cms/cms.module';
+import { HeroModule } from './hero/hero.module';
 import { TransformInterceptor } from './shared/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 
@@ -25,11 +27,13 @@ import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
     SharedModule,
     RedisModule,
     HealthModule,
+    RoomsModule,
     CategoriesModule,
     ProductsModule,
     InquiriesModule,
     AuthModule,
     CmsModule,
+    HeroModule,
   ],
   controllers: [AppController],
   providers: [

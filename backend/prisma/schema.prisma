@@ -1,5 +1,5 @@
 // Prisma schema - Furniture E-commerce
-// Ref: DATABASE_SCHEMA.md
+// Updated structure: Room > Category > Product
 
 generator client {
   provider = "prisma-client-js"
@@ -11,123 +11,259 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// Categories (nested support via parentId)
+// Enums
 // ---------------------------------------------------------------------------
-model Category {
-  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String     @db.VarChar(255)
-  slug        String     @unique @db.VarChar(255)
-  description String?    @db.Text
-  imageUrl    String?    @map("image_url") @db.VarChar(500)
-  parentId    String?    @map("parent_id") @db.Uuid
-  orderIndex  Int        @default(0) @map("order_index")
-  isActive    Boolean    @default(true) @map("is_active")
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
 
-  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children Category[] @relation("CategoryHierarchy")
-  products Product[]
+enum AdminRole {
+  admin
+  editor
+}
+
+enum InquirySource {
+  product
+  contact
+  facebook
+  zalo
+}
+
+enum InquiryStatus {
+  new
+  contacted
+  done
+}
+
+enum ProductStatus {
+  available
+  hidden
+  discontinued
+}
+
+// ---------------------------------------------------------------------------
+// Admins
+// ---------------------------------------------------------------------------
+
+model Admin {
+  id            Int       @id @default(autoincrement())
+  username      String?   @unique
+  email         String    @unique
+  passwordhashed String   @map("passwordhashed")
+  fullname      String?   @map("fullname")
+  role          AdminRole @default(admin)
+  is_active     Boolean   @default(true) @map("is_active")
+  last_login_at DateTime? @map("last_login_at")
+  created_at    DateTime  @default(now()) @map("created_at")
+  updated_at    DateTime  @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+// ---------------------------------------------------------------------------
+// Rooms (Hero/Phòng - Level 1: Phòng khách, Phòng ngủ, Phòng bếp...)
+// ---------------------------------------------------------------------------
+
+model Room {
+  id              Int         @id @default(autoincrement())
+  name            String
+  slug            String       @unique
+  description     String?      @db.Text
+  thumbnail       String?
+  order_index     Int          @default(0) @map("order_index")
+  is_active       Boolean      @default(true) @map("is_active")
+  seo_title       String?      @db.Text @map("seo_title")
+  seo_description String?      @db.Text @map("seo_description")
+  created_at      DateTime     @default(now()) @map("created_at")
+  updated_at      DateTime     @updatedAt @map("updated_at")
+
+  categories      Category[]
 
   @@index([slug])
-  @@index([parentId])
-  @@index([orderIndex])
+  @@index([order_index])
+  @@map("rooms")
+}
+
+// ---------------------------------------------------------------------------
+// Categories (Level 2: Sofa, Giường, Tủ, Bàn, Ghế...)
+// ---------------------------------------------------------------------------
+
+model Category {
+  id              Int           @id @default(autoincrement())
+  room_id         Int           @map("room_id")
+  name            String
+  slug            String
+  description     String?       @db.Text
+  thumbnail       String?
+  order_index     Int           @default(0) @map("order_index")
+  is_active       Boolean       @default(true) @map("is_active")
+  seo_title       String?       @db.Text @map("seo_title")
+  seo_description String?       @db.Text @map("seo_description")
+  created_at      DateTime      @default(now()) @map("created_at")
+  updated_at      DateTime      @updatedAt @map("updated_at")
+
+  room            Room          @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  products        Product[]
+
+  @@unique([room_id, slug])
+  @@index([slug])
+  @@index([room_id])
+  @@index([order_index])
   @@map("categories")
 }
 
 // ---------------------------------------------------------------------------
-// Products
+// Products (Level 3)
 // ---------------------------------------------------------------------------
-model Product {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String    @db.VarChar(255)
-  slug             String    @unique @db.VarChar(255)
-  description      String?   @db.Text
-  shortDescription String?   @map("short_description") @db.VarChar(500)
-  price            Decimal   @db.Decimal(10, 2)
-  comparePrice     Decimal?  @map("compare_price") @db.Decimal(10, 2)
-  sku              String?   @unique @db.VarChar(100)
-  categoryId       String?   @map("category_id") @db.Uuid
-  images           String[]  @db.Text
-  status           String    @default("active") @db.VarChar(50) // active, inactive, draft
-  stockQuantity    Int       @default(0) @map("stock_quantity")
-  weight           Decimal?  @db.Decimal(8, 2)
-  dimensions       String?   @db.VarChar(100)
-  material         String?   @db.VarChar(255)
-  color            String?   @db.VarChar(100)
-  metaTitle        String?   @map("meta_title") @db.VarChar(255)
-  metaDescription  String?   @map("meta_description") @db.Text
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+model Product {
+  id                Int            @id @default(autoincrement())
+  category_id       Int            @map("category_id")
+  name              String
+  slug              String         @unique
+  sku               String
+  short_description String?        @db.Text @map("short_description")
+  description       String?        @db.Text
+  price             Decimal         @db.Decimal(10, 2)
+  sale_price        Decimal?       @db.Decimal(10, 2) @map("sale_price")
+  thumbnail         String?
+  status            ProductStatus  @default(available)
+  material          String?
+  dimensions        String?
+  color             String?
+  warranty          String?
+  is_active         Boolean        @default(true) @map("is_active")
+  is_featured       Boolean        @default(false) @map("is_featured")
+  is_hot            Boolean        @default(false) @map("is_hot")
+  seo_title         String?        @db.Text @map("seo_title")
+  seo_description   String?        @db.Text @map("seo_description")
+  created_at        DateTime       @default(now()) @map("created_at")
+  updated_at        DateTime       @updatedAt @map("updated_at")
+
+  category          Category       @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  images            ProductImage[]
+  inquiries         Inquiry[]
+  collectionProducts CollectionProduct[]
 
   @@index([slug])
-  @@index([categoryId])
+  @@index([category_id])
   @@index([status])
   @@index([sku])
   @@index([price])
+  @@index([is_featured])
+  @@index([is_hot])
   @@map("products")
+}
+
+// ---------------------------------------------------------------------------
+// Product Images
+// ---------------------------------------------------------------------------
+
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  product_id Int      @map("product_id")
+  image_url  String   @map("image_url")
+  is_primary Boolean  @default(false) @map("is_primary")
+  alt_text   String?  @map("alt_text")
+  order_index Int     @default(0) @map("order_index")
+  created_at DateTime @default(now()) @map("created_at")
+  updated_at DateTime @updatedAt @map("updated_at")
+
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id])
+  @@index([is_primary])
+  @@map("product_images")
+}
+
+// ---------------------------------------------------------------------------
+// Collections
+// ---------------------------------------------------------------------------
+
+model Collection {
+  id              Int                  @id @default(autoincrement())
+  name            String
+  slug            String               @unique
+  description     String?              @db.Text
+  thumbnail       String?
+  order_index     Int                  @default(0) @map("order_index")
+  is_active       Boolean              @default(true) @map("is_active")
+  seo_title       String?              @db.Text @map("seo_title")
+  seo_description String?              @db.Text @map("seo_description")
+  created_at      DateTime             @default(now()) @map("created_at")
+  updated_at      DateTime             @updatedAt @map("updated_at")
+
+  products        CollectionProduct[]
+
+  @@index([slug])
+  @@index([order_index])
+  @@map("collections")
+}
+
+// ---------------------------------------------------------------------------
+// Collection Products (Many-to-Many)
+// ---------------------------------------------------------------------------
+
+model CollectionProduct {
+  collection_id Int       @map("collection_id")
+  product_id    Int       @map("product_id")
+  order_index   Int       @default(0) @map("order_index")
+  created_at    DateTime  @default(now()) @map("created_at")
+
+  collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  product       Product    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@id([collection_id, product_id])
+  @@index([collection_id])
+  @@index([product_id])
+  @@map("collection_products")
 }
 
 // ---------------------------------------------------------------------------
 // Inquiries (customer leads)
 // ---------------------------------------------------------------------------
+
 model Inquiry {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String   @db.VarChar(255)
-  phone       String   @db.VarChar(20)
-  email       String?  @db.VarChar(255)
-  message     String   @db.Text
-  productIds  String[] @map("product_ids") @db.Uuid
-  status      String   @default("pending") @db.VarChar(50) // pending, contacted, completed, cancelled
-  anonymousId String?  @map("anonymous_id") @db.VarChar(255)
-  source      String?  @db.VarChar(100)
-  notes       String?  @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           Int            @id @default(autoincrement())
+  product_id   Int?           @map("product_id")
+  name         String
+  phone        String
+  email        String?
+  message      String         @db.Text
+  source       InquirySource
+  status       InquiryStatus  @default(new)
+  admin_notes  String?        @db.Text @map("admin_notes")
+  responded_at DateTime?      @map("responded_at")
+  created_at   DateTime       @default(now()) @map("created_at")
+  updated_at   DateTime       @updatedAt @map("updated_at")
+
+  product      Product?       @relation(fields: [product_id], references: [id], onDelete: SetNull)
 
   @@index([status])
-  @@index([createdAt(sort: Desc)])
-  @@index([anonymousId])
+  @@index([created_at(sort: Desc)])
+  @@index([product_id])
+  @@index([source])
   @@map("inquiries")
 }
 
 // ---------------------------------------------------------------------------
 // CMS Pages (About, Privacy, Terms, etc.)
 // ---------------------------------------------------------------------------
+
 model CmsPage {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  slug           String   @unique @db.VarChar(255)
-  title          String   @db.VarChar(255)
-  content        String   @db.Text
-  metaTitle      String?  @map("meta_title") @db.VarChar(255)
-  metaDescription String? @map("meta_description") @db.Text
-  isPublished   Boolean  @default(true) @map("is_published")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id              Int       @id @default(autoincrement())
+  title           String
+  slug            String    @unique
+  content         String    @db.Text
+  thumbnail       String?
+  seo_title       String?   @map("seo_title")
+  seo_description String?   @db.Text @map("seo_description")
+  page_type       String?   @map("page_type")
+  is_active       Boolean   @default(true) @map("is_active")
+  meta_keywords   String?   @map("meta_keywords")
+  published_at    DateTime? @map("published_at")
+  created_at      DateTime  @default(now()) @map("created_at")
+  updated_at      DateTime  @updatedAt @map("updated_at")
 
   @@index([slug])
-  @@index([isPublished])
+  @@index([is_active])
+  @@index([page_type])
   @@map("cms_pages")
-}
-
-// ---------------------------------------------------------------------------
-// Admins (optional - for admin panel)
-// ---------------------------------------------------------------------------
-model Admin {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username     String    @unique @db.VarChar(100)
-  email        String    @unique @db.VarChar(255)
-  passwordHash String    @map("password_hash") @db.VarChar(255)
-  fullName     String?   @map("full_name") @db.VarChar(255)
-  role         String    @default("admin") @db.VarChar(50) // admin, super_admin
-  isActive     Boolean   @default(true) @map("is_active")
-  lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-
-  @@index([username])
-  @@index([email])
-  @@map("admins")
 }

@@ -12,18 +12,18 @@ export class AuthService {
 
   async login(username: string, password: string) {
     const admin = await this.prisma.admin.findFirst({
-      where: { username, isActive: true },
+      where: { username, is_active: true },
     });
     if (!admin) {
       throw new UnauthorizedException('Sai tên đăng nhập hoặc mật khẩu');
     }
-    const match = await bcrypt.compare(password, admin.passwordHash);
+    const match = await bcrypt.compare(password, admin.passwordhashed);
     if (!match) {
       throw new UnauthorizedException('Sai tên đăng nhập hoặc mật khẩu');
     }
     await this.prisma.admin.update({
       where: { id: admin.id },
-      data: { lastLoginAt: new Date() },
+      data: { last_login_at: new Date() },
     });
     const payload = { sub: admin.id, username: admin.username };
     const accessToken = this.jwtService.sign(payload);
@@ -33,20 +33,20 @@ export class AuthService {
         id: admin.id,
         username: admin.username,
         email: admin.email,
-        fullName: admin.fullName,
+        fullname: admin.fullname,
         role: admin.role,
       },
     };
   }
 
-  async getMe(adminId: string) {
+  async getMe(adminId: number) {
     const admin = await this.prisma.admin.findFirst({
-      where: { id: adminId, isActive: true },
+      where: { id: adminId, is_active: true },
       select: {
         id: true,
         username: true,
         email: true,
-        fullName: true,
+        fullname: true,
         role: true,
       },
     });

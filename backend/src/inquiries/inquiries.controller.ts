@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { InquiriesService } from './inquiries.service';
 import { CreateInquiryDto } from './dto/create-inquiry.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { InquiryStatus } from '@prisma/client';
 
 @Controller('inquiries')
 export class InquiriesController {
@@ -18,7 +19,7 @@ export class InquiriesController {
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('status') status?: string,
+    @Query('status') status?: InquiryStatus,
   ) {
     return this.inquiriesService.findAll(
       page ? parseInt(page, 10) : 1,
@@ -29,7 +30,7 @@ export class InquiriesController {
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
+  updateStatus(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateStatusDto) {
     return this.inquiriesService.updateStatus(id, dto.status);
   }
 }

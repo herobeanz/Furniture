@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -23,6 +24,11 @@ export class CategoriesController {
     return this.categoriesService.findAll();
   }
 
+  @Get('tree')
+  getTree() {
+    return this.categoriesService.findTree();
+  }
+
   @Get('list/all')
   @UseGuards(JwtAuthGuard)
   getAdminList() {
@@ -31,13 +37,19 @@ export class CategoriesController {
 
   @Get('by-id/:id')
   @UseGuards(JwtAuthGuard)
-  getById(@Param('id') id: string) {
+  getById(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.findById(id);
+  }
+
+  @Get('by-room/:roomId')
+  getByRoomId(@Param('roomId', ParseIntPipe) roomId: number) {
+    return this.categoriesService.findByRoomId(roomId);
   }
 
   @Get(':slug/products')
   getCategoryProducts(
     @Param('slug') slug: string,
+    @Query('roomSlug') roomSlug?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('sort') sort?: string,
@@ -45,6 +57,7 @@ export class CategoriesController {
   ) {
     return this.categoriesService.findProductsByCategorySlug(
       slug,
+      roomSlug,
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 20,
       sort ?? 'createdAt',
@@ -53,8 +66,8 @@ export class CategoriesController {
   }
 
   @Get(':slug')
-  getCategory(@Param('slug') slug: string) {
-    return this.categoriesService.findBySlug(slug);
+  getCategory(@Param('slug') slug: string, @Query('roomSlug') roomSlug?: string) {
+    return this.categoriesService.findBySlug(slug, roomSlug);
   }
 
   @Post()
@@ -65,13 +78,13 @@ export class CategoriesController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCategoryDto) {
     return this.categoriesService.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);
   }
 }

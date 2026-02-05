@@ -1,30 +1,4 @@
-import { IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateCmsPageDto } from './create-cms-page.dto';
 
-export class UpdateCmsPageDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  slug?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  content?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  metaTitle?: string;
-
-  @IsOptional()
-  @IsString()
-  metaDescription?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isPublished?: boolean;
-}
+export class UpdateCmsPageDto extends PartialType(CreateCmsPageDto) {}

@@ -6,10 +6,22 @@
         <RouterLink to="/" class="logo">FURNITURE STORE</RouterLink>
         <nav class="nav-menu">
           <RouterLink to="/">Trang chủ</RouterLink>
-          <RouterLink to="/category/sofa-couches">Sofa</RouterLink>
-          <RouterLink to="/category/tables">Bàn</RouterLink>
-          <RouterLink to="/category/chairs">Ghế</RouterLink>
-          <RouterLink to="/contact">Liên hệ</RouterLink>
+          <RouterLink to="/blog">Blog</RouterLink>
+          <div class="nav-dropdown">
+            <span class="nav-dropdown-trigger">
+              Sản phẩm
+              <span class="nav-arrow">▾</span>
+            </span>
+            <div class="nav-dropdown-menu nav-dropdown-menu-products">
+              <template v-for="node in categoryTree" :key="node.id">
+                <RouterLink :to="'/' + node.slug" class="nav-dropdown-item">{{ node.name }}</RouterLink>
+                <template v-for="child in node.children" :key="child.id">
+                  <RouterLink :to="'/' + node.slug + '/' + child.slug" class="nav-dropdown-item sub">{{ child.name }}</RouterLink>
+                </template>
+              </template>
+            </div>
+          </div>
+          <RouterLink to="/lien-he">Liên hệ</RouterLink>
         </nav>
         <div class="header-actions">
           <div class="search-wrap">
@@ -40,39 +52,27 @@
       <slot />
     </main>
 
-    <!-- Footer: category columns + contact row + bottom -->
+    <!-- Footer: menu phân cấp theo Phòng (Cha) → Con -->
     <footer class="site-footer">
       <div class="footer-cols">
         <div class="container footer-cols-inner">
-          <div class="footer-col">
-            <h4>Sofa & Ghế</h4>
+          <div v-for="node in categoryTree" :key="node.id" class="footer-col">
+            <h4>
+              <RouterLink :to="'/' + node.slug">{{ node.name }}</RouterLink>
+            </h4>
             <ul>
-              <li><RouterLink to="/category/sofa-couches">Sofa</RouterLink></li>
-              <li><RouterLink to="/category/living-room-sofas">Sofa phòng khách</RouterLink></li>
-              <li><RouterLink to="/category/sectional-sofas">Sofa góc</RouterLink></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Bàn</h4>
-            <ul>
-              <li><RouterLink to="/category/tables">Bàn</RouterLink></li>
-              <li><RouterLink to="/category/dining-tables">Bàn ăn</RouterLink></li>
-              <li><RouterLink to="/category/coffee-tables">Bàn trà</RouterLink></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Ghế</h4>
-            <ul>
-              <li><RouterLink to="/category/chairs">Ghế</RouterLink></li>
-              <li><RouterLink to="/category/dining-chairs">Ghế ăn</RouterLink></li>
-              <li><RouterLink to="/category/office-chairs">Ghế văn phòng</RouterLink></li>
+              <template v-for="child in node.children" :key="child.id">
+                <li>
+                  <RouterLink :to="'/' + node.slug + '/' + child.slug">{{ child.name }}</RouterLink>
+                </li>
+              </template>
             </ul>
           </div>
           <div class="footer-col">
             <h4>Thông tin</h4>
             <ul>
-              <li><RouterLink to="/contact">Liên hệ</RouterLink></li>
-              <li><a href="#">Về chúng tôi</a></li>
+              <li><RouterLink to="/lien-he">Liên hệ</RouterLink></li>
+              <li><RouterLink to="/trang/about">Về chúng tôi</RouterLink></li>
               <li><a href="#">Giao hàng</a></li>
               <li><a href="#">Đổi trả</a></li>
             </ul>
@@ -98,7 +98,7 @@
           <div class="footer-legal">
             <a href="#">Điều khoản</a>
             <a href="#">Bảo mật</a>
-            <RouterLink to="/contact">Liên hệ</RouterLink>
+            <RouterLink to="/lien-he">Liên hệ</RouterLink>
           </div>
         </div>
       </div>
@@ -107,19 +107,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
+import { categoryService, type CategoryTreeNode } from '@/services/category.service'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 
 const searchQuery = ref('')
+const categoryTree = ref<CategoryTreeNode[]>([])
 
 const cartCount = computed(() => cartStore.totalItems)
 const wishlistCount = computed(() => wishlistStore.items.length)
+
+onMounted(async () => {
+  try {
+    categoryTree.value = await categoryService.getCategoryTree()
+  } catch {
+    categoryTree.value = []
+  }
+})
 
 function onSearch() {
   const q = searchQuery.value?.trim()
@@ -212,15 +222,93 @@ function onSearch() {
 }
 .nav-menu {
   display: flex;
-  gap: 2rem;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
 }
-.nav-menu a {
+.nav-menu > a,
+.nav-dropdown {
   font-weight: 500;
   font-size: 0.95rem;
   color: #1a1a1a;
 }
-.nav-menu a.router-link-active {
+.nav-menu > a.router-link-active,
+.nav-dropdown-trigger.router-link-active {
   color: var(--color-primary);
+}
+.nav-dropdown {
+  position: relative;
+}
+.nav-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+}
+.nav-dropdown-trigger.router-link-active {
+  color: var(--color-primary);
+}
+a.nav-dropdown-trigger:hover,
+.nav-dropdown:hover .nav-dropdown-trigger {
+  color: var(--color-primary);
+}
+.nav-dropdown-menu-products {
+  min-width: 220px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.nav-arrow {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+  z-index: 50;
+}
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+}
+.nav-dropdown-item {
+  display: block;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+.nav-dropdown-item.sub {
+  padding-left: 1.5rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+.nav-dropdown-item:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-primary);
+}
+.nav-dropdown-label {
+  display: block;
+  padding: 0.35rem 1rem 0.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
 }
 .header-actions {
   display: flex;
@@ -296,14 +384,19 @@ main {
 }
 .footer-cols-inner {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 2rem;
 }
 .footer-col h4 {
-  color: #fff;
   font-size: 0.95rem;
   margin-bottom: 1rem;
   font-weight: 600;
+}
+.footer-col h4 a {
+  color: #fff;
+}
+.footer-col h4 a:hover {
+  color: var(--color-primary);
 }
 .footer-col ul {
   list-style: none;
@@ -317,6 +410,13 @@ main {
 }
 .footer-col a:hover {
   color: #fff;
+}
+.footer-sub-label {
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 .footer-mid {
   border-top: 1px solid #333;

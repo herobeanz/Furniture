@@ -18,7 +18,7 @@
       <div class="cart-footer">
         <p class="cart-total">Tổng: <strong>{{ formatPrice(totalPrice) }}</strong></p>
         <p class="cart-note">Thanh toán và giao hàng sẽ được xử lý ở bước tiếp theo.</p>
-        <RouterLink to="/contact?from=cart" class="btn btn-primary btn-checkout">
+        <RouterLink to="/lien-he?from=cart" class="btn btn-primary btn-checkout">
           Thanh toán / Liên hệ đặt hàng
         </RouterLink>
       </div>

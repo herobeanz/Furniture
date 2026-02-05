@@ -1,7 +1,7 @@
-import { IsIn, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
+import { InquiryStatus } from '@prisma/client';
 
 export class UpdateStatusDto {
-  @IsString()
-  @IsIn(['pending', 'contacted', 'completed', 'cancelled'])
-  status: string;
+  @IsEnum(InquiryStatus)
+  status: InquiryStatus;
 }

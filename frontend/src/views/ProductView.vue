@@ -4,8 +4,16 @@
       <!-- Breadcrumb -->
       <nav class="breadcrumb">
         <RouterLink to="/">Trang chủ</RouterLink>
-        <span class="sep">/</span>
-        <span v-if="product">{{ product.name }}</span>
+        <template v-if="product?.breadcrumb">
+          <template v-for="(item, i) in product.breadcrumb" :key="i">
+            <span class="sep">/</span>
+            <RouterLink :to="getBreadcrumbPath(item, i)">{{ item.name }}</RouterLink>
+          </template>
+        </template>
+        <template v-else-if="product">
+          <span class="sep">/</span>
+          <span>{{ product.name }}</span>
+        </template>
         <span v-else class="skeleton-text">...</span>
       </nav>
 
@@ -50,10 +58,10 @@
             <h1 class="product-name">{{ product.name }}</h1>
             <div class="product-prices">
               <span class="price-current">{{ formatPrice(product.price) }}</span>
-              <span v-if="product.comparePrice" class="price-old">
-                {{ formatPrice(product.comparePrice) }}
+              <span v-if="product.salePrice" class="price-old">
+                {{ formatPrice(product.salePrice) }}
               </span>
-              <span v-if="product.comparePrice" class="sale-badge">Sale</span>
+              <span v-if="product.salePrice" class="sale-badge">Sale</span>
             </div>
             <p v-if="product.description" class="product-desc">
               {{ product.description }}
@@ -119,7 +127,9 @@ import { useToast } from '@/composables/useToast'
 import { useWishlistStore } from '@/stores/wishlist'
 
 const route = useRoute()
-const slug = computed(() => (route.params.slug as string) ?? '')
+const roomSlug = computed(() => (route.params.roomSlug as string) ?? '')
+const categorySlug = computed(() => (route.params.categorySlug as string) ?? '')
+const productSlug = computed(() => (route.params.productSlug as string) ?? '')
 
 const product = ref<Product | null>(null)
 const related = ref<Product[]>([])
@@ -134,7 +144,7 @@ const { toast } = useToast()
 
 const currentImage = computed(() => {
   const p = product.value
-  if (!p?.images?.length) return ''
+  if (!p?.images?.length) return p?.thumbnail || ''
   const i = Math.min(selectedIndex.value, p.images.length - 1)
   return p.images[i]
 })
@@ -143,6 +153,15 @@ const inWishlist = computed(() =>
   product.value ? wishlistStore.isInWishlist(product.value.id) : false
 )
 
+function getBreadcrumbPath(item: { name: string; slug: string }, index: number): string {
+  if (product.value?.breadcrumb) {
+    // Build path from breadcrumb
+    const path = product.value.breadcrumb.slice(0, index + 1).map(b => b.slug).join('/')
+    return `/${path}`
+  }
+  return '#'
+}
+
 function addToCart() {
   if (!product.value) return
   addItem({
@@ -150,7 +169,7 @@ function addToCart() {
     name: product.value.name,
     price: product.value.price,
     quantity: quantity.value,
-    image: product.value.images?.[0],
+    image: product.value.images?.[0] || product.value.thumbnail,
     slug: product.value.slug,
   })
   toast.success('Đã thêm vào giỏ', `${product.value.name} x${quantity.value}`)
@@ -162,7 +181,7 @@ function toggleWishlist() {
     id: product.value.id,
     name: product.value.name,
     price: product.value.price,
-    image: product.value.images?.[0],
+    image: product.value.images?.[0] || product.value.thumbnail,
     slug: product.value.slug,
   })
 }
@@ -190,7 +209,7 @@ function toggleWishlistRelated(p: Product) {
 }
 
 async function fetchProduct() {
-  if (!slug.value) return
+  if (!productSlug.value) return
   loading.value = true
   error.value = ''
   product.value = null
@@ -199,8 +218,8 @@ async function fetchProduct() {
   quantity.value = 1
   try {
     const [p, rel] = await Promise.all([
-      productService.getProduct(slug.value),
-      productService.getRelatedProducts(slug.value, 4),
+      productService.getProduct(productSlug.value),
+      productService.getRelatedProducts(productSlug.value, 4),
     ])
     product.value = p
     related.value = Array.isArray(rel) ? rel : []
@@ -212,7 +231,7 @@ async function fetchProduct() {
   }
 }
 
-watch(slug, fetchProduct, { immediate: true })
+watch(productSlug, fetchProduct, { immediate: true })
 </script>
 
 <style scoped>

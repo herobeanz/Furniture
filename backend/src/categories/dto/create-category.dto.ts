@@ -1,6 +1,9 @@
-import { IsString, IsOptional, IsUUID, IsInt, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
 
 export class CreateCategoryDto {
+  @IsInt()
+  roomId: number;
+
   @IsString()
   @MaxLength(255)
   name: string;
@@ -17,13 +20,17 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsString()
   @MaxLength(500)
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsUUID()
-  parentId?: string;
+  thumbnail?: string;
 
   @IsOptional()
   @IsInt()
   orderIndex?: number;
+
+  @IsOptional()
+  @IsString()
+  seoTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  seoDescription?: string;
 }
