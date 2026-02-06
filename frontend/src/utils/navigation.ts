@@ -5,12 +5,12 @@ import type { Room } from '../services/room.service'
 /**
  * Build product path from breadcrumb or fallback
  */
-export function getProductPath(product: Product): string {
-  // If product has breadcrumb, use it to build path
-  if (product.breadcrumb && product.breadcrumb.length >= 3) {
+export function getProductPath(product: Product | { slug: string; breadcrumb?: { name: string; slug: string }[] }): string {
+  // If product has breadcrumb with at least room and category (2 items), use it to build path
+  if (product.breadcrumb && product.breadcrumb.length >= 2) {
     const room = product.breadcrumb[0]
     const category = product.breadcrumb[1]
-    if (room && category) {
+    if (room && category && room.slug && category.slug && product.slug) {
       return `/${room.slug}/${category.slug}/${product.slug}`
     }
   }

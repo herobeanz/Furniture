@@ -2,110 +2,105 @@
   <div class="blog-form">
     <h1>{{ isEdit ? 'Sửa bài viết' : 'Thêm bài viết' }}</h1>
     <div v-if="loading">Đang tải...</div>
-    <form v-else @submit.prevent="onSubmit">
-      <div class="form-group">
-        <label for="title">Tiêu đề *</label>
-        <input id="title" v-model="form.title" required />
-      </div>
-      <div class="form-group">
-        <label for="slug">Slug *</label>
-        <input id="slug" v-model="form.slug" required />
-        <small class="hint" v-if="form.slug">URL: <code>/blog/{{ form.slug }}</code></small>
-      </div>
-      <div class="form-group">
-        <label for="excerpt">Tóm tắt</label>
-        <textarea id="excerpt" v-model="form.excerpt" rows="3" placeholder="Mô tả ngắn về bài viết..."></textarea>
-      </div>
-      <div class="form-group">
-        <label for="content">Nội dung *</label>
-        <textarea id="content" v-model="form.content" rows="15" required></textarea>
-      </div>
+    <form v-else @submit.prevent="onSubmit" class="form-container">
+      <FormField label="Tiêu đề" :required="true">
+        <UiInput v-model="form.title" placeholder="Enter title" :required="true" />
+      </FormField>
+
+      <FormField label="Slug" :required="true" :hint="form.slug ? `URL: /blog/${form.slug}` : ''">
+        <UiInput v-model="form.slug" placeholder="Enter slug" :required="true" />
+      </FormField>
+
+      <FormField label="Tóm tắt" optional>
+        <UiTextarea v-model="form.excerpt" :rows="3" placeholder="Mô tả ngắn về bài viết..." />
+      </FormField>
+
+      <FormField label="Nội dung" :required="true">
+        <UiTextarea v-model="form.content" :rows="15" placeholder="Enter content" :required="true" />
+      </FormField>
+
       <div class="form-row">
-        <div class="form-group">
-          <label for="category">Danh mục</label>
-          <input id="category" v-model="form.category" placeholder="VD: PHÒNG KHÁCH, TIPS, ..." />
-        </div>
-        <div class="form-group">
-          <label for="author">Tác giả</label>
-          <input id="author" v-model="form.author" />
-        </div>
+        <FormField label="Danh mục" optional>
+          <UiInput v-model="form.category" placeholder="VD: PHÒNG KHÁCH, TIPS, ..." />
+        </FormField>
+        <FormField label="Tác giả" optional>
+          <UiInput v-model="form.author" placeholder="Enter author" />
+        </FormField>
       </div>
-      <div class="form-group">
-        <label for="thumbnail">Ảnh đại diện (URL)</label>
-        <input id="thumbnail" v-model="form.thumbnail" type="url" />
+
+      <FormField label="Ảnh đại diện (URL)" optional>
+        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
         <div v-if="form.thumbnail" class="thumbnail-preview">
           <img :src="form.thumbnail" alt="Preview" />
         </div>
-      </div>
+      </FormField>
+
       <div class="form-row">
-        <div class="form-group">
-          <label>
-            <input v-model="form.isActive" type="checkbox" />
-            Kích hoạt
-          </label>
-          <small class="hint warning" v-if="!form.isActive">
+        <FormField>
+          <UiCheckbox v-model="form.isActive" label="Kích hoạt" />
+          <p v-if="!form.isActive" class="form-hint warning">
             ⚠️ Bài viết sẽ không hiển thị trên frontend nếu không được kích hoạt
-          </small>
-        </div>
-        <div class="form-group">
-          <label>
-            <input v-model="form.isFeatured" type="checkbox" />
-            Nổi bật (Featured)
-          </label>
-          <small class="hint">Bài viết nổi bật sẽ hiển thị trên trang chủ</small>
-        </div>
+          </p>
+        </FormField>
+        <FormField>
+          <UiCheckbox v-model="form.isFeatured" label="Nổi bật (Featured)" />
+          <p class="form-hint">Bài viết nổi bật sẽ hiển thị trên trang chủ</p>
+        </FormField>
       </div>
-      <div class="form-group">
-        <label for="publishedAt">Ngày xuất bản</label>
-        <input
-          id="publishedAt"
-          v-model="form.publishedAt"
-          type="datetime-local"
-        />
-        <small class="hint">Để trống để xuất bản ngay</small>
-        <small class="hint warning" v-if="form.publishedAt && new Date(form.publishedAt) > new Date()">
+
+      <FormField label="Ngày xuất bản" optional>
+        <UiInput v-model="form.publishedAt" type="datetime-local" />
+        <p class="form-hint">Để trống để xuất bản ngay</p>
+        <p v-if="form.publishedAt && new Date(form.publishedAt) > new Date()" class="form-hint warning">
           ⚠️ Bài viết sẽ không hiển thị cho đến khi đến ngày xuất bản
-        </small>
-      </div>
-      <div class="form-group">
-        <label for="seoTitle">SEO Title</label>
-        <input id="seoTitle" v-model="form.seoTitle" />
-      </div>
-      <div class="form-group">
-        <label for="seoDescription">SEO Description</label>
-        <textarea id="seoDescription" v-model="form.seoDescription" rows="2"></textarea>
-      </div>
+        </p>
+      </FormField>
+
+      <FormField label="SEO Title" optional>
+        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
+      </FormField>
+
+      <FormField label="SEO Description" optional>
+        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
+      </FormField>
+
       <div v-if="form.slug && isEdit" class="form-group preview-link">
-        <label>Xem trước</label>
-        <div class="preview-actions">
-          <a
-            v-if="canPreview"
-            :href="postUrl(form.slug)"
-            target="_blank"
-            rel="noopener"
-            class="btn btn-outline btn-sm"
-          >
-            Mở bài viết (Public) →
-          </a>
-          <a
-            href="#"
-            class="btn btn-outline btn-sm"
-            :class="{ 'btn-warning': !canPreview }"
-            @click.prevent="openPreview"
-          >
-            {{ canPreview ? 'Xem trước (Admin)' : 'Xem trước (Admin - Chưa public)' }}
-          </a>
-          <small class="hint" v-if="!canPreview">
-            ⚠️ Bài viết chưa hiển thị trên frontend do:
-            <span v-if="!form.isActive">• Chưa được kích hoạt</span>
-            <span v-if="form.publishedAt && new Date(form.publishedAt) > new Date()">
-              • Chưa đến ngày xuất bản
-            </span>
-          </small>
-        </div>
+        <FormField label="Xem trước">
+          <div class="preview-actions">
+            <a
+              v-if="canPreview"
+              :href="postUrl(form.slug)"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-outline btn-sm"
+            >
+              Mở bài viết (Public) →
+            </a>
+            <a
+              href="#"
+              class="btn btn-outline btn-sm"
+              :class="{ 'btn-warning': !canPreview }"
+              @click.prevent="openPreview"
+            >
+              {{ canPreview ? 'Xem trước (Admin)' : 'Xem trước (Admin - Chưa public)' }}
+            </a>
+            <small class="hint" v-if="!canPreview">
+              ⚠️ Bài viết chưa hiển thị trên frontend do:
+              <span v-if="!form.isActive">• Chưa được kích hoạt</span>
+              <span v-if="form.publishedAt && new Date(form.publishedAt) > new Date()">
+                • Chưa đến ngày xuất bản
+              </span>
+            </small>
+          </div>
+        </FormField>
       </div>
-      <p v-if="error" class="error">{{ error }}</p>
+
+      <FormField v-if="error" :error="error" />
+
       <div class="form-actions">
+        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.title">
+          Xem trước
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
@@ -119,6 +114,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { blogService, type BlogPost } from '@/services/blog.service'
+import { savePreviewData } from '@/utils/preview'
+import FormField from '@/components/ui/FormField.vue'
+import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -209,6 +207,38 @@ onMounted(async () => {
   }
 })
 
+function handlePreview() {
+  if (!form.slug || !form.title) {
+    alert('Vui lòng nhập tiêu đề và slug để xem trước.')
+    return
+  }
+  
+  // Create preview blog post data
+  const previewPost: BlogPost = {
+    id: id || 999999, // Temporary ID for preview
+    title: form.title.trim(),
+    slug: form.slug.trim(),
+    excerpt: form.excerpt?.trim() || '',
+    content: form.content.trim(),
+    thumbnail: form.thumbnail?.trim() || '',
+    category: form.category?.trim() || '',
+    author: form.author?.trim() || '',
+    seoTitle: form.seoTitle?.trim() || '',
+    seoDescription: form.seoDescription?.trim() || '',
+    isActive: form.isActive,
+    isFeatured: form.isFeatured,
+    publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : undefined,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+  
+  // Save to localStorage
+  savePreviewData('blog', form.slug, previewPost)
+  
+  // Navigate to preview in same app
+  router.push(`/blog/${form.slug}/preview`)
+}
+
 async function onSubmit() {
   saving.value = true
   error.value = ''
@@ -245,130 +275,75 @@ async function onSubmit() {
 
 <style scoped>
 .blog-form {
-  max-width: 900px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
+
 .blog-form h1 {
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #111827;
 }
-.form-group {
-  margin-bottom: 1.25rem;
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-.form-group input[type="text"],
-.form-group input[type="url"],
-.form-group input[type="datetime-local"],
-.form-group textarea {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-.form-group input[type="checkbox"] {
-  margin-right: 0.5rem;
-}
-.form-group textarea {
-  font-family: inherit;
-  resize: vertical;
-}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
-.hint {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
-  color: #666;
+
+.thumbnail-preview {
+  margin-top: 0.5rem;
 }
-.hint.warning {
-  color: #d32f2f;
-  font-weight: 500;
+
+.thumbnail-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 6px;
+  border: 1px solid #eee;
 }
-.hint code {
-  background: #f0f0f0;
-  padding: 0.15rem 0.3rem;
-  border-radius: 3px;
-  font-size: 0.85rem;
+
+.preview-link {
+  padding: 1rem;
+  background: #f8f8f8;
+  border-radius: 6px;
+  border: 1px solid #eee;
 }
+
 .preview-actions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-.thumbnail-preview {
-  margin-top: 0.5rem;
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
 }
-.thumbnail-preview img {
-  max-width: 200px;
-  max-height: 150px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
+
+.hint {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
 }
-.preview-link {
-  padding: 1rem;
-  background: #f8f8f8;
-  border-radius: 6px;
-}
-.error {
-  color: #d32f2f;
-  padding: 0.75rem;
-  background: #ffebee;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-}
+
 .form-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
-.btn {
-  padding: 0.6rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
-.btn-primary {
-  background: var(--color-primary, #1976d2);
-  color: #fff;
-}
-.btn-primary:hover:not(:disabled) {
-  background: #1565c0;
-}
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.btn-outline {
-  background: #fff;
-  color: #333;
-  border-color: #ddd;
-}
-.btn-outline:hover {
-  border-color: #999;
-}
-.btn-warning {
-  background: #fff3cd;
-  border-color: #ffc107;
-  color: #856404;
-}
-.btn-warning:hover {
-  background: #ffe69c;
-  border-color: #ffb300;
-}
-.btn-sm {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.875rem;
+
+:deep(.form-hint.warning) {
+  color: #dc2626;
 }
 </style>

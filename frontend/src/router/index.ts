@@ -26,6 +26,17 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/BlogView.vue'),
   },
   {
+    path: '/blog/:slug/preview',
+    name: 'blog-post-preview',
+    component: () => import('../layouts/PreviewLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('../views/BlogPostView.vue'),
+      },
+    ],
+  },
+  {
     path: '/blog/:slug',
     name: 'blog-post',
     component: () => import('../views/BlogPostView.vue'),
@@ -46,15 +57,49 @@ const routes: RouteRecordRaw[] = [
   },
   // Collection: /bo-suu-tap/...
   {
+    path: '/bo-suu-tap/:slug/preview',
+    name: 'collection-preview',
+    component: () => import('../layouts/PreviewLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('../views/CollectionView.vue'),
+      },
+    ],
+  },
+  {
     path: '/bo-suu-tap/:slug',
     name: 'collection',
     component: () => import('../views/CollectionView.vue'),
   },
   // CMS Page: /page/about, /page/privacy, etc.
   {
+    path: '/page/:slug/preview',
+    name: 'cms-page-preview',
+    component: () => import('../layouts/PreviewLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('../views/CmsPageView.vue'),
+      },
+    ],
+  },
+  {
     path: '/page/:slug',
     name: 'cms-page',
     component: () => import('../views/CmsPageView.vue'),
+  },
+  // Product preview: /san-pham/.../preview
+  {
+    path: '/san-pham/:productSlug/preview',
+    name: 'product-preview',
+    component: () => import('../layouts/PreviewLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('../views/ProductView.vue'),
+      },
+    ],
   },
   // Product: /phongngu/giuong/giuong-ngu-... (must be before category)
   {
@@ -62,11 +107,35 @@ const routes: RouteRecordRaw[] = [
     name: 'product',
     component: () => import('../views/ProductView.vue'),
   },
+  // Category preview: /phongngu/giuong/preview
+  {
+    path: '/:roomSlug/:categorySlug/preview',
+    name: 'category-preview',
+    component: () => import('../layouts/PreviewLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('../views/CategoryView.vue'),
+      },
+    ],
+  },
   // Category: /phongngu/giuong
   {
     path: '/:roomSlug/:categorySlug',
     name: 'category',
     component: () => import('../views/CategoryView.vue'),
+  },
+  // Room preview: /phongngu/preview
+  {
+    path: '/:roomSlug/preview',
+    name: 'room-preview',
+    component: () => import('../layouts/PreviewLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('../views/CategoryView.vue'),
+      },
+    ],
   },
   // Room: /phongngu (must be last to catch all room slugs)
   {

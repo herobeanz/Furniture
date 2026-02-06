@@ -1,22 +1,40 @@
 <template>
   <div class="dashboard">
-    <h1>Tổng quan</h1>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-value">{{ stats.products }}</span>
-        <span class="stat-label">Sản phẩm</span>
+    <div class="page-header">
+      <h1>Dashboard</h1>
+    </div>
+    <div class="summary-cards">
+      <div class="summary-card card-earnings">
+        <div class="card-content">
+          <div class="card-value">{{ stats.products }}</div>
+          <div class="card-label">Sản phẩm</div>
+        </div>
+        <div class="card-icon">📊</div>
+        <div class="card-update">update: {{ currentTime }}</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-value">{{ stats.categories }}</span>
-        <span class="stat-label">Danh mục</span>
+      <div class="summary-card card-views">
+        <div class="card-content">
+          <div class="card-value">{{ stats.inquiries }}+</div>
+          <div class="card-label">Yêu cầu</div>
+        </div>
+        <div class="card-icon">📋</div>
+        <div class="card-update">update: {{ currentTime }}</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-value">{{ stats.inquiries }}</span>
-        <span class="stat-label">Yêu cầu</span>
+      <div class="summary-card card-tasks">
+        <div class="card-content">
+          <div class="card-value">{{ stats.categories }}</div>
+          <div class="card-label">Danh mục</div>
+        </div>
+        <div class="card-icon">📁</div>
+        <div class="card-update">update: {{ currentTime }}</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-value">{{ stats.cms }}</span>
-        <span class="stat-label">Trang CMS</span>
+      <div class="summary-card card-downloads">
+        <div class="card-content">
+          <div class="card-value">{{ stats.cms }}</div>
+          <div class="card-label">Trang CMS</div>
+        </div>
+        <div class="card-icon">📄</div>
+        <div class="card-update">update: {{ currentTime }}</div>
       </div>
     </div>
     <section class="recent-inquiries">
@@ -47,79 +65,120 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import { useAdminDashboard } from '@/composables/admin/useAdminDashboard'
 
-const stats = ref({ products: 0, categories: 0, inquiries: 0, cms: 0 })
-const recent = ref<any[]>([])
-const loading = ref(true)
+// Container component: orchestrates data and logic
+const { stats, recent, loading, formatDate } = useAdminDashboard()
 
-function formatDate(s: string) {
-  return new Date(s).toLocaleDateString('vi-VN')
-}
+const currentTime = ref('')
+let timeInterval: ReturnType<typeof setInterval> | null = null
 
-onMounted(async () => {
-  try {
-    const [productsRes, categoriesRes, inquiriesRes, cmsRes] = await Promise.all([
-      apiClient.get('/products/list/all').catch(() => []),
-      apiClient.get('/categories/list/all').catch(() => []),
-      apiClient.get('/inquiries', { params: { limit: 5 } }).catch(() => ({ data: [], total: 0 })),
-      apiClient.get('/cms').catch(() => []),
-    ])
-    stats.value = {
-      products: Array.isArray(productsRes) ? (productsRes as any[]).length : 0,
-      categories: Array.isArray(categoriesRes) ? (categoriesRes as any[]).length : 0,
-      inquiries: (inquiriesRes as any).total ?? 0,
-      cms: Array.isArray(cmsRes) ? (cmsRes as any[]).length : 0,
-    }
-    recent.value = (inquiriesRes as any).data ?? []
-  } catch {
-    // ignore
-  } finally {
-    loading.value = false
+onMounted(() => {
+  updateTime()
+  timeInterval = setInterval(updateTime, 60000) // Update every minute
+})
+
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval)
   }
 })
+
+function updateTime() {
+  const now = new Date()
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  currentTime.value = `${hours}:${minutes}`
+}
 </script>
 
 <style scoped>
-.dashboard h1 {
-  font-size: 1.5rem;
+.dashboard {
+  max-width: 1400px;
+}
+.page-header {
   margin-bottom: 1.5rem;
 }
-.stats-grid {
+.page-header h1 {
+  font-size: 1.75rem;
+  margin: 0;
+  font-weight: 700;
+  color: #1e293b;
+}
+.summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
-.stat-card {
+.summary-card {
   background: #fff;
-  padding: 1.25rem;
+  padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
 }
-.stat-value {
-  display: block;
-  font-size: 1.75rem;
+.card-earnings {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: #fff;
+}
+.card-views {
+  background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+  color: #fff;
+}
+.card-tasks {
+  background: linear-gradient(135deg, #ff8787 0%, #ff6b6b 100%);
+  color: #fff;
+}
+.card-downloads {
+  background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+  color: #fff;
+}
+.card-content {
+  flex: 1;
+}
+.card-value {
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--color-primary);
+  margin-bottom: 0.5rem;
 }
-.stat-label {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
+.card-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+.card-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2.5rem;
+  opacity: 0.2;
+}
+.card-update {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+.recent-inquiries {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 .recent-inquiries h2 {
   font-size: 1.1rem;
   margin-bottom: 1rem;
+  color: #1e293b;
 }
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 .data-table th,
 .data-table td {
@@ -130,17 +189,28 @@ onMounted(async () => {
 .data-table th {
   background: #f8f8f8;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+.data-table tbody tr:hover {
+  background: #f8f8f8;
 }
 .badge {
   font-size: 0.75rem;
-  padding: 0.2rem 0.5rem;
-  background: #eee;
+  padding: 0.25rem 0.5rem;
+  background: #e2e8f0;
   border-radius: 4px;
+  color: #475569;
 }
 .link-more {
   display: inline-block;
   margin-top: 0.75rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+.link-more:hover {
+  text-decoration: underline;
 }
 </style>

@@ -1,45 +1,38 @@
 <template>
   <div class="collection-form">
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Sửa bộ sưu tập' : 'Thêm bộ sưu tập' }}</h1>
-      <RouterLink to="/admin/collections" class="btn btn-outline">Quay lại</RouterLink>
-    </div>
-    <form @submit.prevent="save" class="form">
-      <div class="form-group">
-        <label>Tên bộ sưu tập *</label>
-        <input v-model="form.name" required />
-      </div>
-      <div class="form-group">
-        <label>Slug *</label>
-        <input v-model="form.slug" required />
-        <small>URL-friendly name, ví dụ: bo-suu-tap-mua-he</small>
-      </div>
-      <div class="form-group">
-        <label>Mô tả</label>
-        <textarea v-model="form.description" rows="3"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Ảnh đại diện (URL)</label>
-        <input v-model="form.thumbnail" type="url" />
-      </div>
-      <div class="form-group">
-        <label>Thứ tự hiển thị</label>
-        <input v-model.number="form.orderIndex" type="number" min="0" />
-      </div>
-      <div class="form-group">
-        <label>
-          <input v-model="form.isActive" type="checkbox" />
-          Hiển thị
-        </label>
-      </div>
-      <div class="form-group">
-        <label>SEO Title</label>
-        <input v-model="form.seoTitle" />
-      </div>
-      <div class="form-group">
-        <label>SEO Description</label>
-        <textarea v-model="form.seoDescription" rows="2"></textarea>
-      </div>
+    <h1>{{ isEdit ? 'Sửa bộ sưu tập' : 'Thêm bộ sưu tập' }}</h1>
+    <form @submit.prevent="save" class="form-container">
+      <FormField label="Tên bộ sưu tập" :required="true">
+        <UiInput v-model="form.name" placeholder="Enter collection name" :required="true" />
+      </FormField>
+
+      <FormField label="Slug" :required="true" hint="URL-friendly name, ví dụ: bo-suu-tap-mua-he">
+        <UiInput v-model="form.slug" placeholder="Enter slug" :required="true" />
+      </FormField>
+
+      <FormField label="Mô tả" optional>
+        <UiTextarea v-model="form.description" :rows="3" placeholder="Enter description" />
+      </FormField>
+
+      <FormField label="Ảnh đại diện (URL)" optional>
+        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
+      </FormField>
+
+      <FormField label="Thứ tự hiển thị" optional>
+        <UiInput v-model.number="form.orderIndex" type="number" min="0" placeholder="0" />
+      </FormField>
+
+      <FormField>
+        <UiCheckbox v-model="form.isActive" label="Hiển thị" />
+      </FormField>
+
+      <FormField label="SEO Title" optional>
+        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
+      </FormField>
+
+      <FormField label="SEO Description" optional>
+        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
+      </FormField>
 
       <!-- Products Management Section -->
       <div v-if="isEdit" class="products-section">
@@ -55,17 +48,21 @@
           <p>Chưa có sản phẩm nào. Nhấn "Thêm sản phẩm" để thêm.</p>
         </div>
         <div v-else class="products-list">
-          <div v-for="(item, index) in collectionProducts" :key="item.id" class="product-item">
+          <div v-for="item in collectionProducts" :key="item.id" class="product-item">
             <div class="product-info">
-              <img
-                v-if="item.thumbnail"
-                :src="item.thumbnail"
-                :alt="item.name"
-                class="product-thumb"
-              />
-              <div v-else class="product-thumb placeholder">📦</div>
+              <RouterLink :to="getProductPath(item)" class="product-link" target="_blank">
+                <img
+                  v-if="item.thumbnail"
+                  :src="item.thumbnail"
+                  :alt="item.name"
+                  class="product-thumb"
+                />
+                <div v-else class="product-thumb placeholder">📦</div>
+              </RouterLink>
               <div class="product-details">
-                <div class="product-name">{{ item.name }}</div>
+                <RouterLink :to="getProductPath(item)" class="product-name" target="_blank">
+                  {{ item.name }}
+                </RouterLink>
                 <div class="product-meta">{{ formatPrice(item.price) }}</div>
               </div>
             </div>
@@ -91,6 +88,9 @@
       </div>
 
       <div class="form-actions">
+        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.name">
+          Xem trước
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
@@ -146,11 +146,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
 import { formatPrice } from '@/utils/format'
+import { savePreviewData } from '@/utils/preview'
+import { getProductPath } from '@/utils/navigation'
+import FormField from '@/components/ui/FormField.vue'
+import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
 
 const route = useRoute()
+const router = useRouter()
 const id = computed(() => route.params.id as string)
 const isEdit = computed(() => !!id.value)
 const saving = ref(false)
@@ -174,9 +179,11 @@ const form = reactive({
 const collectionProducts = ref<Array<{
   id: number
   name: string
+  slug: string
   price: number
   thumbnail?: string
   orderIndex: number
+  breadcrumb?: { name: string; slug: string }[]
 }>>([])
 
 onMounted(async () => {
@@ -201,9 +208,11 @@ async function loadCollection() {
       collectionProducts.value = c.products.map((p: any) => ({
         id: p.id,
         name: p.name,
+        slug: p.slug || '',
         price: p.price,
         thumbnail: p.thumbnail,
         orderIndex: p.orderIndex || 0,
+        breadcrumb: p.breadcrumb || [],
       }))
     }
   } catch (e) {
@@ -251,12 +260,39 @@ async function addProduct(product: any) {
     await apiClient.post(`/collections/${id.value}/products`, {
       productId: product.id,
     })
+    
+    // Fetch full product details to get breadcrumb
+    let breadcrumb: { name: string; slug: string }[] = []
+    let productSlug = product.slug || ''
+    
+    try {
+      const fullProduct = await apiClient.get(`/products/by-id/${product.id}`) as any
+      productSlug = fullProduct.slug || productSlug
+      // Build breadcrumb from product category if available
+      if (fullProduct.categoryId) {
+        const category = await apiClient.get(`/categories/by-id/${fullProduct.categoryId}`) as any
+        if (category?.roomId) {
+          const room = await apiClient.get(`/rooms/by-id/${category.roomId}`) as any
+          if (room && category) {
+            breadcrumb = [
+              { name: room.name, slug: room.slug },
+              { name: category.name, slug: category.slug },
+            ]
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch full product details for breadcrumb:', e)
+    }
+    
     collectionProducts.value.push({
       id: product.id,
       name: product.name,
+      slug: productSlug,
       price: product.price,
       thumbnail: product.thumbnail,
       orderIndex: collectionProducts.value.length,
+      breadcrumb,
     })
     showAddProductModal.value = false
     productSearch.value = ''
@@ -297,6 +333,74 @@ async function updateProductOrder() {
   }
 }
 
+async function handlePreview() {
+  if (!form.slug || !form.name) {
+    alert('Vui lòng nhập tên và slug để xem trước.')
+    return
+  }
+  
+  // Ensure all products have breadcrumb before preview
+  const productsWithBreadcrumb = await Promise.all(
+    collectionProducts.value.map(async (p) => {
+      // If product already has breadcrumb with at least 2 items, use it
+      if (p.breadcrumb && p.breadcrumb.length >= 2) {
+        return p
+      }
+      
+      // Otherwise, fetch full product details to get breadcrumb
+      try {
+        const fullProduct = await apiClient.get(`/products/by-id/${p.id}`) as any
+        let breadcrumb: { name: string; slug: string }[] = []
+        
+        // Build breadcrumb from product category if available
+        if (fullProduct.categoryId) {
+          const category = await apiClient.get(`/categories/by-id/${fullProduct.categoryId}`) as any
+          if (category?.roomId) {
+            const room = await apiClient.get(`/rooms/by-id/${category.roomId}`) as any
+            if (room && category && room.slug && category.slug) {
+              breadcrumb = [
+                { name: room.name, slug: room.slug },
+                { name: category.name, slug: category.slug },
+              ]
+            }
+          }
+        }
+        
+        return {
+          ...p,
+          slug: fullProduct.slug || p.slug || '',
+          breadcrumb,
+        }
+      } catch (e) {
+        console.warn(`Could not fetch breadcrumb for product ${p.id}:`, e)
+        return p
+      }
+    })
+  )
+  
+  // Create preview collection data
+  const previewCollection = {
+    collection: {
+      id: id.value || 999999, // Temporary ID for preview
+      name: form.name.trim(),
+      slug: form.slug.trim(),
+      description: form.description?.trim() || '',
+      thumbnail: form.thumbnail?.trim() || '',
+      orderIndex: form.orderIndex || 0,
+      isActive: form.isActive,
+      seoTitle: form.seoTitle?.trim() || '',
+      seoDescription: form.seoDescription?.trim() || '',
+    },
+    products: productsWithBreadcrumb, // Include products with breadcrumb
+  }
+  
+  // Save to localStorage
+  savePreviewData('collection', form.slug, previewCollection)
+  
+  // Navigate to preview in same app
+  router.push(`/bo-suu-tap/${form.slug}/preview`)
+}
+
 async function save() {
   saving.value = true
   try {
@@ -321,53 +425,31 @@ async function save() {
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-.page-header h1 {
-  font-size: 1.5rem;
-  margin: 0;
-}
-.form {
+.collection-form {
   max-width: 800px;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin: 0 auto;
+  padding: 2rem;
 }
-.form-group {
-  margin-bottom: 1rem;
+
+.collection-form h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #111827;
 }
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-.form-group input[type="checkbox"] {
-  margin-right: 0.5rem;
-}
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-.form-group small {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
-  color: #666;
-}
-.form-actions {
-  margin-top: 1.5rem;
+
+.form-container {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 /* Products Section */
@@ -426,10 +508,24 @@ async function save() {
 .product-details {
   flex: 1;
 }
+.product-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.product-link:hover {
+  opacity: 0.8;
+}
 .product-name {
   font-weight: 500;
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
+  color: #1a1a1a;
+  text-decoration: none;
+  display: block;
+}
+.product-name:hover {
+  color: var(--color-primary);
 }
 .product-meta {
   font-size: 0.8rem;

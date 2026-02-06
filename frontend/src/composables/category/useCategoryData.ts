@@ -4,6 +4,7 @@ import { roomService, type Room } from '@/services/room.service'
 import { categoryService, type Category } from '@/services/category.service'
 import type { Product } from '@/services/product.service'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
+import { getPreviewData } from '@/utils/preview'
 
 /**
  * Composable for Category/Room page data fetching and state management
@@ -12,6 +13,7 @@ export function useCategoryData() {
   const route = useRoute()
   const roomSlug = computed(() => (route.params.roomSlug as string) ?? '')
   const categorySlug = computed(() => (route.params.categorySlug as string) ?? '')
+  const isPreviewMode = computed(() => route.path.endsWith('/preview'))
 
   const room = ref<Room | null>(null)
   const category = ref<Category | null>(null)
@@ -50,6 +52,18 @@ export function useCategoryData() {
     loading.value = true
     error.value = ''
     isNotFound.value = false
+    
+    // Check for preview data first
+    if (isPreviewMode.value && !categorySlug.value) {
+      const preview = getPreviewData('room', roomSlug.value)
+      if (preview) {
+        room.value = preview as Room
+        loading.value = false
+        await fetchCategories()
+        return
+      }
+    }
+    
     try {
       room.value = await roomService.getRoom(roomSlug.value)
       if (categorySlug.value) {
@@ -74,6 +88,31 @@ export function useCategoryData() {
     loading.value = true
     error.value = ''
     isNotFound.value = false
+    
+    // Check for preview data first
+    if (isPreviewMode.value) {
+      const preview = getPreviewData('category', categorySlug.value)
+      if (preview) {
+        category.value = preview as Category
+        // Also need room data for breadcrumb
+        if (!room.value) {
+          const roomPreview = getPreviewData('room', roomSlug.value)
+          if (roomPreview) {
+            room.value = roomPreview as Room
+          } else {
+            try {
+              room.value = await roomService.getRoom(roomSlug.value)
+            } catch {
+              // Room might not exist yet, use preview data only
+            }
+          }
+        }
+        loading.value = false
+        await fetchProducts()
+        return
+      }
+    }
+    
     try {
       if (!room.value) {
         room.value = await roomService.getRoom(roomSlug.value)

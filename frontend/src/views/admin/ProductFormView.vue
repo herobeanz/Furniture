@@ -1,109 +1,103 @@
 <template>
   <div class="product-form">
     <h1>{{ isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
-    <form @submit.prevent="onSubmit">
-      <div class="form-group">
-        <label for="categoryId">Danh mục *</label>
-        <select id="categoryId" v-model.number="form.categoryId" required>
+    <form @submit.prevent="onSubmit" class="form-container">
+      <FormField label="Danh mục" :required="true">
+        <UiSelect v-model="form.categoryId" placeholder="Chọn danh mục" :required="true">
           <option value="0">Chọn danh mục</option>
           <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="name">Tên *</label>
-        <input id="name" v-model="form.name" required />
-      </div>
-      <div class="form-group">
-        <label for="sku">SKU *</label>
-        <input id="sku" v-model="form.sku" required />
-      </div>
-      <div class="form-group">
-        <label for="slug">Slug (để trống sẽ tự tạo)</label>
-        <input id="slug" v-model="form.slug" />
-      </div>
-      <div class="form-group">
-        <label for="shortDescription">Mô tả ngắn</label>
-        <textarea id="shortDescription" v-model="form.shortDescription" rows="2"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="description">Mô tả đầy đủ</label>
-        <textarea id="description" v-model="form.description" rows="4"></textarea>
-      </div>
+        </UiSelect>
+      </FormField>
+
+      <FormField label="Tên" :required="true">
+        <UiInput v-model="form.name" placeholder="Enter product name" :required="true" />
+      </FormField>
+
+      <FormField label="SKU" optional hint="Để trống sẽ tự động tạo mã SKU dựa trên danh mục">
+        <UiInput v-model="form.sku" placeholder="Enter SKU (optional)" />
+      </FormField>
+
+      <FormField label="Slug" optional hint="Để trống sẽ tự tạo">
+        <UiInput v-model="form.slug" placeholder="Enter slug" />
+      </FormField>
+
+      <FormField label="Mô tả ngắn" optional>
+        <UiTextarea v-model="form.shortDescription" :rows="2" placeholder="Enter short description" />
+      </FormField>
+
+      <FormField label="Mô tả đầy đủ" optional>
+        <UiTextarea v-model="form.description" :rows="4" placeholder="Enter full description" />
+      </FormField>
+
       <div class="form-row">
-        <div class="form-group">
-          <label for="price">Giá *</label>
-          <input id="price" v-model.number="form.price" type="number" min="0" step="0.01" required />
-        </div>
-        <div class="form-group">
-          <label for="salePrice">Giá khuyến mãi</label>
-          <input id="salePrice" v-model.number="form.salePrice" type="number" min="0" step="0.01" />
-        </div>
+        <FormField label="Giá" :required="true">
+          <UiInput v-model.number="form.price" type="number" min="0" step="0.01" placeholder="0" :required="true" />
+        </FormField>
+        <FormField label="Giá khuyến mãi" optional>
+          <UiInput v-model.number="form.salePrice" type="number" min="0" step="0.01" placeholder="0" />
+        </FormField>
       </div>
-      <div class="form-group">
-        <label for="thumbnail">Ảnh đại diện (URL)</label>
-        <input id="thumbnail" v-model="form.thumbnail" type="url" />
-      </div>
-      <div class="form-group">
-        <label for="images">Ảnh sản phẩm (mỗi URL một dòng)</label>
-        <textarea id="images" v-model="imagesText" rows="3" placeholder="https://..."></textarea>
-        <small>Ảnh đầu tiên sẽ là ảnh chính</small>
-      </div>
-      <div class="form-group">
-        <label for="status">Trạng thái</label>
-        <select id="status" v-model="form.status">
+
+      <FormField label="Ảnh đại diện (URL)" optional>
+        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
+      </FormField>
+
+      <FormField label="Ảnh sản phẩm" optional hint="Mỗi URL một dòng. Ảnh đầu tiên sẽ là ảnh chính">
+        <UiTextarea v-model="imagesText" :rows="3" placeholder="https://..." />
+      </FormField>
+
+      <FormField label="Trạng thái" optional>
+        <UiSelect v-model="form.status">
           <option value="available">available</option>
           <option value="hidden">hidden</option>
           <option value="discontinued">discontinued</option>
-        </select>
-      </div>
+        </UiSelect>
+      </FormField>
+
       <div class="form-row">
-        <div class="form-group">
-          <label for="material">Chất liệu</label>
-          <input id="material" v-model="form.material" />
-        </div>
-        <div class="form-group">
-          <label for="dimensions">Kích thước</label>
-          <input id="dimensions" v-model="form.dimensions" />
-        </div>
+        <FormField label="Chất liệu" optional>
+          <UiInput v-model="form.material" placeholder="Enter material" />
+        </FormField>
+        <FormField label="Kích thước" optional>
+          <UiInput v-model="form.dimensions" placeholder="Enter dimensions" />
+        </FormField>
       </div>
+
       <div class="form-row">
-        <div class="form-group">
-          <label for="color">Màu sắc</label>
-          <input id="color" v-model="form.color" />
-        </div>
-        <div class="form-group">
-          <label for="warranty">Bảo hành</label>
-          <input id="warranty" v-model="form.warranty" />
-        </div>
+        <FormField label="Màu sắc" optional>
+          <UiInput v-model="form.color" placeholder="Enter color" />
+        </FormField>
+        <FormField label="Bảo hành" optional>
+          <UiInput v-model="form.warranty" placeholder="Enter warranty" />
+        </FormField>
       </div>
-      <div class="form-group">
-        <label>
-          <input v-model="form.isActive" type="checkbox" />
-          Kích hoạt
-        </label>
+
+      <div class="form-row">
+        <FormField>
+          <UiCheckbox v-model="form.isActive" label="Kích hoạt" />
+        </FormField>
+        <FormField>
+          <UiCheckbox v-model="form.isFeatured" label="Sản phẩm nổi bật" />
+        </FormField>
+        <FormField>
+          <UiCheckbox v-model="form.isHot" label="Sản phẩm hot" />
+        </FormField>
       </div>
-      <div class="form-group">
-        <label>
-          <input v-model="form.isFeatured" type="checkbox" />
-          Sản phẩm nổi bật
-        </label>
-      </div>
-      <div class="form-group">
-        <label>
-          <input v-model="form.isHot" type="checkbox" />
-          Sản phẩm hot
-        </label>
-      </div>
-      <div class="form-group">
-        <label for="seoTitle">SEO Title</label>
-        <input id="seoTitle" v-model="form.seoTitle" />
-      </div>
-      <div class="form-group">
-        <label for="seoDescription">SEO Description</label>
-        <textarea id="seoDescription" v-model="form.seoDescription" rows="2"></textarea>
-      </div>
-      <p v-if="error" class="error">{{ error }}</p>
+
+      <FormField label="SEO Title" optional>
+        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
+      </FormField>
+
+      <FormField label="SEO Description" optional>
+        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
+      </FormField>
+
+      <FormField v-if="error" :error="error" />
+
       <div class="form-actions">
+        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.name">
+          Xem trước
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
@@ -117,6 +111,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
+import { savePreviewData } from '@/utils/preview'
+import FormField from '@/components/ui/FormField.vue'
+import { UiInput, UiTextarea, UiSelect, UiCheckbox } from '@/components/ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -168,7 +165,7 @@ const formPayload = computed(() => {
   return {
     categoryId: form.categoryId,
     name: form.name,
-    sku: form.sku,
+    sku: form.sku?.trim() || undefined, // Send undefined if empty to let backend generate
     slug: form.slug || undefined,
     shortDescription: form.shortDescription || undefined,
     description: form.description || undefined,
@@ -230,6 +227,49 @@ onMounted(async () => {
   }
 })
 
+function handlePreview() {
+  if (!form.slug || !form.name) {
+    alert('Vui lòng nhập tên và slug để xem trước.')
+    return
+  }
+  
+  // Create preview product data
+  const imageUrls = imagesText.value
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  
+  const previewProduct = {
+    id: id.value || 999999, // Temporary ID for preview
+    name: form.name,
+    slug: form.slug,
+    sku: form.sku,
+    description: form.description || '',
+    shortDescription: form.shortDescription || '',
+    price: form.price,
+    salePrice: form.salePrice,
+    thumbnail: form.thumbnail || '',
+    images: imageUrls.length > 0 ? imageUrls : (form.thumbnail ? [form.thumbnail] : []),
+    categoryId: form.categoryId,
+    status: form.status,
+    material: form.material || '',
+    dimensions: form.dimensions || '',
+    color: form.color || '',
+    warranty: form.warranty || '',
+    isActive: form.isActive,
+    isFeatured: form.isFeatured,
+    isHot: form.isHot,
+    seoTitle: form.seoTitle || '',
+    seoDescription: form.seoDescription || '',
+  }
+  
+  // Save to localStorage
+  savePreviewData('product', form.slug, previewProduct)
+  
+  // Navigate to preview in same app
+  router.push(`/san-pham/${form.slug}/preview`)
+}
+
 async function onSubmit() {
   saving.value = true
   error.value = ''
@@ -249,53 +289,36 @@ async function onSubmit() {
 </script>
 
 <style scoped>
+.product-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
 .product-form h1 {
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #111827;
 }
-.form-group {
-  margin-bottom: 1rem;
-}
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.35rem;
-}
-.form-group input[type="checkbox"] {
-  margin-right: 0.5rem;
-}
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  max-width: 500px;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 1rem;
-}
-.form-group small {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
-  color: #666;
-}
-.form-row {
+
+.form-container {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 1.5rem;
 }
-.form-row .form-group {
-  flex: 1;
-  max-width: 250px;
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
 }
-.error {
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-}
+
 .form-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 </style>

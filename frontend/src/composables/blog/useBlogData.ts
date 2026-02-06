@@ -2,6 +2,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { blogService, type BlogPost } from '@/services/blog.service'
 import { extractErrorMessage } from '@/utils/error'
+import { getPreviewData } from '@/utils/preview'
 
 /**
  * Composable for Blog listing page data fetching
@@ -41,6 +42,7 @@ export function useBlogListData() {
 export function useBlogPostData() {
   const route = useRoute()
   const slug = computed(() => route.params.slug as string)
+  const isPreview = computed(() => route.name === 'blog-post-preview')
 
   const post = ref<BlogPost | null>(null)
   const loading = ref(true)
@@ -48,6 +50,17 @@ export function useBlogPostData() {
 
   async function fetchPost() {
     if (!slug.value) return
+    
+    // Check for preview data first
+    if (isPreview.value) {
+      const previewData = getPreviewData('blog', slug.value)
+      if (previewData) {
+        post.value = previewData as BlogPost
+        loading.value = false
+        return
+      }
+    }
+    
     loading.value = true
     error.value = ''
     try {

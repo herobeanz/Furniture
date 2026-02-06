@@ -19,7 +19,39 @@
             </template>
           </div>
         </div>
-        <RouterLink to="/page/lien-he">Liên hệ</RouterLink>
+        <div class="nav-dropdown" v-if="collections.length > 0">
+          <span class="nav-dropdown-trigger">
+            Bộ sưu tập
+            <span class="nav-arrow">▾</span>
+          </span>
+          <div class="nav-dropdown-menu nav-dropdown-menu-collections">
+            <RouterLink
+              v-for="collection in collections"
+              :key="collection.id"
+              :to="'/bo-suu-tap/' + collection.slug"
+              class="nav-dropdown-item"
+            >
+              {{ collection.name }}
+            </RouterLink>
+          </div>
+        </div>
+        <div class="nav-dropdown">
+          <span class="nav-dropdown-trigger">
+            Trang
+            <span class="nav-arrow">▾</span>
+          </span>
+          <div class="nav-dropdown-menu nav-dropdown-menu-pages">
+            <RouterLink to="/page/lien-he" class="nav-dropdown-item">Liên hệ</RouterLink>
+            <RouterLink
+              v-for="page in cmsPages"
+              :key="page.id"
+              :to="'/page/' + page.slug"
+              class="nav-dropdown-item"
+            >
+              {{ page.title }}
+            </RouterLink>
+          </div>
+        </div>
       </nav>
       <div class="header-actions">
         <div class="search-wrap">
@@ -48,35 +80,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { useCartStore } from '@/stores/cart'
-import { useWishlistStore } from '@/stores/wishlist'
-import { categoryService, type CategoryTreeNode } from '@/services/category.service'
+import { useHeader } from '@/composables/common/useHeader'
 
-const router = useRouter()
-const cartStore = useCartStore()
-const wishlistStore = useWishlistStore()
-
-const searchQuery = ref('')
-const categoryTree = ref<CategoryTreeNode[]>([])
-
-const cartCount = computed(() => cartStore.totalItems)
-const wishlistCount = computed(() => wishlistStore.items.length)
-
-onMounted(async () => {
-  try {
-    categoryTree.value = await categoryService.getCategoryTree()
-  } catch {
-    categoryTree.value = []
-  }
-})
-
-function onSearch() {
-  const q = searchQuery.value?.trim()
-  if (q) router.push({ path: '/', query: { search: q } })
-}
+// Presentational component: uses composable for logic
+const {
+  searchQuery,
+  categoryTree,
+  collections,
+  cmsPages,
+  cartCount,
+  wishlistCount,
+  onSearch,
+} = useHeader()
 </script>
 
 <style scoped>

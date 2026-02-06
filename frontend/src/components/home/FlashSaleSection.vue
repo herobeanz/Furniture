@@ -20,7 +20,7 @@
               <span class="price-current">{{ formatPrice(product.price) }}</span>
             </div>
             <div class="product-actions">
-              <button type="button" class="action-btn add-cart" @click="$emit('addToCart', product)">+ Thêm vào giỏ</button>
+              <button type="button" class="action-btn add-cart" @click="$emit('addToCart', product)">Thêm vào giỏ hàng</button>
               <button
                 type="button"
                 class="action-btn icon-only"
@@ -177,15 +177,27 @@ const { isInWishlist } = useProductActions()
 .action-btn {
   padding: 0.4rem 0.6rem;
   font-size: 0.8rem;
-  border: 1px solid var(--color-border);
+  font-weight: 600;
+  border: none;
   border-radius: 6px;
-  background: #fff;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .action-btn.add-cart {
   flex: 1;
+  background: var(--color-primary);
+  color: #fff;
 }
-.action-btn:hover {
+.action-btn.add-cart:hover {
+  background: var(--color-primary-hover, #a00);
+}
+.action-btn.icon-only {
+  width: 32px;
+  padding: 0.4rem;
+  border: 1px solid var(--color-border);
+  background: #fff;
+}
+.action-btn.icon-only:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }

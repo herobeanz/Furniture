@@ -7,19 +7,13 @@
           type="button"
           class="carousel-btn carousel-btn-prev"
           @click="prevSlide"
-          :disabled="currentIndex === 0"
+          :disabled="!canGoPrev"
           aria-label="Đánh giá trước"
         >
           ‹
         </button>
         <div class="carousel-container">
-          <div
-            class="carousel-track"
-            :style="{ 
-              transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-              '--items-per-view': itemsPerView 
-            }"
-          >
+          <div class="carousel-track" :style="transformStyle">
             <div
               v-for="(review, index) in reviews"
               :key="index"
@@ -37,7 +31,7 @@
           type="button"
           class="carousel-btn carousel-btn-next"
           @click="nextSlide"
-          :disabled="currentIndex >= reviews.length - itemsPerView"
+          :disabled="!canGoNext"
           aria-label="Đánh giá tiếp"
         >
           ›
@@ -59,7 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
+import { useCarousel } from '@/composables/common/useCarousel'
 
 export interface Review {
   text: string
@@ -86,54 +81,20 @@ const props = withDefaults(defineProps<Props>(), {
   itemsPerView: 3,
 })
 
-const currentIndex = ref(0)
-let autoPlayTimer: ReturnType<typeof setInterval> | null = null
-
-const maxIndex = computed(() => Math.max(0, props.reviews.length - props.itemsPerView))
-const visibleDots = computed(() => Math.ceil(props.reviews.length / props.itemsPerView))
-const currentDotIndex = computed(() => Math.floor(currentIndex.value / props.itemsPerView))
-
-function nextSlide() {
-  if (currentIndex.value < maxIndex.value) {
-    currentIndex.value = Math.min(currentIndex.value + props.itemsPerView, maxIndex.value)
-  } else {
-    currentIndex.value = 0 // Loop back to start
-  }
-}
-
-function prevSlide() {
-  if (currentIndex.value > 0) {
-    currentIndex.value = Math.max(currentIndex.value - props.itemsPerView, 0)
-  } else {
-    currentIndex.value = maxIndex.value // Loop to end
-  }
-}
-
-function goToSlide(index: number) {
-  currentIndex.value = index * props.itemsPerView
-}
-
-function startAutoPlay() {
-  if (!props.autoPlay) return
-  stopAutoPlay()
-  autoPlayTimer = setInterval(() => {
-    nextSlide()
-  }, props.autoPlayInterval)
-}
-
-function stopAutoPlay() {
-  if (autoPlayTimer) {
-    clearInterval(autoPlayTimer)
-    autoPlayTimer = null
-  }
-}
-
-onMounted(() => {
-  startAutoPlay()
-})
-
-onUnmounted(() => {
-  stopAutoPlay()
+// Use carousel composable for logic
+const {
+  visibleDots,
+  currentDotIndex,
+  canGoPrev,
+  canGoNext,
+  transformStyle,
+  nextSlide,
+  prevSlide,
+  goToSlide,
+} = useCarousel(props.reviews.length, {
+  itemsPerView: props.itemsPerView,
+  autoPlay: props.autoPlay,
+  autoPlayInterval: props.autoPlayInterval,
 })
 </script>
 

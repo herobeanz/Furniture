@@ -243,6 +243,51 @@ export class ProductsService {
     return this.findRelated(categoryId, product.id, limit);
   }
 
+  /**
+   * Generate SKU based on category
+   * Format: 3 letters from category name + "-" + 4 random digits
+   * Example: SOF-1234
+   */
+  private async generateSku(categoryId: number): Promise<string> {
+    const category = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { name: true },
+    });
+    
+    if (!category) {
+      throw new NotFoundException(`Category not found: ${categoryId}`);
+    }
+
+    // Get first 3 letters from category name (uppercase, remove spaces/special chars)
+    const categoryPrefix = category.name
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '')
+      .substring(0, 3)
+      .padEnd(3, 'X'); // Pad with 'X' if less than 3 letters
+
+    // Generate unique SKU by trying random 4-digit numbers
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    while (attempts < maxAttempts) {
+      // Generate 4 random digits
+      const randomDigits = Math.floor(1000 + Math.random() * 9000).toString();
+      const sku = `${categoryPrefix}-${randomDigits}`;
+      
+      // Check if SKU already exists
+      const existing = await this.prisma.product.findFirst({ where: { sku } });
+      if (!existing) {
+        return sku;
+      }
+      
+      attempts++;
+    }
+    
+    // Fallback: use timestamp if all attempts failed
+    const timestamp = Date.now().toString().slice(-4);
+    return `${categoryPrefix}-${timestamp}`;
+  }
+
   async create(dto: CreateProductDto) {
     // Verify category exists
     const category = await this.prisma.category.findUnique({
@@ -256,17 +301,23 @@ export class ProductsService {
     const existing = await this.prisma.product.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now().toString(36)}`;
 
-    // Check SKU uniqueness
-    const existingSku = await this.prisma.product.findFirst({ where: { sku: dto.sku } });
-    if (existingSku) {
-      throw new NotFoundException(`Product with SKU ${dto.sku} already exists`);
+    // Generate SKU if not provided
+    let sku = dto.sku?.trim();
+    if (!sku) {
+      sku = await this.generateSku(dto.categoryId);
+    } else {
+      // Check SKU uniqueness if provided
+      const existingSku = await this.prisma.product.findFirst({ where: { sku } });
+      if (existingSku) {
+        throw new NotFoundException(`Product with SKU ${sku} already exists`);
+      }
     }
 
     const product = await this.prisma.product.create({
       data: {
         name: dto.name.trim(),
         slug,
-        sku: dto.sku.trim(),
+        sku,
         short_description: dto.shortDescription?.trim() ?? null,
         description: dto.description?.trim() ?? null,
         price: dto.price,
@@ -306,10 +357,23 @@ export class ProductsService {
       }
     }
 
-    if (dto.sku && dto.sku !== existing.sku) {
-      const existingSku = await this.prisma.product.findFirst({ where: { sku: dto.sku } });
-      if (existingSku) {
-        throw new NotFoundException(`Product with SKU ${dto.sku} already exists`);
+    // Handle SKU update
+    let sku = existing.sku;
+    if (dto.sku !== undefined) {
+      if (dto.sku.trim()) {
+        // User provided SKU - check uniqueness
+        const newSku = dto.sku.trim();
+        if (newSku !== existing.sku) {
+          const existingSku = await this.prisma.product.findFirst({ where: { sku: newSku } });
+          if (existingSku) {
+            throw new NotFoundException(`Product with SKU ${newSku} already exists`);
+          }
+          sku = newSku;
+        }
+      } else {
+        // Empty SKU - regenerate based on current or new category
+        const categoryId = dto.categoryId ?? existing.category_id;
+        sku = await this.generateSku(categoryId);
       }
     }
 
@@ -326,7 +390,7 @@ export class ProductsService {
       data: {
         ...(dto.name != null && { name: dto.name.trim() }),
         ...(slug != null && { slug }),
-        ...(dto.sku != null && { sku: dto.sku.trim() }),
+        sku,
         ...(dto.shortDescription !== undefined && { short_description: dto.shortDescription?.trim() ?? null }),
         ...(dto.description !== undefined && { description: dto.description?.trim() ?? null }),
         ...(dto.price != null && { price: dto.price }),

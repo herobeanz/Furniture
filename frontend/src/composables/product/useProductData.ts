@@ -2,6 +2,7 @@ import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { productService, type Product } from '@/services/product.service'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
+import { getPreviewData } from '@/utils/preview'
 
 /**
  * Composable for Product page data fetching and state management
@@ -9,6 +10,7 @@ import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 export function useProductData() {
   const route = useRoute()
   const productSlug = computed(() => (route.params.productSlug as string) ?? '')
+  const isPreview = computed(() => route.name === 'product-preview')
 
   const product = ref<Product | null>(null)
   const related = ref<Product[]>([])
@@ -35,6 +37,18 @@ export function useProductData() {
 
   async function fetchProduct() {
     if (!productSlug.value) return
+    
+    // Check for preview data first
+    if (isPreview.value) {
+      const previewData = getPreviewData('product', productSlug.value)
+      if (previewData) {
+        product.value = previewData as Product
+        related.value = [] // No related products in preview
+        loading.value = false
+        return
+      }
+    }
+    
     loading.value = true
     error.value = ''
     isNotFound.value = false

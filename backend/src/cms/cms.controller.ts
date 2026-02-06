@@ -24,6 +24,11 @@ export class CmsController {
     return this.cmsService.findAll();
   }
 
+  @Get('active')
+  findActive() {
+    return this.cmsService.findActive();
+  }
+
   @Get('page/:slug')
   findBySlug(@Param('slug') slug: string) {
     return this.cmsService.findBySlug(slug);

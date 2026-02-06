@@ -1,53 +1,50 @@
 <template>
   <div class="category-form">
-    <div class="page-header">
-      <h1>{{ isEdit ? 'Sửa danh mục' : 'Thêm danh mục' }}</h1>
-      <RouterLink to="/admin/categories" class="btn btn-outline">Quay lại</RouterLink>
-    </div>
-    <form @submit.prevent="save" class="form">
-      <div class="form-group">
-        <label>Phòng *</label>
-        <select v-model.number="form.roomId" required>
-          <option value="">Chọn phòng</option>
+    <h1>{{ isEdit ? 'Sửa danh mục' : 'Thêm danh mục' }}</h1>
+    <form @submit.prevent="save" class="form-container">
+      <FormField label="Phòng" :required="true">
+        <UiSelect v-model="form.roomId" placeholder="Chọn phòng" :required="true">
+          <option value="0">Chọn phòng</option>
           <option v-for="r in rooms" :key="r.id" :value="r.id">{{ r.name }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Tên danh mục *</label>
-        <input v-model="form.name" required />
-      </div>
-      <div class="form-group">
-        <label>Slug *</label>
-        <input v-model="form.slug" required />
-        <small>URL-friendly name, ví dụ: sofa</small>
-      </div>
-      <div class="form-group">
-        <label>Mô tả</label>
-        <textarea v-model="form.description" rows="3"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Ảnh đại diện (URL)</label>
-        <input v-model="form.thumbnail" type="url" />
-      </div>
-      <div class="form-group">
-        <label>Thứ tự hiển thị</label>
-        <input v-model.number="form.orderIndex" type="number" min="0" />
-      </div>
-      <div class="form-group">
-        <label>
-          <input v-model="form.isActive" type="checkbox" />
-          Hiển thị
-        </label>
-      </div>
-      <div class="form-group">
-        <label>SEO Title</label>
-        <input v-model="form.seoTitle" />
-      </div>
-      <div class="form-group">
-        <label>SEO Description</label>
-        <textarea v-model="form.seoDescription" rows="2"></textarea>
-      </div>
+        </UiSelect>
+      </FormField>
+
+      <FormField label="Tên danh mục" :required="true">
+        <UiInput v-model="form.name" placeholder="Enter category name" :required="true" />
+      </FormField>
+
+      <FormField label="Slug" :required="true" hint="URL-friendly name, ví dụ: sofa">
+        <UiInput v-model="form.slug" placeholder="Enter slug" :required="true" />
+      </FormField>
+
+      <FormField label="Mô tả" optional>
+        <UiTextarea v-model="form.description" :rows="3" placeholder="Enter description" />
+      </FormField>
+
+      <FormField label="Ảnh đại diện (URL)" optional>
+        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
+      </FormField>
+
+      <FormField label="Thứ tự hiển thị" optional>
+        <UiInput v-model.number="form.orderIndex" type="number" min="0" placeholder="0" />
+      </FormField>
+
+      <FormField>
+        <UiCheckbox v-model="form.isActive" label="Hiển thị" />
+      </FormField>
+
+      <FormField label="SEO Title" optional>
+        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
+      </FormField>
+
+      <FormField label="SEO Description" optional>
+        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
+      </FormField>
+
       <div class="form-actions">
+        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.name || !form.roomId">
+          Xem trước
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
@@ -59,10 +56,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
+import { savePreviewData } from '@/utils/preview'
+import FormField from '@/components/ui/FormField.vue'
+import { UiInput, UiTextarea, UiSelect, UiCheckbox } from '@/components/ui'
 
 const route = useRoute()
+const router = useRouter()
 const id = computed(() => route.params.id as string)
 const isEdit = computed(() => !!id.value)
 const saving = ref(false)
@@ -108,6 +109,40 @@ onMounted(async () => {
   }
 })
 
+function handlePreview() {
+  if (!form.slug || !form.name || !form.roomId) {
+    alert('Vui lòng nhập đầy đủ thông tin (phòng, tên, slug) để xem trước.')
+    return
+  }
+  
+  // Find room slug
+  const selectedRoom = rooms.value.find(r => r.id === form.roomId)
+  if (!selectedRoom) {
+    alert('Không tìm thấy phòng đã chọn.')
+    return
+  }
+  
+  // Create preview category data
+  const previewCategory = {
+    id: id.value || 999999,
+    roomId: form.roomId,
+    name: form.name,
+    slug: form.slug,
+    description: form.description || '',
+    thumbnail: form.thumbnail || '',
+    orderIndex: form.orderIndex || 0,
+    isActive: form.isActive,
+    seoTitle: form.seoTitle || '',
+    seoDescription: form.seoDescription || '',
+  }
+  
+  // Save to localStorage
+  savePreviewData('category', form.slug, previewCategory)
+  
+  // Navigate to preview in same app
+  router.push(`/${selectedRoom.slug}/${form.slug}/preview`)
+}
+
 async function save() {
   saving.value = true
   try {
@@ -116,8 +151,7 @@ async function save() {
     } else {
       await apiClient.post('/categories', form)
     }
-    // Redirect to list
-    window.location.href = '/admin/categories'
+    router.push('/admin/categories')
   } catch (e) {
     console.error(e)
     alert('Lưu thất bại.')
@@ -128,53 +162,30 @@ async function save() {
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+.category-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
-.page-header h1 {
+
+.category-form h1 {
   font-size: 1.5rem;
-  margin: 0;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #111827;
 }
-.form {
-  max-width: 600px;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-.form-group {
-  margin-bottom: 1rem;
-}
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-.form-group input[type="checkbox"] {
-  margin-right: 0.5rem;
-}
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-.form-group small {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
-  color: #666;
-}
-.form-actions {
-  margin-top: 1.5rem;
+
+.form-container {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 </style>

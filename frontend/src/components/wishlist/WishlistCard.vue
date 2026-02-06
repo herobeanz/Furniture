@@ -9,7 +9,7 @@
       <p class="wishlist-price">{{ formatPrice(item.price) }}</p>
       <div class="wishlist-actions">
         <button type="button" class="btn btn-primary btn-sm" @click="$emit('addToCart')">
-          Thêm vào giỏ
+          Thêm vào giỏ hàng
         </button>
         <button type="button" class="btn btn-outline btn-sm" @click="$emit('viewProduct')">
           Xem sản phẩm

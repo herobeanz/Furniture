@@ -2,58 +2,61 @@
   <div class="cms-form">
     <h1>{{ isEdit ? 'Sửa trang CMS' : 'Thêm trang CMS' }}</h1>
     <div v-if="loading">Đang tải...</div>
-    <form v-else @submit.prevent="onSubmit">
-      <div class="form-group">
-        <label for="slug">Slug *</label>
-        <input id="slug" v-model="form.slug" required />
-        <small class="hint" v-if="form.slug">URL: <code>/page/{{ form.slug }}</code></small>
-      </div>
-      <div class="form-group">
-        <label for="title">Tiêu đề *</label>
-        <input id="title" v-model="form.title" required />
-      </div>
-      <div class="form-group">
-        <label for="content">Nội dung *</label>
-        <textarea id="content" v-model="form.content" rows="12"></textarea>
-      </div>
-      <div class="form-group">
-        <label>
-          <input v-model="form.isActive" type="checkbox" />
-          Kích hoạt
-        </label>
-      </div>
-      <div class="form-group">
-        <label for="thumbnail">Ảnh đại diện (URL)</label>
-        <input id="thumbnail" v-model="form.thumbnail" type="url" />
-      </div>
-      <div class="form-group">
-        <label for="pageType">Loại trang</label>
-        <input id="pageType" v-model="form.pageType" />
-      </div>
-      <div class="form-group">
-        <label for="metaKeywords">Meta Keywords</label>
-        <input id="metaKeywords" v-model="form.metaKeywords" />
-      </div>
-      <div class="form-group">
-        <label for="publishedAt">Ngày xuất bản</label>
-        <input id="publishedAt" v-model="form.publishedAt" type="datetime-local" />
-      </div>
-      <div class="form-group">
-        <label for="seoTitle">SEO Title</label>
-        <input id="seoTitle" v-model="form.seoTitle" />
-      </div>
-      <div class="form-group">
-        <label for="seoDescription">SEO Description</label>
-        <textarea id="seoDescription" v-model="form.seoDescription" rows="2"></textarea>
-      </div>
+    <form v-else @submit.prevent="onSubmit" class="form-container">
+      <FormField label="Slug" :required="true" :hint="form.slug ? `URL: /page/${form.slug}` : ''">
+        <UiInput v-model="form.slug" placeholder="Enter slug" :required="true" />
+      </FormField>
+
+      <FormField label="Tiêu đề" :required="true">
+        <UiInput v-model="form.title" placeholder="Enter title" :required="true" />
+      </FormField>
+
+      <FormField label="Nội dung" :required="true">
+        <UiTextarea v-model="form.content" :rows="12" placeholder="Enter content" :required="true" />
+      </FormField>
+
+      <FormField>
+        <UiCheckbox v-model="form.isActive" label="Kích hoạt" />
+      </FormField>
+
+      <FormField label="Ảnh đại diện (URL)" optional>
+        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
+      </FormField>
+
+      <FormField label="Loại trang" optional>
+        <UiInput v-model="form.pageType" placeholder="Enter page type" />
+      </FormField>
+
+      <FormField label="Meta Keywords" optional>
+        <UiInput v-model="form.metaKeywords" placeholder="Enter meta keywords" />
+      </FormField>
+
+      <FormField label="Ngày xuất bản" optional>
+        <UiInput v-model="form.publishedAt" type="datetime-local" />
+      </FormField>
+
+      <FormField label="SEO Title" optional>
+        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
+      </FormField>
+
+      <FormField label="SEO Description" optional>
+        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
+      </FormField>
+
       <div v-if="form.slug" class="form-group preview-link">
-        <label>Xem trước</label>
-        <a :href="pageUrl(form.slug)" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
-          Mở trang CMS →
-        </a>
+        <FormField label="Xem trước">
+          <a :href="pageUrl(form.slug)" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+            Mở trang CMS →
+          </a>
+        </FormField>
       </div>
-      <p v-if="error" class="error">{{ error }}</p>
+
+      <FormField v-if="error" :error="error" />
+
       <div class="form-actions">
+        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.title">
+          Xem trước
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
@@ -67,6 +70,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
+import { savePreviewData } from '@/utils/preview'
+import FormField from '@/components/ui/FormField.vue'
+import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -94,6 +100,25 @@ const error = ref('')
 function pageUrl(slug: string) {
   const base = window.location.origin + import.meta.env.BASE_URL
   return `${base.replace(/\/$/, '')}/page/${slug}`
+}
+
+function handlePreview() {
+  if (!form.slug || !form.title) {
+    alert('Vui lòng nhập tiêu đề và slug để xem trước.')
+    return
+  }
+  
+  // Create preview CMS page data
+  const previewPage = {
+    title: form.title.trim(),
+    content: form.content.trim(),
+  }
+  
+  // Save to localStorage
+  savePreviewData('cms', form.slug, previewPage)
+  
+  // Navigate to preview in same app
+  router.push(`/page/${form.slug}/preview`)
 }
 
 onMounted(async () => {
@@ -143,61 +168,42 @@ async function onSubmit() {
 </script>
 
 <style scoped>
+.cms-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
 .cms-form h1 {
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #111827;
 }
-.form-group {
-  margin-bottom: 1rem;
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.35rem;
-}
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  max-width: 600px;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 1rem;
-}
-.form-group textarea {
-  font-family: inherit;
-  resize: vertical;
-}
-.hint {
-  display: block;
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: 0.25rem;
-}
-.hint code {
-  background: #f0f0f0;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
+
 .preview-link {
   padding: 1rem;
   background: #f8f8f8;
   border-radius: 6px;
   border: 1px solid #eee;
 }
+
 .btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
 }
-.error {
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-}
+
 .form-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 </style>

@@ -8,6 +8,9 @@
       </span>
       <span v-if="product.salePrice" class="sale-badge">Sale</span>
     </div>
+    
+    <ProductDetails :product="product" />
+    
     <p v-if="product.description" class="product-desc">
       {{ product.description }}
     </p>
@@ -44,6 +47,7 @@
 <script setup lang="ts">
 import type { Product } from '@/services/product.service'
 import { formatPrice } from '@/utils/format'
+import ProductDetails from './ProductDetails.vue'
 
 interface Props {
   product: Product

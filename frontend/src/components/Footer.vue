@@ -52,19 +52,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { categoryService, type CategoryTreeNode } from '@/services/category.service'
+import { useCategoryTree } from '@/composables/common/useCategoryTree'
 
-const categoryTree = ref<CategoryTreeNode[]>([])
-
-onMounted(async () => {
-  try {
-    categoryTree.value = await categoryService.getCategoryTree()
-  } catch {
-    categoryTree.value = []
-  }
-})
+// Presentational component: uses composable for logic
+const { categoryTree } = useCategoryTree()
 </script>
 
 <style scoped>

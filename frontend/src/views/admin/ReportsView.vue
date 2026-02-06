@@ -165,58 +165,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { reportService, type OverviewStats, type InquiriesStats, type ProductsStats } from '@/services/report.service'
+import { useAdminReports } from '@/composables/admin/useAdminReports'
 
-const loading = ref(true)
-const error = ref('')
-const overview = ref<OverviewStats | null>(null)
-const inquiriesStats = ref<InquiriesStats | null>(null)
-const productsStats = ref<ProductsStats | null>(null)
-
-function getStatusLabel(status: string): string {
-  const labels: Record<string, string> = {
-    new: 'Mới',
-    contacted: 'Đã liên hệ',
-    responded: 'Đã phản hồi',
-    closed: 'Đã đóng',
-  }
-  return labels[status] || status
-}
-
-function getSourceLabel(source: string): string {
-  const labels: Record<string, string> = {
-    product: 'Sản phẩm',
-    contact: 'Liên hệ',
-    facebook: 'Facebook',
-    zalo: 'Zalo',
-  }
-  return labels[source] || source
-}
-
-async function fetchReports() {
-  loading.value = true
-  error.value = ''
-  try {
-    const [overviewData, inquiriesData, productsData] = await Promise.all([
-      reportService.getOverview(),
-      reportService.getInquiriesStats(),
-      reportService.getProductsStats(),
-    ])
-    overview.value = overviewData
-    inquiriesStats.value = inquiriesData
-    productsStats.value = productsData
-  } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu báo cáo.'
-    console.error('Failed to fetch reports:', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchReports()
-})
+// Container component: orchestrates data and logic
+const {
+  loading,
+  error,
+  overview,
+  inquiriesStats,
+  productsStats,
+  getStatusLabel,
+  getSourceLabel,
+} = useAdminReports()
 </script>
 
 <style scoped>

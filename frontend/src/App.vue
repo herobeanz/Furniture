@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <MainLayout v-if="!isAdminRoute">
+    <MainLayout v-if="!isAdminRoute && !isPreviewRoute">
       <router-view />
     </MainLayout>
     <router-view v-else />
@@ -16,6 +16,7 @@ import { UiToaster } from '@/components/ui'
 
 const route = useRoute()
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isPreviewRoute = computed(() => route.path.endsWith('/preview'))
 </script>
 
 <style>

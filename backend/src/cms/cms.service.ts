@@ -39,6 +39,18 @@ export class CmsService {
     }));
   }
 
+  async findActive() {
+    const list = await this.prisma.cmsPage.findMany({
+      where: { is_active: true },
+      orderBy: { slug: 'asc' },
+    });
+    return list.map((p: any) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+    }));
+  }
+
   async create(dto: CreateCmsPageDto) {
     const page = await this.prisma.cmsPage.create({
       data: {

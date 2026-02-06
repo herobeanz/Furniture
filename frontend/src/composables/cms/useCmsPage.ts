@@ -2,6 +2,7 @@ import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import apiClient from '@/services/api.client'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
+import { getPreviewData } from '@/utils/preview'
 
 /**
  * Composable for CMS page data fetching
@@ -9,6 +10,7 @@ import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 export function useCmsPage() {
   const route = useRoute()
   const slug = computed(() => route.params.slug as string)
+  const isPreview = computed(() => route.name === 'cms-page-preview')
 
   const page = ref<{ title: string; content: string } | null>(null)
   const loading = ref(true)
@@ -20,6 +22,17 @@ export function useCmsPage() {
       loading.value = false
       return
     }
+    
+    // Check for preview data first
+    if (isPreview.value) {
+      const previewData = getPreviewData('cms', slug.value)
+      if (previewData) {
+        page.value = previewData as { title: string; content: string }
+        loading.value = false
+        return
+      }
+    }
+    
     loading.value = true
     error.value = ''
     isNotFound.value = false

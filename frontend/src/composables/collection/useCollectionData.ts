@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router'
 import { collectionService, type Collection, type CollectionProduct } from '@/services/collection.service'
 import type { Product } from '@/services/product.service'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
+import { getPreviewData } from '@/utils/preview'
 
 /**
  * Composable for Collection page data fetching and state management
@@ -10,6 +11,7 @@ import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 export function useCollectionData() {
   const route = useRoute()
   const collectionSlug = computed(() => (route.params.slug as string) ?? '')
+  const isPreview = computed(() => route.name === 'collection-preview')
 
   const collection = ref<Collection | null>(null)
   const products = ref<Product[]>([])
@@ -33,6 +35,18 @@ export function useCollectionData() {
 
   async function fetchCollection() {
     if (!collectionSlug.value) return
+    
+    // Check for preview data first
+    if (isPreview.value) {
+      const previewData = getPreviewData('collection', collectionSlug.value)
+      if (previewData) {
+        collection.value = previewData.collection as Collection
+        products.value = previewData.products ? (previewData.products as CollectionProduct[]).map(mapToProduct) : []
+        loading.value = false
+        return
+      }
+    }
+    
     loading.value = true
     error.value = ''
     isNotFound.value = false

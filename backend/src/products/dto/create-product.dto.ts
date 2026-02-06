@@ -18,9 +18,10 @@ export class CreateProductDto {
   @MaxLength(255)
   name: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(100)
-  sku: string;
+  sku?: string;
 
   @IsOptional()
   @IsString()

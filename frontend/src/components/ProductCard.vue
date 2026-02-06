@@ -14,7 +14,7 @@
         <span class="price-current">{{ formatPrice(product.price) }}</span>
       </div>
       <div class="product-card-actions">
-        <button type="button" class="btn-add-cart" @click="$emit('addToCart', product)">+ Thêm vào giỏ</button>
+        <button type="button" class="btn-add-cart" @click="$emit('addToCart', product)">Thêm vào giỏ hàng</button>
         <button
           type="button"
           class="btn-wishlist"
@@ -34,7 +34,7 @@ import { computed } from 'vue'
 import type { Product } from '@/services/product.service'
 import { formatPrice } from '@/utils/format'
 import { getProductPath } from '@/utils/navigation'
-import { useWishlistStore } from '@/stores/wishlist'
+import { useWishlist } from '@/composables/useWishlist'
 
 const props = withDefaults(
   defineProps<{
@@ -50,8 +50,9 @@ defineEmits<{
   toggleWishlist: [product: Product]
 }>()
 
-const wishlistStore = useWishlistStore()
-const inWishlist = computed(() => wishlistStore.isInWishlist(props.product.id))
+// Use composable instead of store directly
+const { isInWishlist: checkInWishlist } = useWishlist()
+const inWishlist = computed(() => checkInWishlist(props.product.id))
 </script>
 
 <style scoped>
@@ -140,14 +141,16 @@ const inWishlist = computed(() => wishlistStore.isInWishlist(props.product.id))
   flex: 1;
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
-  border: 1px solid var(--color-border);
+  font-weight: 600;
+  border: none;
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-primary);
+  color: #fff;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .btn-add-cart:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  background: var(--color-primary-hover, #a00);
 }
 .btn-wishlist {
   width: 36px;
