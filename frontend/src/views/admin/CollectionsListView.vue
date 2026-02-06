@@ -43,9 +43,11 @@ const loading = ref(true)
 onMounted(async () => {
   loading.value = true
   try {
-    // TODO: Replace with actual collections API endpoint
-    const res = await apiClient.get('/collections').catch(() => [])
+    const res = await apiClient.get('/collections/list/all')
     items.value = Array.isArray(res) ? res : []
+  } catch (e) {
+    console.error(e)
+    items.value = []
   } finally {
     loading.value = false
   }

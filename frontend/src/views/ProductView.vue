@@ -1,114 +1,39 @@
 <template>
   <div class="product-page">
     <div class="container">
-      <!-- Breadcrumb -->
-      <nav class="breadcrumb">
-        <RouterLink to="/">Trang chủ</RouterLink>
-        <template v-if="product?.breadcrumb">
-          <template v-for="(item, i) in product.breadcrumb" :key="i">
-            <span class="sep">/</span>
-            <RouterLink :to="getBreadcrumbPath(item, i)">{{ item.name }}</RouterLink>
-          </template>
-        </template>
-        <template v-else-if="product">
-          <span class="sep">/</span>
-          <span>{{ product.name }}</span>
-        </template>
-        <span v-else class="skeleton-text">...</span>
-      </nav>
+      <Breadcrumb :items="breadcrumb" />
 
-      <!-- Error -->
-      <div v-if="error" class="error-msg">
-        <p>{{ error }}</p>
-        <RouterLink to="/" class="btn btn-primary">Về trang chủ</RouterLink>
-      </div>
+      <NotFoundView v-if="isNotFound" />
+      <ErrorState v-else-if="error" :message="error" />
+      <LoadingState v-else-if="loading && !product" />
 
-      <!-- Loading -->
-      <div v-else-if="loading && !product" class="loading">Đang tải...</div>
-
-      <!-- Product detail -->
       <template v-else-if="product">
         <section class="product-detail">
-          <!-- Gallery -->
-          <div class="product-gallery">
-            <div class="gallery-main">
-              <img
-                v-if="currentImage"
-                :src="currentImage"
-                :alt="product.name"
-              />
-              <div v-else class="no-image">Ảnh sản phẩm</div>
-            </div>
-            <div v-if="product.images?.length > 1" class="gallery-thumbs">
-              <button
-                v-for="(img, i) in product.images"
-                :key="i"
-                type="button"
-                class="thumb"
-                :class="{ active: selectedIndex === i }"
-                @click="selectedIndex = i"
-              >
-                <img :src="img" :alt="`${product.name} ${i + 1}`" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Info -->
-          <div class="product-info">
-            <h1 class="product-name">{{ product.name }}</h1>
-            <div class="product-prices">
-              <span class="price-current">{{ formatPrice(product.price) }}</span>
-              <span v-if="product.salePrice" class="price-old">
-                {{ formatPrice(product.salePrice) }}
-              </span>
-              <span v-if="product.salePrice" class="sale-badge">Sale</span>
-            </div>
-            <p v-if="product.description" class="product-desc">
-              {{ product.description }}
-            </p>
-
-            <!-- Add to cart -->
-            <div class="add-to-cart-form">
-              <div class="quantity-wrap">
-                <label for="qty">Số lượng:</label>
-                <input
-                  id="qty"
-                  v-model.number="quantity"
-                  type="number"
-                  min="1"
-                  max="99"
-                  class="qty-input"
-                />
-              </div>
-              <button
-                type="button"
-                class="btn btn-primary btn-add-cart"
-                @click="addToCart"
-              >
-                Thêm vào giỏ hàng
-              </button>
-              <button
-                type="button"
-                class="btn btn-outline btn-wishlist"
-                :class="{ active: inWishlist }"
-                @click="toggleWishlist"
-                title="Yêu thích"
-              >
-                ♥ Yêu thích
-              </button>
-            </div>
-          </div>
+          <ProductGallery
+            :images="(product.images || []) as string[]"
+            :current-image="currentImage || ''"
+            :product-name="product.name"
+            :selected-index="selectedIndex"
+            @select-image="setSelectedImage"
+          />
+          <ProductInfo
+            :product="product"
+            :quantity="quantity"
+            :in-wishlist="inWishlist"
+            @add-to-cart="handleAddToCart"
+            @toggle-wishlist="handleToggleWishlist"
+            @update-quantity="setQuantity"
+          />
         </section>
 
-        <!-- Related products -->
         <section v-if="related.length > 0" class="related-section">
           <h2 class="section-title">Sản phẩm liên quan</h2>
           <ProductGrid
             :products="related"
             :columns="4"
             show-sale-tag
-            @add-to-cart="addToCartRelated"
-            @toggle-wishlist="toggleWishlistRelated"
+            @add-to-cart="handleAddToCartRelated"
+            @toggle-wishlist="handleToggleWishlistRelated"
           />
         </section>
       </template>
@@ -117,55 +42,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import ProductGrid from '@/components/ProductGrid.vue'
-import { productService, type Product } from '@/services/product.service'
-import { formatPrice } from '@/utils/format'
+import NotFoundView from '@/views/NotFoundView.vue'
+import Breadcrumb from '@/components/common/Breadcrumb.vue'
+import ProductGallery from '@/components/product/ProductGallery.vue'
+import ProductInfo from '@/components/product/ProductInfo.vue'
+import LoadingState from '@/components/common/LoadingState.vue'
+import ErrorState from '@/components/common/ErrorState.vue'
+import { useProductData } from '@/composables/product/useProductData'
 import { useCart } from '@/composables/useCart'
 import { useToast } from '@/composables/useToast'
-import { useWishlistStore } from '@/stores/wishlist'
+import { useProductActions } from '@/composables/useProductActions'
+import type { Product } from '@/services/product.service'
 
-const route = useRoute()
-const roomSlug = computed(() => (route.params.roomSlug as string) ?? '')
-const categorySlug = computed(() => (route.params.categorySlug as string) ?? '')
-const productSlug = computed(() => (route.params.productSlug as string) ?? '')
-
-const product = ref<Product | null>(null)
-const related = ref<Product[]>([])
-const loading = ref(false)
-const error = ref('')
-const selectedIndex = ref(0)
-const quantity = ref(1)
+// Container component: orchestrates data and logic
+const {
+  product,
+  related,
+  loading,
+  error,
+  isNotFound,
+  selectedIndex,
+  quantity,
+  currentImage,
+  breadcrumb,
+  setSelectedImage,
+  setQuantity,
+} = useProductData()
 
 const { addItem } = useCart()
-const wishlistStore = useWishlistStore()
 const { toast } = useToast()
-
-const currentImage = computed(() => {
-  const p = product.value
-  if (!p?.images?.length) return p?.thumbnail || ''
-  const i = Math.min(selectedIndex.value, p.images.length - 1)
-  return p.images[i]
-})
+const { toggleWishlist: toggleWishlistComposable, isInWishlist, addToCart: addToCartComposable } = useProductActions()
 
 const inWishlist = computed(() =>
-  product.value ? wishlistStore.isInWishlist(product.value.id) : false
+  product.value ? isInWishlist(product.value.id) : false
 )
 
-function getBreadcrumbPath(item: { name: string; slug: string }, index: number): string {
-  if (product.value?.breadcrumb) {
-    // Build path from breadcrumb
-    const path = product.value.breadcrumb.slice(0, index + 1).map(b => b.slug).join('/')
-    return `/${path}`
-  }
-  return '#'
-}
-
-function addToCart() {
+function handleAddToCart() {
   if (!product.value) return
   addItem({
-    id: product.value.id,
+    id: String(product.value.id),
     name: product.value.name,
     price: product.value.price,
     quantity: quantity.value,
@@ -175,63 +92,19 @@ function addToCart() {
   toast.success('Đã thêm vào giỏ', `${product.value.name} x${quantity.value}`)
 }
 
-function toggleWishlist() {
+function handleToggleWishlist() {
   if (!product.value) return
-  wishlistStore.toggleItem({
-    id: product.value.id,
-    name: product.value.name,
-    price: product.value.price,
-    image: product.value.images?.[0] || product.value.thumbnail,
-    slug: product.value.slug,
-  })
+  toggleWishlistComposable(product.value)
 }
 
-function addToCartRelated(p: Product) {
-  addItem({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    quantity: 1,
-    image: p.images?.[0],
-    slug: p.slug,
-  })
+function handleAddToCartRelated(p: Product) {
+  addToCartComposable(p)
   toast.success('Đã thêm vào giỏ', p.name)
 }
 
-function toggleWishlistRelated(p: Product) {
-  wishlistStore.toggleItem({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    image: p.images?.[0],
-    slug: p.slug,
-  })
+function handleToggleWishlistRelated(p: Product) {
+  toggleWishlistComposable(p)
 }
-
-async function fetchProduct() {
-  if (!productSlug.value) return
-  loading.value = true
-  error.value = ''
-  product.value = null
-  related.value = []
-  selectedIndex.value = 0
-  quantity.value = 1
-  try {
-    const [p, rel] = await Promise.all([
-      productService.getProduct(productSlug.value),
-      productService.getRelatedProducts(productSlug.value, 4),
-    ])
-    product.value = p
-    related.value = Array.isArray(rel) ? rel : []
-  } catch (e: any) {
-    error.value =
-      e?.response?.data?.message || e?.message || 'Không tìm thấy sản phẩm.'
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(productSlug, fetchProduct, { immediate: true })
 </script>
 
 <style scoped>

@@ -2,7 +2,7 @@
   <div class="cms-list">
     <div class="page-header">
       <h1>Trang CMS</h1>
-      <RouterLink to="/admin/cms/new" class="btn btn-primary">Thêm trang</RouterLink>
+      <RouterLink to="/admin/cms-pages/new" class="btn btn-primary">Thêm trang</RouterLink>
     </div>
     <div v-if="loading">Đang tải...</div>
     <div v-else-if="items.length === 0">Chưa có trang CMS.</div>
@@ -21,7 +21,7 @@
           <td>{{ p.title }}</td>
           <td>{{ p.isActive ? 'Có' : 'Không' }}</td>
           <td>
-            <RouterLink :to="'/admin/cms/' + p.id" class="link">Sửa</RouterLink>
+            <RouterLink :to="'/admin/cms-pages/' + p.id" class="link">Sửa</RouterLink>
             <a :href="pageUrl(p.slug)" target="_blank" rel="noopener" class="link">Xem</a>
           </td>
         </tr>
@@ -40,7 +40,7 @@ const loading = ref(true)
 
 function pageUrl(slug: string) {
   const base = window.location.origin + import.meta.env.BASE_URL
-  return `${base.replace(/\/$/, '')}/trang/${slug}`
+  return `${base.replace(/\/$/, '')}/page/${slug}`
 }
 
 onMounted(async () => {

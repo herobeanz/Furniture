@@ -1,0 +1,66 @@
+<template>
+  <div v-if="totalPages > 1" class="pagination">
+    <button
+      type="button"
+      class="btn-page"
+      :disabled="currentPage <= 1"
+      @click="$emit('goPage', currentPage - 1)"
+    >
+      Trước
+    </button>
+    <span class="page-info">Trang {{ currentPage }} / {{ totalPages }}</span>
+    <button
+      type="button"
+      class="btn-page"
+      :disabled="currentPage >= totalPages"
+      @click="$emit('goPage', currentPage + 1)"
+    >
+      Sau
+    </button>
+  </div>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  currentPage: number
+  totalPages: number
+}
+
+defineProps<Props>()
+
+defineEmits<{
+  goPage: [page: number]
+}>()
+</script>
+
+<style scoped>
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.btn-page {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-page:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.page-info {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+</style>

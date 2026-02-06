@@ -267,3 +267,32 @@ model CmsPage {
   @@index([page_type])
   @@map("cms_pages")
 }
+
+// ---------------------------------------------------------------------------
+// Blog Posts
+// ---------------------------------------------------------------------------
+
+model BlogPost {
+  id              Int       @id @default(autoincrement())
+  title           String
+  slug            String    @unique
+  excerpt         String?   @db.Text
+  content         String    @db.Text
+  thumbnail       String?
+  category        String?
+  author          String?
+  seo_title       String?   @map("seo_title")
+  seo_description String?   @db.Text @map("seo_description")
+  is_active       Boolean   @default(true) @map("is_active")
+  is_featured     Boolean   @default(false) @map("is_featured")
+  published_at    DateTime? @map("published_at")
+  created_at      DateTime  @default(now()) @map("created_at")
+  updated_at      DateTime  @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([is_active])
+  @@index([is_featured])
+  @@index([published_at])
+  @@index([category])
+  @@map("blog_posts")
+}

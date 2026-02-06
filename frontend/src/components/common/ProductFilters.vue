@@ -1,0 +1,62 @@
+<template>
+  <div class="filters-bar">
+    <div class="filters-left">
+      <span class="product-count">{{ totalProducts }} sản phẩm</span>
+    </div>
+    <div class="filters-right">
+      <select v-model="localSortOption" class="sort-select" @change="$emit('update:sortOption', localSortOption)">
+        <option value="createdAt:desc">Mới nhất</option>
+        <option value="createdAt:asc">Cũ nhất</option>
+        <option value="price:asc">Giá tăng dần</option>
+        <option value="price:desc">Giá giảm dần</option>
+        <option value="name:asc">Tên A-Z</option>
+        <option value="name:desc">Tên Z-A</option>
+      </select>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+
+interface Props {
+  totalProducts: number
+  sortOption: string
+}
+
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  'update:sortOption': [value: string]
+}>()
+
+const localSortOption = ref(props.sortOption)
+
+watch(() => props.sortOption, (newVal) => {
+  localSortOption.value = newVal
+})
+</script>
+
+<style scoped>
+.filters-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.product-count {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+.sort-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+</style>

@@ -13,7 +13,9 @@ import { ProductsModule } from './products/products.module';
 import { InquiriesModule } from './inquiries/inquiries.module';
 import { AuthModule } from './auth/auth.module';
 import { CmsModule } from './cms/cms.module';
-import { HeroModule } from './hero/hero.module';
+import { CollectionsModule } from './collections/collections.module';
+import { ReportsModule } from './reports/reports.module';
+import { BlogModule } from './blog/blog.module';
 import { TransformInterceptor } from './shared/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 
@@ -33,7 +35,9 @@ import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
     InquiriesModule,
     AuthModule,
     CmsModule,
-    HeroModule,
+    CollectionsModule,
+    ReportsModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [

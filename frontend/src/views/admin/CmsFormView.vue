@@ -6,6 +6,7 @@
       <div class="form-group">
         <label for="slug">Slug *</label>
         <input id="slug" v-model="form.slug" required />
+        <small class="hint" v-if="form.slug">URL: <code>/page/{{ form.slug }}</code></small>
       </div>
       <div class="form-group">
         <label for="title">Tiêu đề *</label>
@@ -45,12 +46,18 @@
         <label for="seoDescription">SEO Description</label>
         <textarea id="seoDescription" v-model="form.seoDescription" rows="2"></textarea>
       </div>
+      <div v-if="form.slug" class="form-group preview-link">
+        <label>Xem trước</label>
+        <a :href="pageUrl(form.slug)" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+          Mở trang CMS →
+        </a>
+      </div>
       <p v-if="error" class="error">{{ error }}</p>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
-        <RouterLink to="/admin/cms" class="btn btn-outline">Hủy</RouterLink>
+        <RouterLink to="/admin/cms-pages" class="btn btn-outline">Hủy</RouterLink>
       </div>
     </form>
   </div>
@@ -83,6 +90,11 @@ const form = reactive({
 const loading = ref(!!isEdit)
 const saving = ref(false)
 const error = ref('')
+
+function pageUrl(slug: string) {
+  const base = window.location.origin + import.meta.env.BASE_URL
+  return `${base.replace(/\/$/, '')}/page/${slug}`
+}
 
 onMounted(async () => {
   if (!isEdit) {
@@ -121,7 +133,7 @@ async function onSubmit() {
     } else {
       await apiClient.post('/cms', form)
     }
-    router.push('/admin/cms')
+    router.push('/admin/cms-pages')
   } catch (e: any) {
     error.value = e?.response?.data?.message || e?.message || 'Lưu thất bại.'
   } finally {
@@ -156,6 +168,28 @@ async function onSubmit() {
 .form-group textarea {
   font-family: inherit;
   resize: vertical;
+}
+.hint {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+.hint code {
+  background: #f0f0f0;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.preview-link {
+  padding: 1rem;
+  background: #f8f8f8;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
 }
 .error {
   color: var(--color-primary);

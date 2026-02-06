@@ -5,9 +5,8 @@ export interface CreateInquiryPayload {
   phone: string
   email?: string
   message: string
-  productIds?: string[]
-  anonymousId?: string
-  source?: string
+  productId?: number
+  source: 'product' | 'contact' | 'facebook' | 'zalo'
 }
 
 export interface InquiryResponse {

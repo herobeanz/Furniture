@@ -31,9 +31,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
 import type { Product } from '@/services/product.service'
 import { formatPrice } from '@/utils/format'
+import { getProductPath } from '@/utils/navigation'
 import { useWishlistStore } from '@/stores/wishlist'
 
 const props = withDefaults(
@@ -52,25 +52,6 @@ defineEmits<{
 
 const wishlistStore = useWishlistStore()
 const inWishlist = computed(() => wishlistStore.isInWishlist(props.product.id))
-
-function getProductPath(product: Product): string {
-  // If product has breadcrumb, use it to build path
-  if (product.breadcrumb && product.breadcrumb.length >= 3) {
-    const room = product.breadcrumb[0]
-    const category = product.breadcrumb[1]
-    return `/${room.slug}/${category.slug}/${product.slug}`
-  }
-  // Fallback: try to construct from current route if available
-  // This is a temporary fallback - ideally all products should have breadcrumb
-  const route = useRoute()
-  const roomSlug = route.params.roomSlug as string
-  const categorySlug = route.params.categorySlug as string
-  if (roomSlug && categorySlug) {
-    return `/${roomSlug}/${categorySlug}/${product.slug}`
-  }
-  // Last resort: use simple path (will show 404 but better than breaking)
-  return `/${product.slug}`
-}
 </script>
 
 <style scoped>

@@ -3,76 +3,292 @@
     <div class="page-header">
       <h1>Báo cáo</h1>
     </div>
-    <div class="reports-grid">
-      <div class="report-card">
-        <h3>Tổng quan</h3>
-        <p class="report-desc">Xem tổng quan về hệ thống</p>
-        <div class="report-stats">
-          <div class="stat-item">
-            <span class="stat-label">Tổng sản phẩm</span>
-            <span class="stat-value">{{ stats.totalProducts || '—' }}</span>
+
+    <div v-if="loading" class="loading">Đang tải dữ liệu...</div>
+
+    <div v-else-if="error" class="error">{{ error }}</div>
+
+    <template v-else>
+      <!-- Overview Section -->
+      <section class="reports-section">
+        <h2 class="section-title">Tổng quan hệ thống</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🏠</div>
+            <div class="stat-content">
+              <div class="stat-label">Phòng</div>
+              <div class="stat-value">{{ overview?.totals?.rooms || 0 }}</div>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">Tổng inquiries</span>
-            <span class="stat-value">{{ stats.totalInquiries || '—' }}</span>
+          <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-content">
+              <div class="stat-label">Danh mục</div>
+              <div class="stat-value">{{ overview?.totals?.categories || 0 }}</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🛋️</div>
+            <div class="stat-content">
+              <div class="stat-label">Sản phẩm</div>
+              <div class="stat-value">{{ overview?.totals?.products || 0 }}</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+              <div class="stat-label">Yêu cầu</div>
+              <div class="stat-value">{{ overview?.totals?.inquiries || 0 }}</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-content">
+              <div class="stat-label">Bộ sưu tập</div>
+              <div class="stat-value">{{ overview?.totals?.collections || 0 }}</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-content">
+              <div class="stat-label">Trang CMS</div>
+              <div class="stat-value">{{ overview?.totals?.cmsPages || 0 }}</div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="report-card">
-        <h3>Inquiries mới</h3>
-        <p class="report-desc">Các yêu cầu chưa xử lý</p>
-        <div class="report-stats">
-          <div class="stat-item">
-            <span class="stat-label">Chưa xử lý</span>
-            <span class="stat-value">{{ stats.newInquiries || '—' }}</span>
+      </section>
+
+      <!-- Inquiries Section -->
+      <section class="reports-section">
+        <h2 class="section-title">Thống kê yêu cầu</h2>
+        <div class="reports-grid">
+          <div class="report-card">
+            <h3>Tổng quan</h3>
+            <div class="report-stats">
+              <div class="stat-item">
+                <span class="stat-label">Tổng số</span>
+                <span class="stat-value">{{ inquiriesStats?.total || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">30 ngày qua</span>
+                <span class="stat-value">{{ inquiriesStats?.last30Days || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">7 ngày qua</span>
+                <span class="stat-value">{{ inquiriesStats?.last7Days || 0 }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="report-card">
+            <h3>Theo trạng thái</h3>
+            <div class="report-stats">
+              <div
+                v-for="(count, status) in inquiriesStats?.byStatus"
+                :key="status"
+                class="stat-item"
+              >
+                <span class="stat-label">{{ getStatusLabel(status) }}</span>
+                <span class="stat-value">{{ count }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="report-card">
+            <h3>Theo nguồn</h3>
+            <div class="report-stats">
+              <div
+                v-for="(count, source) in inquiriesStats?.bySource"
+                :key="source"
+                class="stat-item"
+              >
+                <span class="stat-label">{{ getSourceLabel(source) }}</span>
+                <span class="stat-value">{{ count }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="report-card highlight">
+            <h3>Yêu cầu mới</h3>
+            <div class="report-stats">
+              <div class="stat-item">
+                <span class="stat-label">Chưa xử lý</span>
+                <span class="stat-value large">{{ overview?.inquiries?.new || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">7 ngày qua</span>
+                <span class="stat-value">{{ overview?.inquiries?.recent || 0 }}</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-    <p class="note">Tính năng báo cáo đang được phát triển.</p>
+      </section>
+
+      <!-- Products Section -->
+      <section class="reports-section">
+        <h2 class="section-title">Thống kê sản phẩm</h2>
+        <div class="reports-grid">
+          <div class="report-card">
+            <h3>Tổng quan</h3>
+            <div class="report-stats">
+              <div class="stat-item">
+                <span class="stat-label">Tổng số</span>
+                <span class="stat-value">{{ productsStats?.total || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Đang hoạt động</span>
+                <span class="stat-value">{{ productsStats?.active || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Không hoạt động</span>
+                <span class="stat-value">{{ productsStats?.inactive || 0 }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="report-card">
+            <h3>Theo phòng</h3>
+            <div class="report-stats">
+              <div
+                v-for="(count, room) in productsStats?.byRoom"
+                :key="room"
+                class="stat-item"
+              >
+                <span class="stat-label">{{ room }}</span>
+                <span class="stat-value">{{ count }}</span>
+              </div>
+              <div v-if="!productsStats?.byRoom || Object.keys(productsStats.byRoom).length === 0" class="stat-item">
+                <span class="stat-label">Chưa có dữ liệu</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import apiClient from '@/services/api.client'
+import { reportService, type OverviewStats, type InquiriesStats, type ProductsStats } from '@/services/report.service'
 
-const stats = ref({
-  totalProducts: null as number | null,
-  totalInquiries: null as number | null,
-  newInquiries: null as number | null,
-})
+const loading = ref(true)
+const error = ref('')
+const overview = ref<OverviewStats | null>(null)
+const inquiriesStats = ref<InquiriesStats | null>(null)
+const productsStats = ref<ProductsStats | null>(null)
 
-onMounted(async () => {
-  try {
-    // TODO: Replace with actual reports API endpoints
-    // const productsRes = await apiClient.get('/products?limit=1')
-    // stats.value.totalProducts = productsRes.total || 0
-    
-    // const inquiriesRes = await apiClient.get('/inquiries')
-    // stats.value.totalInquiries = Array.isArray(inquiriesRes) ? inquiriesRes.length : 0
-    // stats.value.newInquiries = Array.isArray(inquiriesRes) 
-    //   ? inquiriesRes.filter((i: any) => i.status === 'new').length 
-    //   : 0
-  } catch (e) {
-    console.error(e)
+function getStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    new: 'Mới',
+    contacted: 'Đã liên hệ',
+    responded: 'Đã phản hồi',
+    closed: 'Đã đóng',
   }
+  return labels[status] || status
+}
+
+function getSourceLabel(source: string): string {
+  const labels: Record<string, string> = {
+    product: 'Sản phẩm',
+    contact: 'Liên hệ',
+    facebook: 'Facebook',
+    zalo: 'Zalo',
+  }
+  return labels[source] || source
+}
+
+async function fetchReports() {
+  loading.value = true
+  error.value = ''
+  try {
+    const [overviewData, inquiriesData, productsData] = await Promise.all([
+      reportService.getOverview(),
+      reportService.getInquiriesStats(),
+      reportService.getProductsStats(),
+    ])
+    overview.value = overviewData
+    inquiriesStats.value = inquiriesData
+    productsStats.value = productsData
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu báo cáo.'
+    console.error('Failed to fetch reports:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchReports()
 })
 </script>
 
 <style scoped>
+.reports-view {
+  max-width: 1400px;
+}
 .page-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 .page-header h1 {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   margin: 0;
+  font-weight: 700;
+}
+.loading,
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+.error {
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 8px;
+}
+.reports-section {
+  margin-bottom: 2.5rem;
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.stat-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+.stat-content {
+  flex: 1;
+}
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary, #1976d2);
+  display: block;
 }
 .reports-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 .report-card {
   background: #fff;
@@ -80,14 +296,15 @@ onMounted(async () => {
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-.report-card h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
+.report-card.highlight {
+  border: 2px solid var(--color-primary, #1976d2);
+  background: #f3f8ff;
 }
-.report-desc {
-  color: #666;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
+.report-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
 }
 .report-stats {
   display: flex;
@@ -98,24 +315,22 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
   border-top: 1px solid #eee;
 }
 .stat-item:first-child {
   border-top: none;
 }
-.stat-label {
+.stat-item .stat-label {
   font-size: 0.875rem;
   color: #666;
 }
-.stat-value {
+.stat-item .stat-value {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-primary, #1976d2);
 }
-.note {
-  color: #666;
-  font-size: 0.875rem;
-  font-style: italic;
+.stat-item .stat-value.large {
+  font-size: 1.75rem;
 }
 </style>

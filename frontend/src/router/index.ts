@@ -26,30 +26,33 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/BlogView.vue'),
   },
   {
-    path: '/lien-he',
-    name: 'contact',
-    component: () => import('../views/ContactView.vue'),
+    path: '/blog/:slug',
+    name: 'blog-post',
+    component: () => import('../views/BlogPostView.vue'),
   },
-  // Redirect old /contact to /lien-he
+  {
+    path: '/checkout',
+    name: 'checkout',
+    component: () => import('../views/CheckoutView.vue'),
+  },
+  // Redirect old /contact and /lien-he to /page/lien-he
   {
     path: '/contact',
-    redirect: '/lien-he',
+    redirect: '/page/lien-he',
   },
-  // Inquiry Form: /san-pham/:slug/lien-he
   {
-    path: '/san-pham/:slug/lien-he',
-    name: 'product-inquiry',
-    component: () => import('../views/ContactView.vue'),
+    path: '/lien-he',
+    redirect: '/page/lien-he',
   },
   // Collection: /bo-suu-tap/...
   {
     path: '/bo-suu-tap/:slug',
     name: 'collection',
-    component: () => import('../views/CategoryView.vue'),
+    component: () => import('../views/CollectionView.vue'),
   },
-  // CMS Page: /trang/...
+  // CMS Page: /page/about, /page/privacy, etc.
   {
-    path: '/trang/:slug',
+    path: '/page/:slug',
     name: 'cms-page',
     component: () => import('../views/CmsPageView.vue'),
   },
@@ -73,7 +76,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/admin',
-    component: () => import('../views/admin/AdminLayout.vue'),
+    component: () => import('../layouts/AdminLayout.vue'),
     meta: { requiresAdmin: true },
     children: [
       {
@@ -169,6 +172,21 @@ const routes: RouteRecordRaw[] = [
         path: 'reports',
         name: 'admin-reports',
         component: () => import('../views/admin/ReportsView.vue'),
+      },
+      {
+        path: 'blog',
+        name: 'admin-blog',
+        component: () => import('../views/admin/BlogListView.vue'),
+      },
+      {
+        path: 'blog/new',
+        name: 'admin-blog-new',
+        component: () => import('../views/admin/BlogFormView.vue'),
+      },
+      {
+        path: 'blog/:id',
+        name: 'admin-blog-edit',
+        component: () => import('../views/admin/BlogFormView.vue'),
       },
     ],
   },

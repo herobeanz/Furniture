@@ -1,40 +1,27 @@
 <template>
   <div class="cms-page container">
-    <div v-if="loading">Đang tải...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <article v-else>
-      <h1>{{ page?.title }}</h1>
-      <div class="cms-content" v-html="page?.content"></div>
-    </article>
+    <ContactView v-if="slug === 'lien-he'" />
+    <template v-else>
+      <LoadingState v-if="loading" />
+      <NotFoundView v-else-if="isNotFound" />
+      <ErrorState v-else-if="error" :message="error" />
+      <article v-else>
+        <h1>{{ page?.title }}</h1>
+        <div class="cms-content" v-html="page?.content"></div>
+      </article>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import apiClient from '@/services/api.client'
+import ContactView from '@/views/ContactView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
+import LoadingState from '@/components/common/LoadingState.vue'
+import ErrorState from '@/components/common/ErrorState.vue'
+import { useCmsPage } from '@/composables/cms/useCmsPage'
 
-const route = useRoute()
-const slug = computed(() => route.params.slug as string)
-
-const page = ref<{ title: string; content: string } | null>(null)
-const loading = ref(true)
-const error = ref('')
-
-async function fetchPage() {
-  if (!slug.value) return
-  loading.value = true
-  error.value = ''
-  try {
-    page.value = await apiClient.get(`/cms/page/${slug.value}`) as { title: string; content: string }
-  } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Không tìm thấy trang.'
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(slug, fetchPage, { immediate: true })
+// Container component: orchestrates data and logic
+const { slug, page, loading, error, isNotFound } = useCmsPage()
 </script>
 
 <style scoped>
