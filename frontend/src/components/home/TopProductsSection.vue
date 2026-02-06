@@ -14,7 +14,7 @@
           {{ category.name }}
         </button>
       </div>
-      <div v-if="loading" class="loading">Đang tải...</div>
+      <ProductGridSkeleton v-if="loading" :columns="4" :count="4" />
       <div v-else-if="products.length === 0" class="empty">Chưa có sản phẩm.</div>
       <div v-else class="product-grid four-cols">
         <ProductCard
@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import ProductCard from '../ProductCard.vue'
+import ProductGridSkeleton from '../skeleton/ProductGridSkeleton.vue'
 import type { Product } from '../../services/product.service'
 import type { Room } from '../../services/room.service'
 

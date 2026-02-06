@@ -5,7 +5,7 @@
 
       <NotFoundView v-if="isNotFound" />
       <ErrorState v-else-if="error" :message="error" />
-      <LoadingState v-else-if="loading && !product" />
+      <ProductDetailSkeleton v-else-if="loading && !product" />
 
       <template v-else-if="product">
         <section class="product-detail">
@@ -48,11 +48,10 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import ProductGallery from '@/components/product/ProductGallery.vue'
 import ProductInfo from '@/components/product/ProductInfo.vue'
-import LoadingState from '@/components/common/LoadingState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
+import ProductDetailSkeleton from '@/components/skeleton/ProductDetailSkeleton.vue'
 import { useProductData } from '@/composables/product/useProductData'
 import { useCart } from '@/composables/useCart'
-import { useToast } from '@/composables/useToast'
 import { useProductActions } from '@/composables/useProductActions'
 import type { Product } from '@/services/product.service'
 
@@ -72,7 +71,6 @@ const {
 } = useProductData()
 
 const { addItem } = useCart()
-const { toast } = useToast()
 const { toggleWishlist: toggleWishlistComposable, isInWishlist, addToCart: addToCartComposable } = useProductActions()
 
 const inWishlist = computed(() =>
@@ -89,21 +87,23 @@ function handleAddToCart() {
     image: product.value.images?.[0] || product.value.thumbnail,
     slug: product.value.slug,
   })
-  toast.success('Đã thêm vào giỏ', `${product.value.name} x${quantity.value}`)
+  // Toast is automatically shown by useCart composable
 }
 
 function handleToggleWishlist() {
   if (!product.value) return
   toggleWishlistComposable(product.value)
+  // Toast is automatically shown by useProductActions composable
 }
 
 function handleAddToCartRelated(p: Product) {
   addToCartComposable(p)
-  toast.success('Đã thêm vào giỏ', p.name)
+  // Toast is automatically shown by useProductActions composable
 }
 
 function handleToggleWishlistRelated(p: Product) {
   toggleWishlistComposable(p)
+  // Toast is automatically shown by useProductActions composable
 }
 </script>
 

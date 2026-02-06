@@ -4,7 +4,9 @@
       <h1 class="blog-title">Blog</h1>
       <p class="blog-desc">Cập nhật xu hướng nội thất, mẹo trang trí và tin tức từ Furniture Store.</p>
 
-      <LoadingState v-if="loading" />
+      <div v-if="loading" class="blog-grid">
+        <BlogSkeleton v-for="i in 6" :key="i" />
+      </div>
       <ErrorState v-else-if="error" :message="error" />
       <EmptyState v-else-if="posts.length === 0" message="Chưa có bài viết nào." />
 
@@ -23,7 +25,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import BlogCard from '@/components/blog/BlogCard.vue'
-import LoadingState from '@/components/common/LoadingState.vue'
+import BlogSkeleton from '@/components/skeleton/BlogSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
 import { useBlogListData } from '@/composables/blog/useBlogData'

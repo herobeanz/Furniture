@@ -3,7 +3,7 @@
     <div class="container">
       <h2 class="flash-title">Daily Flash Sale!</h2>
       <div class="flash-countdown" v-if="countdownText">{{ countdownText }}</div>
-      <div v-if="loading" class="loading">Đang tải...</div>
+      <ProductGridSkeleton v-if="loading" :columns="4" :count="4" />
       <div v-else-if="products.length === 0" class="empty">Chưa có sản phẩm.</div>
       <div v-else class="product-grid four-cols">
         <article v-for="product in products" :key="product.id" class="product-card flash-card">
@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import ProductGridSkeleton from '../skeleton/ProductGridSkeleton.vue'
 import type { Product } from '../../services/product.service'
 import { formatPrice } from '../../utils/format'
 import { getProductPath } from '../../utils/navigation'

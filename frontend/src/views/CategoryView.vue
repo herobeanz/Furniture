@@ -26,7 +26,7 @@
             :sort-option="sortOption"
             @update:sort-option="sortOption = $event"
           />
-          <LoadingState v-if="loadingProducts" message="Đang tải sản phẩm..." />
+          <ProductGridSkeleton v-if="loadingProducts" :columns="4" :count="8" />
           <EmptyState
             v-else-if="products.length === 0"
             message="Chưa có sản phẩm trong danh mục này."
@@ -58,6 +58,7 @@ import Pagination from '@/components/common/Pagination.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
+import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
 import { useCategoryData } from '@/composables/category/useCategoryData'
 import { useProductActions } from '@/composables/useProductActions'
 

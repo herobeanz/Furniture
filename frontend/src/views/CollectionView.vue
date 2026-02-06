@@ -3,7 +3,7 @@
     <div class="container">
       <Breadcrumb :items="breadcrumb" />
 
-      <LoadingState v-if="loading" skeleton />
+      <ProductGridSkeleton v-if="loading" :columns="4" :count="8" />
       <NotFoundView v-else-if="isNotFound" />
       <ErrorState v-else-if="error" :message="error" />
 
@@ -30,7 +30,7 @@ import ProductGrid from '@/components/ProductGrid.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import CollectionHeader from '@/components/collection/CollectionHeader.vue'
-import LoadingState from '@/components/common/LoadingState.vue'
+import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
 import { useCollectionData } from '@/composables/collection/useCollectionData'

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useTrackingStore } from '@/stores/tracking'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 import { getAdminToken } from '@/services/api.client'
 
 const routes: RouteRecordRaw[] = [
@@ -277,25 +278,52 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, from, next) => {
+  const routerLoading = useRouterLoadingStore()
+  
+  // Start loading indicator (except for same route or admin routes)
+  if (to.path !== from.path && !to.path.startsWith('/admin')) {
+    routerLoading.start()
+  }
+
   const requiresAdmin = to.matched.some((r) => r.meta?.requiresAdmin)
   const token = getAdminToken()
   if (requiresAdmin && to.path !== '/admin/login') {
     if (!token) {
+      routerLoading.stop()
       next('/admin/login')
       return
     }
   }
   if (to.path === '/admin/login' && token) {
+    routerLoading.stop()
     next('/admin/dashboard')
     return
   }
   next()
 })
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   const tracking = useTrackingStore()
+  const routerLoading = useRouterLoadingStore()
+  
   tracking.trackPageView(to.path, to.name as string)
+  
+  // Store route depth for transition animations
+  const depth = to.path.split('/').filter(Boolean).length
+  to.meta.prevDepth = from.path.split('/').filter(Boolean).length
+  to.meta.depth = depth
+  
+  // Stop loading indicator after a small delay for smooth transition
+  setTimeout(() => {
+    routerLoading.stop()
+  }, 100)
+})
+
+router.onError((error) => {
+  const routerLoading = useRouterLoadingStore()
+  routerLoading.stop()
+  console.error('Router error:', error)
 })
 
 export default router
