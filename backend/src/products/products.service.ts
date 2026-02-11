@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ElasticsearchService } from './elasticsearch.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { ProductStatus } from '@prisma/client';
 import type { CreateProductDto } from './dto/create-product.dto';
@@ -49,7 +50,12 @@ function serializeProduct(p: any) {
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ProductsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly elasticsearchService: ElasticsearchService,
+  ) {}
 
   async findAllAdmin() {
     const products = await this.prisma.product.findMany({
@@ -87,20 +93,57 @@ export class ProductsService {
         where.category_id = category.id;
       }
     }
-    if (params.search?.trim()) {
+    // Use Elasticsearch for search if enabled, otherwise use Prisma
+    let productIds: number[] | null = null;
+    let total = 0;
+
+    if (params.search?.trim() && this.elasticsearchService.isEnabled()) {
+      try {
+        const searchResult = await this.elasticsearchService.searchProducts(
+          params.search.trim(),
+          (page - 1) * limit,
+          limit,
+        );
+        productIds = searchResult.ids;
+        total = searchResult.total;
+
+        if (productIds.length === 0) {
+          return {
+            data: [],
+            total: 0,
+            page,
+            limit,
+          };
+        }
+      } catch (error) {
+        this.logger.warn('Elasticsearch search failed, falling back to Prisma', error);
+        // Fallback to Prisma search
+      }
+    }
+
+    if (params.search?.trim() && !productIds) {
+      // Prisma search fallback
       where.OR = [
         { name: { contains: params.search.trim(), mode: 'insensitive' } },
         { description: { contains: params.search.trim(), mode: 'insensitive' } },
+        { short_description: { contains: params.search.trim(), mode: 'insensitive' } },
         { sku: { contains: params.search.trim(), mode: 'insensitive' } },
+        { material: { contains: params.search.trim(), mode: 'insensitive' } },
+        { color: { contains: params.search.trim(), mode: 'insensitive' } },
       ];
     }
 
-    const [products, total] = await Promise.all([
+    // If using Elasticsearch, filter by IDs
+    if (productIds && productIds.length > 0) {
+      where.id = { in: productIds };
+    }
+
+    const [products, totalCount] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        orderBy: { [orderBy === 'createdAt' ? 'created_at' : orderBy]: sortOrder },
-        skip: (page - 1) * limit,
-        take: limit,
+        orderBy: productIds ? undefined : { [orderBy === 'createdAt' ? 'created_at' : orderBy]: sortOrder },
+        skip: productIds ? 0 : (page - 1) * limit,
+        take: productIds ? productIds.length : limit,
         include: {
           images: {
             orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
@@ -118,11 +161,21 @@ export class ProductsService {
           },
         },
       }),
-      this.prisma.product.count({ where }),
+      productIds ? Promise.resolve(total) : this.prisma.product.count({ where }),
     ]);
 
+    // Sort products by Elasticsearch order if using Elasticsearch
+    let sortedProducts = products;
+    if (productIds && productIds.length > 0) {
+      const productMap = new Map(products.map((p) => [p.id, p]));
+      sortedProducts = productIds
+        .map((id) => productMap.get(id))
+        .filter(Boolean)
+        .slice(0, limit) as typeof products;
+    }
+
     // Map products with breadcrumb
-    const data = products.map((p: any) => {
+    const data = sortedProducts.map((p: any) => {
       const result = serializeProduct(p) as ReturnType<typeof serializeProduct> & {
         breadcrumb?: { name: string; slug: string }[];
       };
@@ -139,7 +192,7 @@ export class ProductsService {
 
     return {
       data,
-      total,
+      total: total || totalCount,
       page,
       limit,
     };

@@ -58,5 +58,47 @@ watch(() => props.sortOption, (newVal) => {
   background: var(--color-bg);
   color: var(--color-text);
   font-size: 0.9rem;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .filters-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .filters-left,
+  .filters-right {
+    width: 100%;
+  }
+
+  .product-count {
+    font-size: 0.85rem;
+  }
+
+  .sort-select {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-bar {
+    padding: 0.5rem 0;
+  }
+
+  .product-count {
+    font-size: 0.8rem;
+  }
+
+  .sort-select {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
 }
 </style>

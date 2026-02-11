@@ -23,9 +23,10 @@
               <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" />
             </th>
             <th>Tên</th>
-            <th>Slug</th>
-            <th>Giá</th>
-            <th>Trạng thái</th>
+            <th>Danh mục</th>
+            <th>Kích hoạt</th>
+            <th>Sản phẩm nổi bật</th>
+            <th>Sản phẩm hot</th>
             <th>Thao tác</th>
           </tr>
         </thead>
@@ -35,9 +36,10 @@
               <input type="checkbox" :checked="selectedItems.includes(p.id)" @change="toggleSelect(p.id)" />
             </td>
             <td>{{ p.name }}</td>
-            <td>{{ p.slug }}</td>
-            <td>{{ formatPrice(p.price) }}</td>
-            <td>{{ p.status }}</td>
+            <td>{{ getCategoryName(p.categoryId) }}</td>
+            <td>{{ p.isActive ? 'Có' : 'Không' }}</td>
+            <td>{{ p.isFeatured ? 'Có' : 'Không' }}</td>
+            <td>{{ p.isHot ? 'Có' : 'Không' }}</td>
             <td class="actions-cell">
               <RouterLink :to="'/admin/products/' + p.id" class="action-btn edit" title="Sửa">
                 ✏️
@@ -85,10 +87,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
-import { formatPrice } from '@/utils/format'
+import { categoryService, type Category } from '@/services/category.service'
 import { ITEMS_PER_PAGE } from '@/constants/admin'
 
 const items = ref<any[]>([])
+const categories = ref<Category[]>([])
 const loading = ref(true)
 const selectedItems = ref<number[]>([])
 const currentPage = ref(1)
@@ -109,11 +112,20 @@ const paginatedItems = computed(() => {
 async function fetchList() {
   loading.value = true
   try {
-    const res = await apiClient.get('/products/list/all')
-    items.value = Array.isArray(res) ? res : []
+    const [productsRes, categoriesRes] = await Promise.all([
+      apiClient.get('/products/list/all'),
+      categoryService.getCategories()
+    ])
+    items.value = Array.isArray(productsRes) ? productsRes : []
+    categories.value = Array.isArray(categoriesRes) ? categoriesRes : []
   } finally {
     loading.value = false
   }
+}
+
+function getCategoryName(categoryId: number): string {
+  const category = categories.value.find((c) => c.id === categoryId)
+  return category?.name || '—'
 }
 
 function toggleSelect(id: number) {
@@ -164,7 +176,9 @@ async function remove(id: number) {
   }
 }
 
-onMounted(fetchList)
+onMounted(() => {
+  fetchList()
+})
 </script>
 
 <style scoped>

@@ -4,14 +4,17 @@
       <img v-if="product.images?.length" :src="product.images[0]" :alt="product.name" />
       <img v-else-if="product.thumbnail" :src="product.thumbnail" :alt="product.name" />
       <div v-else class="no-image">Ảnh</div>
-      <span v-if="showSaleTag && product.salePrice" class="tag sale">Sale</span>
+      <span v-if="showSaleTag && hasDiscount" class="tag sale">SALE CỰC SỐC</span>
+      <span v-if="showSaleTag && hasDiscount" class="tag discount">{{ discountPercentage }}%</span>
       <span v-if="showHotTag" class="tag hot">HOT</span>
     </RouterLink>
     <div class="product-card-info">
+      <div v-if="product.sku" class="product-code">MÃ: {{ product.sku }}</div>
       <RouterLink :to="getProductPath(product)" class="product-card-name">{{ product.name }}</RouterLink>
       <div class="product-card-prices">
-        <span v-if="product.salePrice" class="price-old">{{ formatPrice(product.salePrice) }}</span>
-        <span class="price-current">{{ formatPrice(product.price) }}</span>
+        <span v-if="hasDiscount" class="price-current">{{ formatPrice(product.price) }}</span>
+        <span v-if="hasDiscount" class="price-old">{{ formatPrice(product.salePrice!) }}</span>
+        <span v-else class="price-current">{{ formatPrice(product.price) }}</span>
       </div>
       <div class="product-card-actions">
         <button type="button" class="btn-add-cart" @click="$emit('addToCart', product)">Thêm vào giỏ hàng</button>
@@ -53,6 +56,16 @@ defineEmits<{
 // Use composable instead of store directly
 const { isInWishlist: checkInWishlist } = useWishlist()
 const inWishlist = computed(() => checkInWishlist(props.product.id))
+
+// Calculate discount
+const hasDiscount = computed(() => {
+  return props.product.salePrice && props.product.salePrice > props.product.price
+})
+
+const discountPercentage = computed(() => {
+  if (!hasDiscount.value || !props.product.salePrice) return 0
+  return Math.round(((props.product.salePrice - props.product.price) / props.product.salePrice) * 100)
+})
 </script>
 
 <style scoped>
@@ -99,12 +112,32 @@ const inWishlist = computed(() => checkInWishlist(props.product.id))
 }
 .tag.sale {
   background: var(--color-primary);
+  top: 8px;
+  left: 8px;
+}
+.tag.discount {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: #fff;
 }
 .tag.hot {
   background: #c00;
+  top: 8px;
+  right: 8px;
 }
 .product-card-info {
   padding: 1rem;
+}
+.product-code {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.25rem;
 }
 .product-card-name {
   display: block;
@@ -166,5 +199,50 @@ const inWishlist = computed(() => checkInWishlist(props.product.id))
 .btn-wishlist.active {
   color: var(--color-primary);
   border-color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .product-card-info {
+    padding: 0.875rem;
+  }
+  .product-card-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+  .product-card-prices {
+    margin-bottom: 0.4rem;
+  }
+  .price-current {
+    font-size: 0.95rem;
+  }
+  .price-old {
+    font-size: 0.8rem;
+  }
+  .btn-add-cart {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
+  }
+  .btn-wishlist {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card-info {
+    padding: 0.75rem;
+  }
+  .product-code {
+    font-size: 0.75rem;
+  }
+  .product-card-name {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .btn-add-cart {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.5rem;
+  }
 }
 </style>

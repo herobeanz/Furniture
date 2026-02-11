@@ -268,18 +268,75 @@ a.nav-dropdown-trigger:hover,
   background: var(--color-primary);
 }
 
+@media (max-width: 1024px) {
+  .header-inner {
+    gap: 1rem;
+  }
+  .nav-menu {
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+  .search-input {
+    width: 180px;
+  }
+}
+
 @media (max-width: 768px) {
   .header-inner {
     flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .logo {
+    font-size: 1.2rem;
+    text-align: center;
   }
   .nav-menu {
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .nav-menu > a {
+    padding: 0.25rem 0.5rem;
+  }
+  .nav-dropdown-menu {
+    min-width: 180px;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
   .search-wrap {
-    width: 100%;
+    flex: 1;
+    max-width: none;
   }
   .search-input {
     width: 100%;
+    font-size: 0.9rem;
+  }
+  .icon-link {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header {
+    padding: 0.5rem 0;
+  }
+  .nav-menu {
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+  .nav-menu > a {
+    padding: 0.25rem;
+  }
+  .search-input {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+  }
+  .search-btn {
+    padding: 0.4rem 0.6rem;
   }
 }
 </style>

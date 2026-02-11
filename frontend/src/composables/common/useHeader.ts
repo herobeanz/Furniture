@@ -60,7 +60,7 @@ export function useHeader() {
   function onSearch() {
     const q = searchQuery.value?.trim()
     if (q) {
-      router.push({ path: '/', query: { search: q } })
+      router.push({ path: '/search', query: { q } })
     }
   }
 

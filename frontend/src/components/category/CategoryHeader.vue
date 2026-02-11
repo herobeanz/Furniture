@@ -26,5 +26,34 @@ defineProps<Props>()
 .category-desc {
   color: var(--color-text-muted);
   font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .category-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .category-title {
+    font-size: 1.5rem;
+  }
+
+  .category-desc {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-header {
+    margin-bottom: 1rem;
+  }
+
+  .category-title {
+    font-size: 1.25rem;
+  }
+
+  .category-desc {
+    font-size: 0.85rem;
+  }
 }
 </style>

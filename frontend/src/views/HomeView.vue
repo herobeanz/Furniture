@@ -86,4 +86,10 @@ onMounted(() => {
 .home-page {
   padding-bottom: 0;
 }
+
+@media (max-width: 768px) {
+  .home-page {
+    padding-bottom: 0;
+  }
+}
 </style>

@@ -35,4 +35,29 @@ defineProps<Props>()
 .breadcrumb a:hover {
   color: var(--color-primary);
 }
+
+@media (max-width: 768px) {
+  .breadcrumb {
+    font-size: 0.8rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .breadcrumb .sep {
+    margin: 0 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb {
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .breadcrumb .sep {
+    margin: 0 0.3rem;
+  }
+}
 </style>

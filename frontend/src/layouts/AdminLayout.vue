@@ -94,8 +94,7 @@ function toggleUserMenu() {
 
 function handleAccountInfo() {
   showUserMenu.value = false
-  // TODO: Navigate to account info page or show modal
-  console.log('Thông tin tài khoản')
+  router.push('/admin/account')
 }
 
 function logout() {

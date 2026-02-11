@@ -2,10 +2,12 @@
  * Format price for VND
  */
 export function formatPrice(value: number, currency = 'VND'): string {
-  return new Intl.NumberFormat('vi-VN', {
+  const formatted = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency,
   }).format(value)
+  // Replace ₫ with đ for Vietnamese currency display
+  return formatted.replace('₫', 'đ')
 }
 
 /**

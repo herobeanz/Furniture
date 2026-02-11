@@ -47,6 +47,11 @@ const routes: RouteRecordRaw[] = [
     name: 'checkout',
     component: () => import('../views/CheckoutView.vue'),
   },
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('../views/SearchView.vue'),
+  },
   // Redirect old /contact and /lien-he to /page/lien-he
   {
     path: '/contact',
@@ -242,6 +247,11 @@ const routes: RouteRecordRaw[] = [
         path: 'reports',
         name: 'admin-reports',
         component: () => import('../views/admin/ReportsView.vue'),
+      },
+      {
+        path: 'account',
+        name: 'admin-account',
+        component: () => import('../views/admin/AccountInfoView.vue'),
       },
       {
         path: 'blog',

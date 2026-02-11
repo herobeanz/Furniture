@@ -63,4 +63,37 @@ defineEmits<{
   font-size: 0.9rem;
   color: var(--color-text-muted);
 }
+
+@media (max-width: 768px) {
+  .pagination {
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn-page {
+    padding: 0.45rem 0.875rem;
+    font-size: 0.85rem;
+  }
+
+  .page-info {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .btn-page {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    min-width: 60px;
+  }
+
+  .page-info {
+    font-size: 0.8rem;
+  }
+}
 </style>

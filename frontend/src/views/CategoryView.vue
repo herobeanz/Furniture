@@ -8,14 +8,20 @@
       <ErrorState v-else-if="error" :message="error" />
 
       <template v-else>
-        <!-- Room view: show categories -->
+        <!-- Room view: show categories with products -->
         <template v-if="room && !category">
           <CategoryHeader :title="room.name" :description="room.description" />
-          <CategoryGrid
+          <RoomProductsView
+            v-if="categories.length > 0"
             :categories="categories"
             :room-slug="roomSlug"
-            :loading="loadingCategories"
+            @add-to-cart="addToCart"
+            @toggle-wishlist="toggleWishlist"
           />
+          <div v-else-if="loadingCategories" class="loading-categories">
+            Đang tải danh mục...
+          </div>
+          <EmptyState v-else message="Chưa có danh mục trong phòng này." />
         </template>
 
         <!-- Category view: show products -->
@@ -52,7 +58,7 @@ import ProductGrid from '@/components/ProductGrid.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import CategoryHeader from '@/components/category/CategoryHeader.vue'
-import CategoryGrid from '@/components/category/CategoryGrid.vue'
+import RoomProductsView from '@/components/category/RoomProductsView.vue'
 import ProductFilters from '@/components/common/ProductFilters.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
@@ -88,5 +94,27 @@ const { toggleWishlist, addToCart } = useProductActions()
 <style scoped>
 .category-page {
   padding: 1.5rem 0 3rem;
+}
+
+.loading-categories {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  .category-page {
+    padding: 1rem 0 2rem;
+  }
+
+  .loading-categories {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-page {
+    padding: 0.75rem 0 1.5rem;
+  }
 }
 </style>

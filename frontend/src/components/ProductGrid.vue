@@ -57,16 +57,35 @@ function isHot(p: Product) {
   grid-template-columns: repeat(4, 1fr);
 }
 @media (max-width: 1024px) {
+  .product-grid {
+    gap: 1rem;
+  }
   .product-grid.cols-4,
   .product-grid.cols-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+@media (max-width: 768px) {
+  .product-grid {
+    gap: 0.875rem;
+  }
+}
+
 @media (max-width: 600px) {
+  .product-grid {
+    gap: 0.75rem;
+  }
   .product-grid.cols-2,
   .product-grid.cols-3,
   .product-grid.cols-4 {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    gap: 0.625rem;
   }
 }
 </style>
