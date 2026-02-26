@@ -27,6 +27,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { CartItem as CartItemType } from '@/stores/cart'
 import { formatPrice } from '@/utils/format'
+import { getProductPath } from '@/utils/navigation'
 
 const props = defineProps<{
   item: CartItemType
@@ -37,7 +38,7 @@ const emit = defineEmits<{
   updateQuantity: [quantity: number]
 }>()
 
-const productLink = computed(() => '/san-pham/' + (props.item.slug || props.item.id))
+const productLink = computed(() => getProductPath(props.item))
 </script>
 
 <style scoped>

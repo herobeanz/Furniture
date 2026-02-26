@@ -71,6 +71,8 @@ const mockReviews = [
   { text: 'Phục vụ rất nhiệt tình, sản phẩm đúng mô tả. Tôi rất hài lòng.', name: 'Khách hàng A' },
   { text: 'Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ lâu dài.', name: 'Khách hàng B' },
   { text: 'Chất lượng tốt, giá hợp lý. Recommend cho mọi người.', name: 'Khách hàng C' },
+  { text: 'Sản phẩm đẹp, chất lượng cao. Đúng như hình ảnh.', name: 'Khách hàng D' },
+  { text: 'Dịch vụ chăm sóc khách hàng tuyệt vời. Cảm ơn shop!', name: 'Khách hàng E' },
 ]
 
 function goToBlogPost(slug: string) {

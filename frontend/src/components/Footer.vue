@@ -27,7 +27,7 @@
     </div>
     <div class="footer-mid">
       <div class="container footer-mid-inner">
-        <RouterLink to="/" class="footer-logo">FURNITURE STORE</RouterLink>
+        <RouterLink to="/" class="footer-logo">{{ BRAND_NAME }}</RouterLink>
         <div class="footer-contact">
           <p class="footer-phone">(024) 1234 5678</p>
           <p class="footer-hours">Thứ 2 - Thứ 6: 8:00 - 21:00 / Thứ 7: 9:00 - 18:00</p>
@@ -40,7 +40,7 @@
     </div>
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <p>© Furniture Store. Bảo lưu mọi quyền.</p>
+        <p>© {{ BRAND_NAME }}. Bảo lưu mọi quyền.</p>
         <div class="footer-legal">
           <a href="#">Điều khoản</a>
           <a href="#">Bảo mật</a>
@@ -54,6 +54,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { useCategoryTree } from '@/composables/common/useCategoryTree'
+import { BRAND_NAME } from '@/constants/brand'
 
 // Presentational component: uses composable for logic
 const { categoryTree } = useCategoryTree()

@@ -18,21 +18,36 @@
       <div class="cart-footer">
         <p class="cart-total">Tổng: <strong>{{ formatPrice(totalPrice) }}</strong></p>
         <p class="cart-note">Thanh toán và giao hàng sẽ được xử lý ở bước tiếp theo.</p>
-        <RouterLink to="/checkout" class="btn btn-primary btn-checkout">
-          Thanh toán
-        </RouterLink>
+        <button type="button" class="btn btn-primary btn-checkout" @click="showContactModal = true">
+          Liên hệ đặt hàng
+        </button>
       </div>
+      <OrderContactModal
+        :is-open="showContactModal"
+        :phone-number="phoneNumber"
+        :facebook-url="facebookUrl"
+        :zalo-url="zaloUrl"
+        @close="showContactModal = false"
+      />
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { ref, computed } from 'vue'
 import CartItem from '@/components/CartItem.vue'
+import OrderContactModal from '@/components/cart/OrderContactModal.vue'
 import { useCart } from '@/composables/useCart'
 import { formatPrice } from '@/utils/format'
 
 const { items, totalPrice, updateQuantity, removeItem } = useCart()
+
+const showContactModal = ref(false)
+
+// Contact information
+const phoneNumber = '(024) 1234 5678'
+const facebookUrl = computed(() => import.meta.env.VITE_FACEBOOK_URL || '')
+const zaloUrl = computed(() => import.meta.env.VITE_ZALO_URL || '')
 </script>
 
 <style scoped>

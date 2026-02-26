@@ -2,7 +2,7 @@
   <div class="blog-page">
     <div class="container">
       <h1 class="blog-title">Blog</h1>
-      <p class="blog-desc">Cập nhật xu hướng nội thất, mẹo trang trí và tin tức từ Furniture Store.</p>
+      <p class="blog-desc">Cập nhật xu hướng nội thất, mẹo trang trí và tin tức từ {{ BRAND_NAME }}.</p>
 
       <div v-if="loading" class="blog-grid">
         <BlogSkeleton v-for="i in 6" :key="i" />
@@ -29,6 +29,7 @@ import BlogSkeleton from '@/components/skeleton/BlogSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
 import { useBlogListData } from '@/composables/blog/useBlogData'
+import { BRAND_NAME } from '@/constants/brand'
 
 // Container component: orchestrates data and logic
 const { posts, loading, error } = useBlogListData()

@@ -281,9 +281,34 @@ export class ProductsService {
         images: {
           orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
         },
+        category: {
+          include: {
+            room: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
       },
     });
-    return list.map(serializeProduct);
+
+    // Map related products with breadcrumb so frontend can build proper URL
+    return list.map((p: any) => {
+      const result = serializeProduct(p) as ReturnType<typeof serializeProduct> & {
+        breadcrumb?: { name: string; slug: string }[];
+      };
+      const category = p.category;
+      if (category) {
+        result.breadcrumb = [
+          { name: category.room.name, slug: category.room.slug },
+          { name: category.name, slug: category.slug },
+        ];
+      }
+      return result;
+    });
   }
 
   async findRelatedBySlug(slug: string, limit: number) {

@@ -8,6 +8,7 @@ export interface CartItem {
   quantity: number
   image?: string
   slug?: string
+  breadcrumb?: { name: string; slug: string }[]
 }
 
 export const useCartStore = defineStore('cart', () => {

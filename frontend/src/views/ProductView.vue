@@ -86,6 +86,7 @@ function handleAddToCart() {
     quantity: quantity.value,
     image: product.value.images?.[0] || product.value.thumbnail,
     slug: product.value.slug,
+    breadcrumb: product.value.breadcrumb,
   })
   // Toast is automatically shown by useCart composable
 }

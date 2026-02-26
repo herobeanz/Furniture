@@ -1,7 +1,7 @@
 <template>
   <header class="site-header">
     <div class="container header-inner">
-      <RouterLink to="/" class="logo">FURNITURE STORE</RouterLink>
+      <RouterLink to="/" class="logo">{{ BRAND_NAME }}</RouterLink>
       <nav class="nav-menu">
         <RouterLink to="/">Trang chủ</RouterLink>
         <RouterLink to="/blog">Blog</RouterLink>
@@ -82,6 +82,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { useHeader } from '@/composables/common/useHeader'
+import { BRAND_NAME } from '@/constants/brand'
 
 // Presentational component: uses composable for logic
 const {

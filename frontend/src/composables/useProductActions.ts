@@ -13,13 +13,17 @@ export function useProductActions() {
   const { toast } = useToast()
 
   function addToCart(product: Product | WishlistItem) {
+    const productImage = 'images' in product 
+      ? (product as Product).images?.[0] || (product as Product).thumbnail
+      : (product as WishlistItem).image
     cartStore.addItem({
       id: String(product.id),
       name: product.name,
       price: product.price,
       quantity: 1,
-      image: (product as Product).images?.[0] || product.image || (product as Product).thumbnail,
+      image: productImage,
       slug: product.slug,
+      breadcrumb: 'breadcrumb' in product ? (product as Product).breadcrumb : undefined,
     })
     toast.success('Đã thêm vào giỏ hàng', product.name)
   }

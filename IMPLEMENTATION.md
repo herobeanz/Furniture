@@ -130,7 +130,7 @@ MAX_FILE_SIZE=5242880
 VITE_API_BASE_URL=http://localhost:3000/api/v1
 
 # App
-VITE_APP_NAME=Furniture Store
+VITE_APP_NAME=Đồ gỗ Hùng Cường
 VITE_APP_URL=http://localhost:5173
 
 # Social Links

@@ -7,7 +7,7 @@ import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 
 /**
- * Composable for Category/Room page data fetching and state management
+ * Composable for Category page data fetching and state management
  */
 export function useCategoryData() {
   const route = useRoute()
@@ -17,14 +17,12 @@ export function useCategoryData() {
 
   const room = ref<Room | null>(null)
   const category = ref<Category | null>(null)
-  const categories = ref<Category[]>([])
   const products = ref<Product[]>([])
   const totalProducts = ref(0)
   const page = ref(1)
   const limit = 12
   const sortOption = ref('createdAt:desc')
   const loading = ref(false)
-  const loadingCategories = ref(false)
   const loadingProducts = ref(false)
   const error = ref('')
   const isNotFound = ref(false)
@@ -46,42 +44,6 @@ export function useCategoryData() {
   })
 
   const totalPages = computed(() => Math.max(1, Math.ceil(totalProducts.value / limit)))
-
-  async function fetchRoom() {
-    if (!roomSlug.value) return
-    loading.value = true
-    error.value = ''
-    isNotFound.value = false
-    
-    // Check for preview data first
-    if (isPreviewMode.value && !categorySlug.value) {
-      const preview = getPreviewData('room', roomSlug.value)
-      if (preview) {
-        room.value = preview as Room
-        loading.value = false
-        await fetchCategories()
-        return
-      }
-    }
-    
-    try {
-      room.value = await roomService.getRoom(roomSlug.value)
-      if (categorySlug.value) {
-        await fetchCategory()
-      } else {
-        await fetchCategories()
-      }
-    } catch (e: any) {
-      if (isNotFoundError(e, ['room not found'])) {
-        isNotFound.value = true
-      } else {
-        error.value = extractErrorMessage(e, 'Không tìm thấy phòng.')
-      }
-      room.value = null
-    } finally {
-      loading.value = false
-    }
-  }
 
   async function fetchCategory() {
     if (!categorySlug.value || !roomSlug.value) return
@@ -131,18 +93,6 @@ export function useCategoryData() {
     }
   }
 
-  async function fetchCategories() {
-    if (!room.value || error.value) return
-    loadingCategories.value = true
-    try {
-      categories.value = await roomService.getRoomCategories(roomSlug.value)
-    } catch (e: any) {
-      categories.value = []
-    } finally {
-      loadingCategories.value = false
-    }
-  }
-
   async function fetchProducts() {
     if (!category.value || error.value) return
     loadingProducts.value = true
@@ -177,7 +127,6 @@ export function useCategoryData() {
     page.value = 1
     room.value = null
     category.value = null
-    categories.value = []
     products.value = []
     totalProducts.value = 0
     isNotFound.value = false
@@ -188,8 +137,6 @@ export function useCategoryData() {
     reset()
     if (categorySlug.value && roomSlug.value) {
       fetchCategory()
-    } else if (roomSlug.value) {
-      fetchRoom()
     }
   }, { immediate: true })
 
@@ -207,14 +154,12 @@ export function useCategoryData() {
     // State
     room,
     category,
-    categories,
     products,
     totalProducts,
     page,
     limit,
     sortOption,
     loading,
-    loadingCategories,
     loadingProducts,
     error,
     isNotFound,

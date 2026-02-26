@@ -7,46 +7,27 @@
       <NotFoundView v-else-if="isNotFound" />
       <ErrorState v-else-if="error" :message="error" />
 
-      <template v-else>
-        <!-- Room view: show categories with products -->
-        <template v-if="room && !category">
-          <CategoryHeader :title="room.name" :description="room.description" />
-          <RoomProductsView
-            v-if="categories.length > 0"
-            :categories="categories"
-            :room-slug="roomSlug"
+      <template v-else-if="category">
+        <CategoryHeader :title="category.name" :description="category.description" />
+        <ProductFilters
+          :total-products="totalProducts"
+          :sort-option="sortOption"
+          @update:sort-option="sortOption = $event"
+        />
+        <ProductGridSkeleton v-if="loadingProducts" :columns="4" :count="8" />
+        <EmptyState
+          v-else-if="products.length === 0"
+          message="Chưa có sản phẩm trong danh mục này."
+        />
+        <template v-else>
+          <ProductGrid
+            :products="products"
+            :columns="4"
+            show-sale-tag
             @add-to-cart="addToCart"
             @toggle-wishlist="toggleWishlist"
           />
-          <div v-else-if="loadingCategories" class="loading-categories">
-            Đang tải danh mục...
-          </div>
-          <EmptyState v-else message="Chưa có danh mục trong phòng này." />
-        </template>
-
-        <!-- Category view: show products -->
-        <template v-else-if="category">
-          <CategoryHeader :title="category.name" :description="category.description" />
-          <ProductFilters
-            :total-products="totalProducts"
-            :sort-option="sortOption"
-            @update:sort-option="sortOption = $event"
-          />
-          <ProductGridSkeleton v-if="loadingProducts" :columns="4" :count="8" />
-          <EmptyState
-            v-else-if="products.length === 0"
-            message="Chưa có sản phẩm trong danh mục này."
-          />
-          <template v-else>
-            <ProductGrid
-              :products="products"
-              :columns="4"
-              show-sale-tag
-              @add-to-cart="addToCart"
-              @toggle-wishlist="toggleWishlist"
-            />
-            <Pagination :current-page="page" :total-pages="totalPages" @go-page="goPage" />
-          </template>
+          <Pagination :current-page="page" :total-pages="totalPages" @go-page="goPage" />
         </template>
       </template>
     </div>
@@ -58,7 +39,6 @@ import ProductGrid from '@/components/ProductGrid.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import CategoryHeader from '@/components/category/CategoryHeader.vue'
-import RoomProductsView from '@/components/category/RoomProductsView.vue'
 import ProductFilters from '@/components/common/ProductFilters.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
@@ -70,21 +50,17 @@ import { useProductActions } from '@/composables/useProductActions'
 
 // Container component: orchestrates data and logic
 const {
-  room,
   category,
-  categories,
   products,
   totalProducts,
   page,
   sortOption,
   loading,
-  loadingCategories,
   loadingProducts,
   error,
   isNotFound,
   breadcrumb,
   totalPages,
-  roomSlug,
   goPage,
 } = useCategoryData()
 
@@ -96,19 +72,9 @@ const { toggleWishlist, addToCart } = useProductActions()
   padding: 1.5rem 0 3rem;
 }
 
-.loading-categories {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-text-muted);
-}
-
 @media (max-width: 768px) {
   .category-page {
     padding: 1rem 0 2rem;
-  }
-
-  .loading-categories {
-    padding: 1.5rem;
   }
 }
 

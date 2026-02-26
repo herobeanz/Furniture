@@ -139,7 +139,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        component: () => import('../views/CategoryView.vue'),
+        component: () => import('../views/RoomView.vue'),
       },
     ],
   },
@@ -147,7 +147,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/:roomSlug',
     name: 'room',
-    component: () => import('../views/CategoryView.vue'),
+    component: () => import('../views/RoomView.vue'),
   },
   {
     path: '/admin',
