@@ -4,7 +4,6 @@
     <ValuePropsSection />
     <FlashSaleSection
       :products="flashProducts"
-      :countdown-text="countdownText"
       :loading="loading"
       @add-to-cart="addToCart"
       @toggle-wishlist="toggleWishlist"
@@ -26,7 +25,6 @@
       :loading="loadingBlogs"
       @go-to-post="goToBlogPost"
     />
-    <NewsletterSection />
   </div>
 </template>
 
@@ -40,16 +38,13 @@ import CategoriesSection from '../components/home/CategoriesSection.vue'
 import SaleBannerSection from '../components/home/SaleBannerSection.vue'
 import TopProductsSection from '../components/home/TopProductsSection.vue'
 import BlogSection from '../components/home/BlogSection.vue'
-import NewsletterSection from '../components/home/NewsletterSection.vue'
 import ReviewsCarousel from '../components/ReviewsCarousel.vue'
 import { useHomeData } from '../composables/home/useHomeData'
-import { useCountdown } from '../composables/useCountdown'
 import { useProductActions } from '../composables/useProductActions'
 
 const router = useRouter()
 
 // Composables
-const { countdownText } = useCountdown()
 const { addToCart, toggleWishlist } = useProductActions()
 const {
   rooms,

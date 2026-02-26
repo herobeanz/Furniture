@@ -84,6 +84,20 @@
         </FormField>
       </div>
 
+      <div class="form-row">
+        <FormField>
+          <UiCheckbox v-model="form.isDailyFlashSale" label="Tham gia Daily Flash Sale" />
+        </FormField>
+        <FormField label="Thời gian kết thúc Flash Sale" optional>
+          <UiInput
+            v-model="form.flashSaleEndAt"
+            type="datetime-local"
+            placeholder="Chọn thời gian kết thúc"
+            :disabled="!form.isDailyFlashSale"
+          />
+        </FormField>
+      </div>
+
       <FormField label="SEO Title" optional>
         <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
       </FormField>
@@ -108,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import apiClient from '@/services/api.client'
 import { savePreviewData } from '@/utils/preview'
@@ -141,6 +155,8 @@ const form = reactive({
   isActive: true,
   isFeatured: false,
   isHot: false,
+  isDailyFlashSale: false,
+  flashSaleEndAt: '',
   seoTitle: '',
   seoDescription: '',
 })
@@ -180,6 +196,8 @@ const formPayload = computed(() => {
     isActive: form.isActive,
     isFeatured: form.isFeatured,
     isHot: form.isHot,
+    isDailyFlashSale: form.isDailyFlashSale,
+    flashSaleEndAt: form.isDailyFlashSale && form.flashSaleEndAt ? form.flashSaleEndAt : undefined,
     seoTitle: form.seoTitle || undefined,
     seoDescription: form.seoDescription || undefined,
     images,
@@ -194,6 +212,16 @@ async function fetchCategories() {
     console.error(e)
   }
 }
+
+// Clear flash sale end time when unchecking Daily Flash Sale
+watch(
+  () => form.isDailyFlashSale,
+  (isEnabled) => {
+    if (!isEnabled) {
+      form.flashSaleEndAt = ''
+    }
+  }
+)
 
 onMounted(async () => {
   await fetchCategories()
@@ -218,6 +246,8 @@ onMounted(async () => {
       form.isActive = product.isActive ?? true
       form.isFeatured = product.isFeatured ?? false
       form.isHot = product.isHot ?? false
+      form.isDailyFlashSale = product.isDailyFlashSale ?? false
+      form.flashSaleEndAt = product.flashSaleEndAt || ''
       form.seoTitle = product.seoTitle || ''
       form.seoDescription = product.seoDescription || ''
       imagesText.value = (product.images ?? []).join('\n')
@@ -259,6 +289,8 @@ function handlePreview() {
     isActive: form.isActive,
     isFeatured: form.isFeatured,
     isHot: form.isHot,
+    isDailyFlashSale: form.isDailyFlashSale,
+    flashSaleEndAt: form.flashSaleEndAt || '',
     seoTitle: form.seoTitle || '',
     seoDescription: form.seoDescription || '',
   }

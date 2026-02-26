@@ -132,6 +132,8 @@ model Product {
   is_active         Boolean        @default(true) @map("is_active")
   is_featured       Boolean        @default(false) @map("is_featured")
   is_hot            Boolean        @default(false) @map("is_hot")
+  is_daily_flash_sale Boolean      @default(false) @map("is_daily_flash_sale")
+  flash_sale_end_at  DateTime?     @map("flash_sale_end_at")
   seo_title         String?        @db.Text @map("seo_title")
   seo_description   String?        @db.Text @map("seo_description")
   created_at        DateTime       @default(now()) @map("created_at")

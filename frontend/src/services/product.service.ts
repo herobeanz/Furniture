@@ -20,6 +20,14 @@ export interface Product {
   isActive: boolean
   isFeatured: boolean
   isHot: boolean
+  /**
+   * Đánh dấu sản phẩm thuộc Daily Flash Sale
+   */
+  isDailyFlashSale?: boolean
+  /**
+   * Thời gian kết thúc flash sale cho từng sản phẩm (ISO string)
+   */
+  flashSaleEndAt?: string | null
   seoTitle?: string
   seoDescription?: string
   breadcrumb?: { name: string; slug: string }[]

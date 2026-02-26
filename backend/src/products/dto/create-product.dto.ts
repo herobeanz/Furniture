@@ -7,6 +7,7 @@ import {
   MaxLength,
   Min,
   IsBoolean,
+  IsDateString,
 } from 'class-validator';
 import { ProductStatus } from '@prisma/client';
 
@@ -90,4 +91,12 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   seoDescription?: string;
+
+   @IsOptional()
+   @IsBoolean()
+   isDailyFlashSale?: boolean;
+
+   @IsOptional()
+   @IsDateString()
+   flashSaleEndAt?: string;
 }

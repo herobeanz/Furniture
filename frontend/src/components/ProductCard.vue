@@ -4,9 +4,12 @@
       <img v-if="product.images?.length" :src="product.images[0]" :alt="product.name" />
       <img v-else-if="product.thumbnail" :src="product.thumbnail" :alt="product.name" />
       <div v-else class="no-image">Ảnh</div>
-      <span v-if="showSaleTag && hasDiscount" class="tag sale">SALE CỰC SỐC</span>
-      <span v-if="showSaleTag && hasDiscount" class="tag discount">{{ discountPercentage }}%</span>
+      <!-- <span v-if="showSaleTag && hasDiscount" class="tag sale">SALE CỰC SỐC</span> -->
+      <!-- <span v-if="showSaleTag && hasDiscount" class="tag discount">{{ discountPercentage }}%</span> -->
       <span v-if="showHotTag" class="tag hot">HOT</span>
+      <div class="product-quickview-overlay">
+        <span class="product-quickview-label">Xem chi tiết</span>
+      </div>
     </RouterLink>
     <div class="product-card-info">
       <div v-if="product.sku" class="product-code">MÃ: {{ product.sku }}</div>
@@ -100,6 +103,31 @@ const discountPercentage = computed(() => {
   color: #999;
   font-size: 0.875rem;
 }
+.product-quickview-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+.product-card:hover .product-quickview-overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.18);
+  pointer-events: auto;
+}
+.product-quickview-label {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
 .tag {
   position: absolute;
   top: 8px;
@@ -130,6 +158,8 @@ const discountPercentage = computed(() => {
   background: #c00;
   top: 8px;
   right: 8px;
+  /* left: auto; */
+  right: auto;
 }
 .product-card-info {
   padding: 1rem;

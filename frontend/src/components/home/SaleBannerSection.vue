@@ -1,7 +1,9 @@
 <template>
   <section class="home-sale-banner-section">
     <div class="container">
-      <p class="sale-banner-text">{{ text }}</p>
+      <div class="sale-banner">
+        <p class="sale-banner-text">{{ text }}</p>
+      </div>
     </div>
   </section>
 </template>
@@ -19,15 +21,28 @@ withDefaults(
 
 <style scoped>
 .home-sale-banner-section {
-  background: var(--color-primary);
+  padding: 1.25rem 0;
+  background: #fff;
+}
+.sale-banner {
+  position: relative;
+  background: #b30000;
   color: #fff;
-  padding: 1rem;
   text-align: center;
+  padding: 0.9rem 1rem;
+}
+.sale-banner::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.7);
+  pointer-events: none;
 }
 .sale-banner-text {
   font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.05em;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
   margin: 0;
+  text-transform: uppercase;
 }
 </style>

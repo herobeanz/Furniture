@@ -56,22 +56,19 @@ function getTileBg(room: Room, _i: number) {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  min-height: 60vh;
-  max-height: 70vh;
-  padding: 1rem;
 }
 .hero-tile {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
   text-decoration: none;
   color: #1a1a1a;
-  padding-bottom: 2rem;
   border-radius: 8px;
+  aspect-ratio: 3 / 4;
 }
 .hero-tile-bg {
   position: absolute;
@@ -88,11 +85,11 @@ function getTileBg(room: Room, _i: number) {
 .hero-tile-btn {
   position: relative;
   z-index: 1;
-  padding: 0.6rem 1.5rem;
+  padding: 0.7rem 1.8rem;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 999px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #1a1a1a;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
@@ -116,17 +113,23 @@ function getTileBg(room: Room, _i: number) {
 }
 
 @media (max-width: 1024px) {
-  .hero-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    min-height: 70vh;
+  .hero-tile-btn {
+    font-size: 0.98rem;
+    padding: 0.6rem 1.6rem;
   }
 }
 @media (max-width: 768px) {
   .hero-grid {
-    min-height: 60vh;
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-tile-btn {
+    font-size: 0.9rem;
+    padding: 0.55rem 1.4rem;
+  }
+}
+@media (min-width: 1280px) {
+  .hero-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 </style>

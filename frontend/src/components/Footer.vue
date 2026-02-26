@@ -2,64 +2,86 @@
   <footer class="site-footer">
     <div class="footer-cols">
       <div class="container footer-cols-inner">
-        <div v-for="node in categoryTree" :key="node.id" class="footer-col">
-          <h4>
-            <RouterLink :to="'/' + node.slug">{{ node.name }}</RouterLink>
-          </h4>
-          <ul>
-            <template v-for="child in node.children" :key="child.id">
-              <li>
-                <RouterLink :to="'/' + node.slug + '/' + child.slug">{{ child.name }}</RouterLink>
-              </li>
-            </template>
-          </ul>
+        <!-- Column 1: Brand intro + socials -->
+        <div class="footer-col footer-brand">
+          <h3 class="footer-logo">{{ BRAND_NAME }}</h3>
+          <p class="footer-desc">
+            {{ BRAND_NAME }} là cửa hàng nội thất hỗ trợ bạn chọn lựa, bài trí và chăm sóc không gian sống một cách
+            nhanh chóng và chính xác.
+          </p>
+          <div class="footer-socials">
+            <a href="#" class="social-icon fb" aria-label="Facebook">f</a>
+            <a href="#" class="social-icon ig" aria-label="Instagram">◎</a>
+            <a href="#" class="social-icon tw" aria-label="Twitter">t</a>
+            <a href="#" class="social-icon yt" aria-label="YouTube">▶</a>
+          </div>
         </div>
+
+        <!-- Column 2: Thông tin (CMS pages tĩnh) -->
         <div class="footer-col">
           <h4>Thông tin</h4>
           <ul>
-            <li><RouterLink to="/page/lien-he">Liên hệ</RouterLink></li>
-            <li><RouterLink to="/page/about">Về chúng tôi</RouterLink></li>
-            <li><a href="#">Giao hàng</a></li>
-            <li><a href="#">Đổi trả</a></li>
+            <li><a href="/page/gioi-thieu">Giới thiệu</a></li>
+            <li><a href="/page/chinh-sach-bao-mat">Chính sách bảo hành</a></li>
+            <li><a href="/page/chinh-sach-giao-hang">Chính sách giao hàng</a></li>
+            <li><a href="/page/terms">Điều khoản sử dụng</a></li>
+            <li><a href="/page/lien-he">Liên hệ</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Nội thất (các loại phòng) -->
+        <div class="footer-col">
+          <h4>Nội thất</h4>
+          <ul>
+            <li><a href="/phong-khach">Phòng khách</a></li>
+            <li><a href="/phong-ngu">Phòng ngủ</a></li>
+            <li><a href="/phong-bep">Phòng bếp</a></li>
+            <li><a href="/phong-tho">Phòng thờ</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Address + contact -->
+        <div class="footer-col footer-contact-col">
+          <h4>Contact</h4>
+          <ul class="footer-contact-list">
+            <li>
+              📍
+              <a
+                class="footer-address"
+                href="https://maps.app.goo.gl/FTVZq3HGJzbsoC9V8"
+                target="_blank"
+                rel="noopener"
+              >
+                Làng Nghề Châu Phong, Liên Hà, Đông Anh, Hà Nội
+              </a>
+            </li>
+            <li>
+              ☎️
+              <a class="footer-phone" href="tel:+84357803837">
+                (+84) 357803837
+              </a>
+            </li>
+            <li>
+              📧
+              <a class="footer-email" href="mailto:support@dogohungcuong.vn">
+                support@dogohungcuong.vn
+              </a>
+            </li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="footer-mid">
-      <div class="container footer-mid-inner">
-        <RouterLink to="/" class="footer-logo">{{ BRAND_NAME }}</RouterLink>
-        <div class="footer-contact">
-          <p class="footer-phone">{{ phoneNumber }}</p>
-          <p class="footer-hours">Thứ 2 - Thứ 6: 8:00 - 21:00 / Thứ 7: 9:00 - 18:00</p>
-        </div>
-        <div class="footer-payments">
-          <span class="payment-label">Thanh toán:</span>
-          <span class="payment-icons">Visa · Mastercard · COD</span>
-        </div>
-      </div>
-    </div>
+
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <p>© {{ BRAND_NAME }}. Bảo lưu mọi quyền.</p>
-        <div class="footer-legal">
-          <a href="#">Điều khoản</a>
-          <a href="#">Bảo mật</a>
-          <RouterLink to="/page/lien-he">Liên hệ</RouterLink>
-        </div>
+        <p>Cung cấp bởi © {{ BRAND_NAME }}</p>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { useCategoryTree } from '@/composables/common/useCategoryTree'
 import { BRAND_NAME } from '@/constants/brand'
-import { useContactInfo } from '@/composables/common/useContactInfo'
-
-// Presentational component: uses composable for logic
-const { categoryTree } = useCategoryTree()
-const { phoneNumber } = useContactInfo()
 </script>
 
 <style scoped>
@@ -74,8 +96,27 @@ const { phoneNumber } = useContactInfo()
 }
 .footer-cols-inner {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
   gap: 2rem;
+  align-items: flex-start;
+}
+
+.footer-brand {
+  max-width: 380px;
+}
+
+.footer-logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #fff;
+}
+
+.footer-desc {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin: 0 0 1rem;
+  line-height: 1.6;
 }
 .footer-col h4 {
   font-size: 0.95rem;
@@ -105,44 +146,91 @@ const { phoneNumber } = useContactInfo()
 .footer-col a:hover {
   color: #fff;
 }
-.footer-mid {
-  border-top: 1px solid #333;
-  padding: 1.25rem 0;
+.footer-address {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-decoration: none;
 }
-.footer-mid-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+.footer-address:hover {
+  color: #fff;
+  text-decoration: underline;
 }
-.footer-logo {
+
+.footer-contact-col {
+  text-align: left;
+}
+
+.footer-phone {
   font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.05em;
   color: #fff;
   text-decoration: none;
 }
-.footer-contact {
-  text-align: center;
-}
-.footer-phone {
-  font-weight: 600;
+.footer-phone:hover {
   color: #fff;
-  margin: 0 0 0.2rem 0;
+  text-decoration: underline;
 }
+
 .footer-hours {
-  margin: 0;
+  margin: 0 0 0.75rem;
   font-size: 0.85rem;
-  color: #888;
+  color: #aaa;
 }
-.footer-payments {
+
+.footer-socials {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.social-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.85rem;
-  color: #888;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
 }
-.payment-label {
-  margin-right: 0.5rem;
+
+.social-icon.fb {
+  background: #1877f2;
 }
+
+.social-icon.ig {
+  background: #e4405f;
+}
+
+.social-icon.tw {
+  background: #1da1f2;
+}
+
+.social-icon.yt {
+  background: #ff0000;
+}
+
+.footer-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.footer-contact-list li {
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+
+.footer-email {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-decoration: none;
+}
+.footer-email:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
 .footer-bottom {
   border-top: 1px solid #333;
   padding: 0.75rem 0;
@@ -159,26 +247,16 @@ const { phoneNumber } = useContactInfo()
   font-size: 0.8rem;
   color: #888;
 }
-.footer-legal {
-  display: flex;
-  gap: 1rem;
-}
-.footer-legal a {
-  font-size: 0.8rem;
-  color: #888;
-  text-decoration: none;
-}
-.footer-legal a:hover {
-  color: #fff;
-}
 
 @media (max-width: 768px) {
   .footer-cols-inner {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
   }
-  .footer-mid-inner {
-    flex-direction: column;
-    text-align: center;
+}
+
+@media (max-width: 480px) {
+  .footer-cols-inner {
+    grid-template-columns: 1fr;
   }
 }
 </style>

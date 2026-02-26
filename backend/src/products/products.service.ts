@@ -42,6 +42,8 @@ function serializeProduct(p: any) {
     isActive: p.is_active ?? p.isActive,
     isFeatured: p.is_featured ?? p.isFeatured,
     isHot: p.is_hot ?? p.isHot,
+    isDailyFlashSale: p.is_daily_flash_sale ?? p.isDailyFlashSale ?? false,
+    flashSaleEndAt: (p.flash_sale_end_at ?? p.flashSaleEndAt)?.toISOString?.() ?? null,
     seoTitle: p.seo_title ?? p.seoTitle ?? undefined,
     seoDescription: p.seo_description ?? p.seoDescription ?? undefined,
     images: imageUrls, // Array of image URL strings
@@ -410,6 +412,8 @@ export class ProductsService {
         is_active: dto.isActive ?? true,
         is_featured: dto.isFeatured ?? false,
         is_hot: dto.isHot ?? false,
+        is_daily_flash_sale: dto.isDailyFlashSale ?? false,
+        flash_sale_end_at: dto.flashSaleEndAt ? new Date(dto.flashSaleEndAt) : null,
         seo_title: dto.seoTitle?.trim() ?? null,
         seo_description: dto.seoDescription?.trim() ?? null,
       },
@@ -483,6 +487,10 @@ export class ProductsService {
         ...(dto.isActive !== undefined && { is_active: dto.isActive }),
         ...(dto.isFeatured !== undefined && { is_featured: dto.isFeatured }),
         ...(dto.isHot !== undefined && { is_hot: dto.isHot }),
+        ...(dto.isDailyFlashSale !== undefined && { is_daily_flash_sale: dto.isDailyFlashSale }),
+        ...(dto.flashSaleEndAt !== undefined && {
+          flash_sale_end_at: dto.flashSaleEndAt ? new Date(dto.flashSaleEndAt) : null,
+        }),
         ...(dto.seoTitle !== undefined && { seo_title: dto.seoTitle?.trim() ?? null }),
         ...(dto.seoDescription !== undefined && { seo_description: dto.seoDescription?.trim() ?? null }),
       },
