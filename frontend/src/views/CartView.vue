@@ -34,20 +34,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import CartItem from '@/components/CartItem.vue'
 import OrderContactModal from '@/components/cart/OrderContactModal.vue'
 import { useCart } from '@/composables/useCart'
 import { formatPrice } from '@/utils/format'
+import { useContactInfo } from '@/composables/common/useContactInfo'
 
 const { items, totalPrice, updateQuantity, removeItem } = useCart()
 
 const showContactModal = ref(false)
 
-// Contact information
-const phoneNumber = '(024) 1234 5678'
-const facebookUrl = computed(() => import.meta.env.VITE_FACEBOOK_URL || '')
-const zaloUrl = computed(() => import.meta.env.VITE_ZALO_URL || '')
+// Contact information (centralized)
+const { phoneNumber, facebookUrl, zaloUrl } = useContactInfo()
 </script>
 
 <style scoped>

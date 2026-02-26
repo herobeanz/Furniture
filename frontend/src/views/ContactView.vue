@@ -19,8 +19,8 @@
 
     <div class="contact-info">
       <h2>Thông tin liên hệ</h2>
-      <p>Hotline: (024) 1234 5678</p>
-      <p>Email: support@furniture-store.vn</p>
+      <p>Hotline: {{ phoneNumber }}</p>
+      <p>Email: {{ email }}</p>
       <p>Giờ làm việc: Thứ 2 - Thứ 6, 8:00 - 21:00</p>
     </div>
   </div>
@@ -30,6 +30,7 @@
 import ContactForm from '@/components/contact/ContactForm.vue'
 import SocialLinks from '@/components/contact/SocialLinks.vue'
 import { useContactForm } from '@/composables/contact/useContactForm'
+import { useContactInfo } from '@/composables/common/useContactInfo'
 
 // Container component: orchestrates data and logic
 const {
@@ -42,6 +43,8 @@ const {
   hasSocialLinks,
   submit,
 } = useContactForm()
+
+const { phoneNumber, email } = useContactInfo()
 
 async function handleSubmit() {
   await submit('contact')

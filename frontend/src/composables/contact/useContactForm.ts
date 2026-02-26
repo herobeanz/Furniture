@@ -1,7 +1,8 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { inquiryService } from '@/services/inquiry.service'
 import { useToast } from '@/composables/useToast'
 import { extractErrorMessage } from '@/utils/error'
+import { useContactInfo } from '@/composables/common/useContactInfo'
 
 /**
  * Composable for Contact form logic
@@ -20,9 +21,7 @@ export function useContactForm() {
   const submitMessage = ref('')
   const submitError = ref(false)
 
-  const facebookUrl = import.meta.env.VITE_FACEBOOK_URL || ''
-  const zaloUrl = import.meta.env.VITE_ZALO_URL || ''
-  const hasSocialLinks = computed(() => !!(facebookUrl || zaloUrl))
+  const { facebookUrl, zaloUrl, hasSocialLinks } = useContactInfo()
 
   async function submit(source: 'contact' | 'product' = 'contact', productId?: number) {
     sending.value = true
