@@ -134,6 +134,7 @@ const roleLabel = computed(() => {
   const roleMap: Record<string, string> = {
     admin: 'Quản trị viên',
     editor: 'Biên tập viên',
+    manager: 'Quản lý nội dung',
   }
   return roleMap[form.role] || form.role
 })

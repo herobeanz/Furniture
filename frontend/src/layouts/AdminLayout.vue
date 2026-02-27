@@ -15,7 +15,7 @@
             <span class="nav-icon">📋</span>
             <span>Yêu cầu</span>
           </RouterLink>
-          <RouterLink to="/admin/reports" class="nav-item">
+          <RouterLink v-if="admin?.role === 'admin'" to="/admin/reports" class="nav-item">
             <span class="nav-icon">📊</span>
             <span>Báo cáo</span>
           </RouterLink>

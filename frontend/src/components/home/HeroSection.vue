@@ -14,7 +14,7 @@
         </RouterLink>
       </div>
       <div class="hero-placeholder" v-else>
-        <p>Chưa có phòng nào. Truy cập <RouterLink to="/admin/rooms">tài khoản Admin</RouterLink> để thêm phòng.</p>
+        <p>Chưa có phòng nào.</p>
       </div>
     </div>
   </section>

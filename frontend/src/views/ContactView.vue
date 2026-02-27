@@ -21,7 +21,6 @@
       <h2>Thông tin liên hệ</h2>
       <p>Hotline: {{ phoneNumber }}</p>
       <p>Email: {{ email }}</p>
-      <p>Giờ làm việc: Thứ 2 - Thứ 6, 8:00 - 21:00</p>
     </div>
   </div>
 </template>

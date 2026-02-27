@@ -21,7 +21,7 @@
           v-for="(product, idx) in products"
           :key="product.id"
           :product="product"
-          :show-hot-tag="idx < 2"
+          :show-hot-tag="product.isHot"
           @add-to-cart="$emit('addToCart', product)"
           @toggle-wishlist="$emit('toggleWishlist', product)"
         />

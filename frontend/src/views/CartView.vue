@@ -27,6 +27,7 @@
         :phone-number="phoneNumber"
         :facebook-url="facebookUrl"
         :zalo-url="zaloUrl"
+        :cart-message="cartSummary"
         @close="showContactModal = false"
       />
     </template>
@@ -34,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import CartItem from '@/components/CartItem.vue'
 import OrderContactModal from '@/components/cart/OrderContactModal.vue'
 import { useCart } from '@/composables/useCart'
@@ -47,6 +48,18 @@ const showContactModal = ref(false)
 
 // Contact information (centralized)
 const { phoneNumber, facebookUrl, zaloUrl } = useContactInfo()
+
+// Build cart summary message to send via Zalo / Facebook
+const cartSummary = computed(() => {
+  if (!items.value.length) return ''
+
+  const lines = items.value.map((item, index) => {
+    const lineTotal = item.price * item.quantity
+    return `${index + 1}. ${item.name} x${item.quantity} - ${formatPrice(lineTotal)}`
+  })
+
+  return `Đơn hàng từ website Đồ gỗ Hùng Cường:\n${lines.join('\n')}\nTổng: ${formatPrice(totalPrice.value)}`
+})
 </script>
 
 <style scoped>

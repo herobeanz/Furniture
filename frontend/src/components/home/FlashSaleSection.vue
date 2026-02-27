@@ -4,8 +4,9 @@
       <h2 class="flash-title">Daily Flash Sale!</h2>
       <ProductGridSkeleton v-if="loading" :columns="4" :count="4" />
       <div v-else-if="products.length === 0" class="empty">Chưa có sản phẩm.</div>
-      <div v-else class="product-grid four-cols">
-        <article v-for="product in visibleProducts" :key="product.id" class="product-card flash-card">
+      <div v-else class="product-grid-wrapper">
+        <div class="product-grid four-cols" :class="{ 'carousel-mode': showCarousel }">
+          <article v-for="product in visibleProducts" :key="`${product.id}-${currentPage}`" class="product-card flash-card">
           <RouterLink :to="getProductPath(product)" class="product-image-wrap">
             <img v-if="product.images?.length" :src="product.images[0]" :alt="product.name" />
             <div v-else class="no-image">Ảnh</div>
@@ -38,6 +39,7 @@
             </div>
           </div>
         </article>
+        </div>
       </div>
       <div v-if="showCarousel" class="flash-carousel-nav">
         <button type="button" class="carousel-arrow prev" @click="prevPage">
@@ -216,12 +218,20 @@ onUnmounted(() => {
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
+.product-grid-wrapper {
+  position: relative;
+  overflow: hidden;
+}
 .product-grid {
   display: grid;
   gap: 1.25rem;
+  transition: transform 0.3s ease;
 }
 .four-cols {
   grid-template-columns: repeat(4, 1fr);
+}
+.product-grid.carousel-mode {
+  transform: translateX(0);
 }
 .product-card {
   background: #fff;

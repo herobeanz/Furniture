@@ -42,7 +42,7 @@
 
         <!-- Column 4: Address + contact -->
         <div class="footer-col footer-contact-col">
-          <h4>Contact</h4>
+          <h4>Thông tin liên hệ</h4>
           <ul class="footer-contact-list">
             <li>
               📍
@@ -64,7 +64,7 @@
             <li>
               📧
               <a class="footer-email" href="mailto:support@dogohungcuong.vn">
-                support@dogohungcuong.vn
+                xuongdogohungcuong@gmail.com
               </a>
             </li>
           </ul>
@@ -219,6 +219,9 @@ import { BRAND_NAME } from '@/constants/brand'
 .footer-contact-list li {
   font-size: 0.85rem;
   margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .footer-email {

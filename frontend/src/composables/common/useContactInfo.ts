@@ -7,8 +7,8 @@ import { computed } from 'vue'
 export function useContactInfo() {
   const phoneNumber = computed(() => import.meta.env.VITE_CONTACT_PHONE || '0357803837')
   const email = computed(() => import.meta.env.VITE_CONTACT_EMAIL || 'support@dogohungcuong.vn')
-  const facebookUrl = computed(() => import.meta.env.VITE_FACEBOOK_URL || '')
-  const zaloUrl = computed(() => import.meta.env.VITE_ZALO_URL || '')
+  const facebookUrl = computed(() => import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/dogohungcuong')
+  const zaloUrl = computed(() => import.meta.env.VITE_ZALO_URL || 'https://zalo.me/0357803837')
 
   const hasSocialLinks = computed(() => !!(facebookUrl.value || zaloUrl.value))
 

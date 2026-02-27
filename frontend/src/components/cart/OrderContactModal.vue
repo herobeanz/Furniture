@@ -25,7 +25,7 @@
               </a>
               <a
                 v-if="facebookUrl"
-                :href="facebookUrl"
+                :href="facebookLink"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="contact-option contact-option-facebook"
@@ -39,7 +39,7 @@
               </a>
               <a
                 v-if="zaloUrl"
-                :href="zaloUrl"
+                :href="zaloLink"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="contact-option contact-option-zalo"
@@ -67,12 +67,14 @@ interface Props {
   phoneNumber?: string
   facebookUrl?: string
   zaloUrl?: string
+  cartMessage?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   phoneNumber: '(024) 1234 5678',
   facebookUrl: '',
   zaloUrl: '',
+  cartMessage: '',
 })
 
 const emit = defineEmits<{
@@ -83,6 +85,24 @@ const phoneLink = computed(() => {
   // Remove spaces and format for tel: link
   const cleaned = props.phoneNumber.replace(/\s+/g, '').replace(/[()]/g, '')
   return `tel:${cleaned}`
+})
+
+const encodedCartMessage = computed(() => {
+  return props.cartMessage ? encodeURIComponent(props.cartMessage) : ''
+})
+
+const facebookLink = computed(() => {
+  if (!props.facebookUrl) return ''
+  if (!encodedCartMessage.value) return props.facebookUrl
+  const sep = props.facebookUrl.includes('?') ? '&' : '?'
+  return `${props.facebookUrl}${sep}ref=${encodedCartMessage.value}`
+})
+
+const zaloLink = computed(() => {
+  if (!props.zaloUrl) return ''
+  if (!encodedCartMessage.value) return props.zaloUrl
+  const sep = props.zaloUrl.includes('?') ? '&' : '?'
+  return `${props.zaloUrl}${sep}text=${encodedCartMessage.value}`
 })
 
 function close() {

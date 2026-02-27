@@ -22,7 +22,8 @@ export function useHomeData() {
   const rootCategories = computed(() => rooms.value)
   const heroTiles = computed(() => rooms.value.slice(0, 4))
   const allDeptCategories = computed(() => allCategories.value)
-  const flashProducts = computed(() => products.value.slice(0, 4))
+  // Chỉ lấy các sản phẩm tham gia Daily Flash Sale, để nguyên toàn bộ danh sách cho carousel
+  const flashProducts = computed(() => products.value.filter((p) => p.isDailyFlashSale))
 
   // Load tab products
   async function loadTabProducts() {
