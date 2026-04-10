@@ -1,0 +1,51 @@
+---
+alwaysApply: true
+globs: be/**
+---
+
+# Backend (NestJS + Prisma) Guide
+
+- **Tech stack**
+  - NestJS (REST API) in `[be](mdc:be)`
+  - Prisma ORM with PostgreSQL in `[be/prisma](mdc:be/prisma)`
+  - Compiled output in `[be/dist](mdc:be/dist)` (đừng sửa trực tiếp)
+
+- **Entry points**
+  - Main bootstrap file: `[be/src/main.ts](mdc:be/src/main.ts)`
+  - Root module: `[be/src/app.module.ts](mdc:be/src/app.module.ts)`
+  - Global Prisma service: `[be/src/prisma](mdc:be/src/prisma)`
+
+- **Domain modules (từng tính năng một module riêng)**
+  - Auth: `[be/src/auth](mdc:be/src/auth)` (JWT, guard, decorator `CurrentUser`)
+  - Products: `[be/src/products](mdc:be/src/products)` (CRUD sản phẩm, filter, DTO)
+  - Categories / Rooms / Collections / CMS / Blog / Reports / Inquiries:
+    - Mỗi thư mục con trong `[be/src](mdc:be/src)` là một Nest module hoàn chỉnh:
+      `*.controller.ts` (route), `*.service.ts` (logic), `dto/*` (validate input)
+
+- **Database & migrations**
+  - Prisma schema: `[be/prisma/schema.prisma](mdc:be/prisma/schema.prisma)` là nguồn sự thật về DB.
+  - Khi đổi schema, LUÔN chạy migration thay vì chỉnh tay DB:
+    - Dev: `cd be && npx prisma migrate dev --name <tên_migration>`
+    - Prod: `cd be && npx prisma migrate deploy`
+  - Seed data: `[be/prisma/seed.ts](mdc:be/prisma/seed.ts)` + script seed trong `be/package.json`.
+
+- **Kiểu dữ liệu & DTO**
+  - Tất cả input từ client phải qua DTO trong thư mục `dto/` và dùng class-validator.
+  - Khi thêm field mới cho entity:
+    1. Cập nhật `schema.prisma` và chạy migration.
+    2. Cập nhật DTO (`create-*.dto.ts`, `update-*.dto.ts`).
+    3. Cập nhật service serialize/return kiểu trả về (tránh lộ field nhạy cảm).
+
+- **Best practices khi sửa code backend**
+  - Không import trực tiếp Prisma Client ở controller; luôn dùng Prisma service hoặc service cụ thể.
+  - Không trả raw Prisma model thẳng ra API; dùng method serialize/mapper trong service nếu có.
+  - Luôn dùng guard `JwtAuthGuard` cho route cần đăng nhập, và decorator `@CurrentUser()` thay vì tự đọc token.
+  - Đặt logic nghiệp vụ vào `*.service.ts`, controller chỉ nên:
+    - Validate input (DTO)
+    - Gọi service
+    - Trả HTTP status phù hợp
+
+- **Testing / chạy cục bộ**
+  - Chạy server dev: `cd be && npm run start:dev`
+  - E2E tests (nếu dùng): xem `[be/test/app.e2e-spec.ts](mdc:be/test/app.e2e-spec.ts)` và config Jest trong `[be/test/jest-e2e.json](mdc:be/test/jest-e2e.json)`.
+

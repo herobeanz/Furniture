@@ -1,0 +1,39 @@
+---
+alwaysApply: true
+globs: fe/**
+---
+
+# Frontend (Vue 3 + Vite) Guide
+
+- **Tech stack & entry**
+  - Vue 3 + TypeScript, Vite in `[fe](mdc:fe)`
+  - App entry: `[fe/src/main.ts](mdc:fe/src/main.ts)` → mounts `[fe/src/App.vue](mdc:fe/src/App.vue)`
+  - Router: `[fe/src/router/index.ts](mdc:fe/src/router/index.ts)`
+
+- **Project structure**
+  - Components: `[fe/src/components](mdc:fe/src/components)` (dùng `<script setup>` + Composition API)
+  - Composables: `[fe/src/composables](mdc:fe/src/composables)` (logic dùng lại, ví dụ `useHeader`, `useHomeData`, `useCarousel`, …)
+  - Layouts: `[fe/src/layouts](mdc:fe/src/layouts)` (khung chung cho public/admin nếu có)
+  - Services (API): `[fe/src/services](mdc:fe/src/services)` (gọi backend qua `apiClient`)
+  - State: `[fe/src/stores](mdc:fe/src/stores)` (Pinia stores)
+  - Constants: `[fe/src/constants](mdc:fe/src/constants)` (vd: `BRAND_NAME`)
+
+- **Branding & UI**
+  - Không hard-code tên thương hiệu; luôn import `BRAND_NAME` từ `[fe/src/constants/brand.ts](mdc:fe/src/constants/brand.ts)`.
+  - Ưu tiên tái sử dụng component chung (vd: `ProductCard`, section shells) thay vì copy/paste HTML/CSS giữa các view.
+  - CSS/SCSS:
+    - Dùng style scoped trong từng component, sử dụng biến màu toàn cục (`var(--color-primary)`, `--color-border`, …) thay vì mã màu rải rác.
+
+- **Routing & views**
+  - Views nằm trong `[fe/src/views](mdc:fe/src/views)` và được map trong router.
+  - Dùng `RouterLink` cho điều hướng nội bộ; không dùng `<a href>` thẳng tới route SPA.
+
+- **API & types**
+  - Mọi gọi API nên đi qua layer service trong `[fe/src/services](mdc:fe/src/services)`.
+  - Khai báo kiểu dữ liệu (interface/type) cho response trong service hoặc `[fe/src/types](mdc:fe/src/types)` thay vì dùng `any`.
+
+- **Best practices**
+  - Dùng Composition API (`ref`, `computed`, `watch`, `onMounted`) trong `<script setup>`.
+  - Tách logic phức tạp vào composables để component chỉ tập trung render.
+  - Khi chỉnh flow tìm kiếm, filter, pagination… ưu tiên dùng lại composables/service hiện có thay vì tạo logic trùng lặp.
+
