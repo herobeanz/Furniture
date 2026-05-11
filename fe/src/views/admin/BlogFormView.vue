@@ -111,9 +111,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { blogService, type BlogPost } from '@/services/blog.service'
+import { blogApi, type BlogPost } from '@/services/api/blog'
 import { savePreviewData } from '@/utils/preview'
 import FormField from '@/components/ui/FormField.vue'
 import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
@@ -159,7 +160,7 @@ async function openPreview(e: Event) {
   if (!form.slug) return
   try {
     // Verify post exists via admin preview endpoint
-    await blogService.getPostPreview(form.slug)
+    await blogApi.getPostPreview(form.slug)
     // Open in new tab
     window.open(postUrl(form.slug), '_blank')
   } catch (err: any) {
@@ -186,7 +187,7 @@ onMounted(async () => {
   if (!id) return
   loading.value = true
   try {
-    const post = await blogService.getAdminPost(id)
+    const post = await blogApi.getAdminPost(id)
     form.title = post.title || ''
     form.slug = post.slug || ''
     form.excerpt = post.excerpt || ''
@@ -201,7 +202,7 @@ onMounted(async () => {
     form.publishedAt = post.publishedAt ? formatDateTime(post.publishedAt) : ''
   } catch (e: any) {
     error.value = e?.response?.data?.message || e?.message || 'Không thể tải bài viết.'
-    console.error('Failed to load blog post:', e)
+    logger.error('Failed to load blog post:', e)
   } finally {
     loading.value = false
   }
@@ -259,14 +260,14 @@ async function onSubmit() {
     }
 
     if (isEdit && id) {
-      await blogService.updatePost(id, payload)
+      await blogApi.updatePost(id, payload)
     } else {
-      await blogService.createPost(payload)
+      await blogApi.createPost(payload)
     }
     router.push('/admin/blog')
   } catch (e: any) {
     error.value = e?.response?.data?.message || e?.message || 'Lưu thất bại.'
-    console.error('Failed to save blog post:', e)
+    logger.error('Failed to save blog post:', e)
   } finally {
     saving.value = false
   }

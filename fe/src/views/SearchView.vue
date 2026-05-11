@@ -33,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ProductGrid from '@/components/ProductGrid.vue'
@@ -40,8 +41,8 @@ import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import { productService } from '@/services/product.service'
-import type { Product } from '@/services/product.service'
+import { productApi } from '@/services/api/products'
+import type { Product } from '@/services/api/products'
 
 const route = useRoute()
 const router = useRouter()
@@ -72,7 +73,7 @@ async function performSearch() {
   loading.value = true
 
   try {
-    const result = await productService.getProducts({
+    const result = await productApi.getProducts({
       search: searchQuery.value,
       page: page.value,
       limit,
@@ -80,7 +81,7 @@ async function performSearch() {
     products.value = result.data || []
     totalResults.value = result.total || 0
   } catch (error) {
-    console.error('Search error:', error)
+    logger.error('Search error:', error)
     products.value = []
     totalResults.value = 0
   } finally {

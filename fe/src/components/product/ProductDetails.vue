@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Product } from '@/services/product.service'
+import type { Product } from '@/services/api/products'
 
 interface Props {
   product: Product

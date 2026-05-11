@@ -145,9 +145,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { formatPrice } from '@/utils/format'
 import { savePreviewData } from '@/utils/preview'
 import { getProductPath } from '@/utils/navigation'
@@ -216,7 +217,7 @@ async function loadCollection() {
       }))
     }
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 }
 
@@ -237,7 +238,7 @@ async function searchProducts() {
       )
       .slice(0, 20)
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     searchResults.value = []
   } finally {
     loadingSearch.value = false
@@ -282,7 +283,7 @@ async function addProduct(product: any) {
         }
       }
     } catch (e) {
-      console.warn('Could not fetch full product details for breadcrumb:', e)
+      logger.warn('Could not fetch full product details for breadcrumb:', e)
     }
     
     collectionProducts.value.push({
@@ -298,7 +299,7 @@ async function addProduct(product: any) {
     productSearch.value = ''
     searchResults.value = []
   } catch (e: any) {
-    console.error(e)
+    logger.error(e)
     alert(e?.response?.data?.message || 'Thêm sản phẩm thất bại.')
   }
 }
@@ -312,7 +313,7 @@ async function removeProduct(productId: number) {
     await apiClient.delete(`/collections/${id.value}/products/${productId}`)
     collectionProducts.value = collectionProducts.value.filter((p) => p.id !== productId)
   } catch (e: any) {
-    console.error(e)
+    logger.error(e)
     alert(e?.response?.data?.message || 'Xóa sản phẩm thất bại.')
   }
 }
@@ -328,7 +329,7 @@ async function updateProductOrder() {
       })),
     })
   } catch (e: any) {
-    console.error(e)
+    logger.error(e)
     // Don't show error for order updates, just log it
   }
 }
@@ -372,7 +373,7 @@ async function handlePreview() {
           breadcrumb,
         }
       } catch (e) {
-        console.warn(`Could not fetch breadcrumb for product ${p.id}:`, e)
+        logger.warn(`Could not fetch breadcrumb for product ${p.id}:`, e)
         return p
       }
     })
@@ -415,7 +416,7 @@ async function save() {
     // Redirect to list
     window.location.href = '/admin/collections'
   } catch (e: any) {
-    console.error(e)
+    logger.error(e)
     const errorMsg = e?.response?.data?.message || e?.message || 'Lưu thất bại.'
     alert(errorMsg)
   } finally {

@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import type { Category } from '@/services/category.service'
+import type { Category } from '@/services/api/categories'
 
 interface Props {
   categories: Category[]

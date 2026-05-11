@@ -1,5 +1,5 @@
 import { ref, onMounted } from 'vue'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 
 export interface DashboardStats {
   products: number

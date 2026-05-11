@@ -99,8 +99,9 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, computed, watch } from 'vue'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { ITEMS_PER_PAGE } from '@/constants/admin'
 
 const items = ref<any[]>([])
@@ -226,7 +227,7 @@ async function handleBulkDelete() {
     items.value = items.value.filter((x) => !selectedItems.value.includes(x.id))
     selectedItems.value = []
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     alert('Xóa thất bại.')
   }
 }
@@ -237,7 +238,7 @@ async function updateStatus(id: number, status: string) {
     const item = items.value.find((x) => x.id === id)
     if (item) item.status = status
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     alert('Cập nhật thất bại.')
   }
 }

@@ -94,12 +94,13 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, computed, onMounted } from 'vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - xlsx types may not be available
 import * as XLSX from 'xlsx'
-import apiClient from '@/services/api.client'
-import { categoryService, type Category } from '@/services/category.service'
+import apiClient from '@/services/api/client'
+import { categoryApi, type Category } from '@/services/api/categories'
 
 interface ImportRowPayload {
   categoryId: number
@@ -152,7 +153,7 @@ onMounted(async () => {
   try {
     const [productsList, categoriesList] = await Promise.all([
       apiClient.get('/products/list/all'),
-      categoryService.getCategories(),
+      categoryApi.getCategories(),
     ])
 
     if (Array.isArray(productsList)) {
@@ -167,7 +168,7 @@ onMounted(async () => {
       categories.value = categoriesList
     }
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 })
 
@@ -360,7 +361,7 @@ async function exportProducts() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   } catch (e: any) {
-    console.error(e)
+    logger.error(e)
     error.value = e?.response?.data?.message || e?.message || 'Export sản phẩm thất bại.'
   } finally {
     exporting.value = false
@@ -398,7 +399,7 @@ function handleFileChange(e: Event) {
       }
       rows.value = parsed
     } catch (err: any) {
-      console.error(err)
+      logger.error(err)
       error.value = 'Không đọc được file XLSX. Vui lòng kiểm tra lại định dạng.'
       rows.value = []
     }
@@ -561,7 +562,7 @@ async function applyChanges() {
     alert('Đã áp dụng thay đổi cho các sản phẩm.')
     rows.value = []
   } catch (e: any) {
-    console.error(e)
+    logger.error(e)
     error.value =
       e?.response?.data?.message || e?.message || 'Áp dụng thay đổi thất bại. Vui lòng thử lại.'
   } finally {

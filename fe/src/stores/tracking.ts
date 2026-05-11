@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { logger } from '@/utils/logger'
 
 const STORAGE_KEY = 'furniture-anonymous-id'
 
@@ -18,7 +19,7 @@ export const useTrackingStore = defineStore('tracking', () => {
   function trackPageView(path: string, name?: string) {
     if (typeof window === 'undefined') return
     // Có thể gửi lên analytics sau: { anonymousId: anonymousId.value, path, name, timestamp }
-    console.debug('[tracking] pageView', { path, name })
+    logger.debug('[tracking] pageView', { path, name })
   }
 
   function getAnonymousId(): string {

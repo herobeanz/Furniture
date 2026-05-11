@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { productService, type Product } from '@/services/product.service'
+import { productApi, type Product } from '@/services/api/products'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 
@@ -58,8 +58,8 @@ export function useProductData() {
     quantity.value = 1
     try {
       const [p, rel] = await Promise.all([
-        productService.getProduct(productSlug.value),
-        productService.getRelatedProducts(productSlug.value, 4),
+        productApi.getProduct(productSlug.value),
+        productApi.getRelatedProducts(productSlug.value, 4),
       ])
       product.value = p
       related.value = Array.isArray(rel) ? rel : []

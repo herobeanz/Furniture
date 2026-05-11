@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/blog.service'
+import type { BlogPost } from '@/services/api/blog'
 import { formatBlogDate, formatBlogContent } from '@/utils/format'
 
 interface Props {

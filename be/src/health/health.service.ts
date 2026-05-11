@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../shared/modules/redis.service';
 
@@ -12,6 +12,8 @@ export interface HealthResult {
 
 @Injectable()
 export class HealthService {
+  private readonly logger = new Logger(HealthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,

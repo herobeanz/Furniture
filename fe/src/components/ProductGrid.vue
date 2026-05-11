@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import ProductCard from './ProductCard.vue'
-import type { Product } from '@/services/product.service'
+import type { Product } from '@/services/api/products'
 
 const props = withDefaults(
   defineProps<{

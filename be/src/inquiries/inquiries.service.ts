@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InquiryStatus } from '@prisma/client';
 import type { CreateInquiryDto } from './dto/create-inquiry.dto';
 
 @Injectable()
 export class InquiriesService {
+  private readonly logger = new Logger(InquiriesService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateInquiryDto) {

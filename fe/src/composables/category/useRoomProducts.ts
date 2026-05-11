@@ -1,6 +1,6 @@
 import { ref, type Ref } from 'vue'
-import { categoryService, type Category } from '@/services/category.service'
-import type { Product } from '@/services/product.service'
+import { categoryApi, type Category } from '@/services/api/categories'
+import type { Product } from '@/services/api/products'
 
 interface CategoryProducts {
   category: Category
@@ -52,7 +52,7 @@ export function useRoomProducts(categories: Ref<Category[]> | Category[], roomSl
       // Fetch products for each category in parallel
       const promises = cats.map(async (category) => {
         try {
-          const res = await categoryService.getCategoryProducts(
+          const res = await categoryApi.getCategoryProducts(
             category.slug,
             queryParams,
             roomSlug

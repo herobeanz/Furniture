@@ -1,8 +1,9 @@
 import { ref, computed, watch } from 'vue'
-import { roomService, type Room } from '../../services/room.service'
-import { productService, type Product } from '../../services/product.service'
-import { blogService, type BlogPost } from '../../services/blog.service'
-import type { Category } from '../../services/category.service'
+import { roomApi, type Room } from '../../services/api/rooms'
+import { productApi, type Product } from '../../services/api/products'
+import { blogApi, type BlogPost } from '../../services/api/blog'
+import type { Category } from '../../services/api/categories'
+import { logger } from '../../utils/logger'
 
 /**
  * Composable for home page data fetching and management
@@ -25,16 +26,15 @@ export function useHomeData() {
   // Chỉ lấy các sản phẩm tham gia Daily Flash Sale, để nguyên toàn bộ danh sách cho carousel
   const flashProducts = computed(() => products.value.filter((p) => p.isDailyFlashSale))
 
-  // Load tab products
   async function loadTabProducts() {
     if (!activeTab.value) return
     tabProductsLoading.value = true
     try {
-      const categories = await roomService.getRoomCategories(activeTab.value)
+      const categories = await roomApi.getRoomCategories(activeTab.value)
       if (categories.length > 0) {
-        const res = await productService.getProducts({ 
+        const res = await productApi.getProducts({
           category: categories[0].slug,
-          limit: 8 
+          limit: 8,
         })
         tabProducts.value = res.data || []
       } else {
@@ -47,11 +47,10 @@ export function useHomeData() {
     }
   }
 
-  // Load all categories
   async function loadAllCategories() {
     try {
       const categoriesPromises = rooms.value.map((room) =>
-        roomService.getRoomCategories(room.slug).catch(() => [])
+        roomApi.getRoomCategories(room.slug).catch(() => [])
       )
       const categoriesArrays = await Promise.all(categoriesPromises)
       const allCats: Category[] = []
@@ -70,42 +69,40 @@ export function useHomeData() {
       })
       allCategories.value = allCats
     } catch (e) {
-      console.error('Failed to load categories:', e)
+      logger.error('Failed to load categories:', e)
       allCategories.value = []
     }
   }
 
-  // Load blog posts
   async function loadBlogPosts() {
     loadingBlogs.value = true
     try {
-      blogPosts.value = await blogService.getPosts(true) // Get featured posts
+      blogPosts.value = await blogApi.getPosts(true)
     } catch (e) {
-      console.error('Failed to load blog posts:', e)
+      logger.error('Failed to load blog posts:', e)
       blogPosts.value = []
     } finally {
       loadingBlogs.value = false
     }
   }
 
-  // Initial load
   async function loadInitialData() {
     try {
       const [roomsData, res] = await Promise.all([
-        roomService.getRooms(),
-        productService.getProducts({ limit: 12 }),
+        roomApi.getRooms(),
+        productApi.getProducts({ limit: 12 }),
       ])
       rooms.value = roomsData
       products.value = res.data || []
-      
+
       await loadAllCategories()
       await loadBlogPosts()
-      
+
       if (rootCategories.value.length && !activeTab.value) {
         activeTab.value = rootCategories.value[0]?.slug ?? ''
       }
     } catch (e) {
-      console.error('Failed to load initial data:', e)
+      logger.error('Failed to load initial data:', e)
     } finally {
       loading.value = false
     }

@@ -104,8 +104,8 @@ import { RouterLink } from 'vue-router'
 import CategoryTabs from './CategoryTabs.vue'
 import ProductGrid from '@/components/ProductGrid.vue'
 import PriceRangeSlider from '@/components/common/PriceRangeSlider.vue'
-import type { Category } from '@/services/category.service'
-import type { Product } from '@/services/product.service'
+import type { Category } from '@/services/api/categories'
+import type { Product } from '@/services/api/products'
 import { useRoomProducts } from '@/composables/category/useRoomProducts'
 
 interface Props {

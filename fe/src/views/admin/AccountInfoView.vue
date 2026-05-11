@@ -105,7 +105,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAdminAuthStore } from '@/stores/adminAuth'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { FormField, UiInput } from '@/components/ui'
 
 const authStore = useAdminAuthStore()

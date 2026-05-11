@@ -1,8 +1,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { blogService, type BlogPost } from '@/services/blog.service'
+import { blogApi, type BlogPost } from '@/services/api/blog'
 import { extractErrorMessage } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
+import { logger } from '@/utils/logger'
 
 /**
  * Composable for Blog listing page data fetching
@@ -16,10 +17,10 @@ export function useBlogListData() {
     loading.value = true
     error.value = ''
     try {
-      posts.value = await blogService.getPosts()
+      posts.value = await blogApi.getPosts()
     } catch (e: any) {
       error.value = extractErrorMessage(e, 'Không thể tải bài viết.')
-      console.error('Failed to fetch blog posts:', e)
+      logger.error('Failed to fetch blog posts:', e)
     } finally {
       loading.value = false
     }
@@ -64,10 +65,10 @@ export function useBlogPostData() {
     loading.value = true
     error.value = ''
     try {
-      post.value = await blogService.getPost(slug.value)
+      post.value = await blogApi.getPost(slug.value)
     } catch (e: any) {
       error.value = extractErrorMessage(e, 'Không tìm thấy bài viết.')
-      console.error('Failed to fetch blog post:', e)
+      logger.error('Failed to fetch blog post:', e)
     } finally {
       loading.value = false
     }

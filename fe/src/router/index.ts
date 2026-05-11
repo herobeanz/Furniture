@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useTrackingStore } from '@/stores/tracking'
 import { useRouterLoadingStore } from '@/stores/routerLoading'
-import { getAdminToken } from '@/services/api.client'
+import { getAdminToken } from '@/services/api/client'
+import { logger } from '@/utils/logger'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -337,7 +338,7 @@ router.afterEach((to, from) => {
 router.onError((error) => {
   const routerLoading = useRouterLoadingStore()
   routerLoading.stop()
-  console.error('Router error:', error)
+  logger.error('Router error:', error)
 })
 
 export default router

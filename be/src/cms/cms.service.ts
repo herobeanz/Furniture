@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCmsPageDto } from './dto/create-cms-page.dto';
 import type { UpdateCmsPageDto } from './dto/update-cms-page.dto';
 
 @Injectable()
 export class CmsService {
+  private readonly logger = new Logger(CmsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findBySlug(slug: string) {

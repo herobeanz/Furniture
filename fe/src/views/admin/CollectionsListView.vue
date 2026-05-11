@@ -82,9 +82,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { ITEMS_PER_PAGE } from '@/constants/admin'
 
 const items = ref<any[]>([])
@@ -111,7 +112,7 @@ onMounted(async () => {
     const res = await apiClient.get('/collections/list/all')
     items.value = Array.isArray(res) ? res : []
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     items.value = []
   } finally {
     loading.value = false
@@ -150,7 +151,7 @@ async function handleBulkDelete() {
     items.value = items.value.filter((x) => !selectedItems.value.includes(x.id))
     selectedItems.value = []
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     alert('Xóa thất bại.')
   }
 }
@@ -160,7 +161,7 @@ function confirmRemove(c: any) {
   apiClient.delete(`/collections/${c.id}`).then(() => {
     items.value = items.value.filter((x) => x.id !== c.id)
   }).catch((e) => {
-    console.error(e)
+    logger.error(e)
     alert('Xóa thất bại.')
   })
 }

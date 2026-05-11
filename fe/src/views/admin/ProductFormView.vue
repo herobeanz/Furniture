@@ -162,12 +162,13 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - xlsx types may not be available
 import * as XLSX from 'xlsx'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { savePreviewData } from '@/utils/preview'
 import FormField from '@/components/ui/FormField.vue'
 import { UiInput, UiTextarea, UiSelect, UiCheckbox } from '@/components/ui'
@@ -267,7 +268,7 @@ async function fetchCategories() {
     const res = await apiClient.get('/categories/list/all')
     categories.value = Array.isArray(res) ? res : []
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 }
 
@@ -313,7 +314,7 @@ onMounted(async () => {
       form.seoDescription = product.seoDescription || ''
       imagesText.value = (product.images ?? []).join('\n')
     } catch (e) {
-      console.error(e)
+      logger.error(e)
     }
   }
 })

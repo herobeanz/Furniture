@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCollectionDto } from './dto/create-collection.dto';
 import type { UpdateCollectionDto } from './dto/update-collection.dto';
@@ -29,6 +29,8 @@ function serializeCollection(c: any) {
 
 @Injectable()
 export class CollectionsService {
+  private readonly logger = new Logger(CollectionsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {

@@ -1,5 +1,5 @@
 import { ref, onMounted } from 'vue'
-import { categoryService, type CategoryTreeNode } from '@/services/category.service'
+import { categoryApi, type CategoryTreeNode } from '@/services/api/categories'
 
 /**
  * Composable for fetching and managing category tree
@@ -14,7 +14,7 @@ export function useCategoryTree() {
     loading.value = true
     error.value = ''
     try {
-      categoryTree.value = await categoryService.getCategoryTree()
+      categoryTree.value = await categoryApi.getCategoryTree()
     } catch (e: any) {
       error.value = e?.message || 'Không thể tải danh mục.'
       categoryTree.value = []

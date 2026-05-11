@@ -67,9 +67,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { savePreviewData } from '@/utils/preview'
 import FormField from '@/components/ui/FormField.vue'
 import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
@@ -139,7 +140,7 @@ onMounted(async () => {
     form.metaKeywords = p.metaKeywords || ''
     form.publishedAt = p.publishedAt ? new Date(p.publishedAt).toISOString().slice(0, 16) : ''
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   } finally {
     loading.value = false
   }

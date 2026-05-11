@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import type { BlogPost } from '@/services/blog.service'
+import type { BlogPost } from '@/services/api/blog'
 import { formatBlogDate } from '@/utils/format'
 
 interface Props {

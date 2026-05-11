@@ -1,5 +1,5 @@
 import { ref, reactive } from 'vue'
-import { inquiryService } from '@/services/inquiry.service'
+import { inquiryApi } from '@/services/api/inquiries'
 import { useToast } from '@/composables/useToast'
 import { extractErrorMessage } from '@/utils/error'
 import { useContactInfo } from '@/composables/common/useContactInfo'
@@ -28,7 +28,7 @@ export function useContactForm() {
     submitMessage.value = ''
     submitError.value = false
     try {
-      await inquiryService.create({
+      await inquiryApi.create({
         name: form.name.trim(),
         phone: form.phone.trim(),
         email: form.email?.trim() || undefined,

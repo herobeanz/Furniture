@@ -1,6 +1,7 @@
 import { ref, onMounted } from 'vue'
-import { reportService, type OverviewStats, type InquiriesStats, type ProductsStats } from '@/services/report.service'
+import { reportApi, type OverviewStats, type InquiriesStats, type ProductsStats } from '@/services/api/reports'
 import { extractErrorMessage } from '@/utils/error'
+import { logger } from '@/utils/logger'
 
 /**
  * Composable for Admin Reports data
@@ -37,16 +38,16 @@ export function useAdminReports() {
     error.value = ''
     try {
       const [overviewData, inquiriesData, productsData] = await Promise.all([
-        reportService.getOverview(),
-        reportService.getInquiriesStats(),
-        reportService.getProductsStats(),
+        reportApi.getOverview(),
+        reportApi.getInquiriesStats(),
+        reportApi.getProductsStats(),
       ])
       overview.value = overviewData
       inquiriesStats.value = inquiriesData
       productsStats.value = productsData
     } catch (e: any) {
       error.value = extractErrorMessage(e, 'Không thể tải dữ liệu báo cáo.')
-      console.error('Failed to fetch reports:', e)
+      logger.error('Failed to fetch reports:', e)
     } finally {
       loading.value = false
     }

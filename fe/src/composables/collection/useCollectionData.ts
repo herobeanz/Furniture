@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { collectionService, type Collection, type CollectionProduct } from '@/services/collection.service'
-import type { Product } from '@/services/product.service'
+import { collectionApi, type Collection, type CollectionProduct } from '@/services/api/collections'
+import type { Product } from '@/services/api/products'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 
@@ -51,7 +51,7 @@ export function useCollectionData() {
     error.value = ''
     isNotFound.value = false
     try {
-      collection.value = await collectionService.getCollectionBySlug(collectionSlug.value)
+      collection.value = await collectionApi.getCollectionBySlug(collectionSlug.value)
       if (collection.value?.products) {
         products.value = collection.value.products.map(mapToProduct)
       } else {

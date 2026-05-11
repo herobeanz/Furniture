@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Product } from '@/services/product.service'
+import type { Product } from '@/services/api/products'
 import { formatPrice } from '@/utils/format'
 import ProductDetails from './ProductDetails.vue'
 

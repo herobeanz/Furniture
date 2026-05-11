@@ -1,8 +1,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCategoryTree } from './useCategoryTree'
-import { collectionService, type Collection } from '@/services/collection.service'
-import apiClient from '@/services/api.client'
+import { collectionApi, type Collection } from '@/services/api/collections'
+import apiClient from '@/services/api/client'
+import { unwrapResponseData } from '@/services/api/response'
+import { logger } from '@/utils/logger'
 
 export interface CmsPage {
   id: number
@@ -26,11 +28,10 @@ export function useHeader() {
   async function loadCollections() {
     loadingCollections.value = true
     try {
-      const allCollections = await collectionService.getCollections()
-      // Only show active collections
+      const allCollections = await collectionApi.getCollections()
       collections.value = allCollections.filter(c => c.isActive).sort((a, b) => a.orderIndex - b.orderIndex)
     } catch (e) {
-      console.error('Failed to load collections:', e)
+      logger.error('Failed to load collections:', e)
       collections.value = []
     } finally {
       loadingCollections.value = false
@@ -40,11 +41,11 @@ export function useHeader() {
   async function loadCmsPages() {
     loadingCmsPages.value = true
     try {
-      const allPages = await apiClient.get('/cms/active') as CmsPage[]
-      // Exclude 'lien-he' as it's shown separately in dropdown
+      const response = await apiClient.get('/cms/active')
+      const allPages = unwrapResponseData<CmsPage[]>(response)
       cmsPages.value = allPages.filter(p => p.slug !== 'lien-he')
     } catch (e) {
-      console.error('Failed to load CMS pages:', e)
+      logger.error('Failed to load CMS pages:', e)
       cmsPages.value = []
     } finally {
       loadingCmsPages.value = false

@@ -1,8 +1,8 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { roomService, type Room } from '@/services/room.service'
-import { categoryService, type Category } from '@/services/category.service'
-import type { Product } from '@/services/product.service'
+import { roomApi, type Room } from '@/services/api/rooms'
+import { categoryApi, type Category } from '@/services/api/categories'
+import type { Product } from '@/services/api/products'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 
@@ -63,7 +63,7 @@ export function useCategoryData() {
             room.value = roomPreview as Room
           } else {
             try {
-              room.value = await roomService.getRoom(roomSlug.value)
+              room.value = await roomApi.getRoom(roomSlug.value)
             } catch {
               // Room might not exist yet, use preview data only
             }
@@ -77,9 +77,9 @@ export function useCategoryData() {
     
     try {
       if (!room.value) {
-        room.value = await roomService.getRoom(roomSlug.value)
+        room.value = await roomApi.getRoom(roomSlug.value)
       }
-      category.value = await categoryService.getCategoryByRoomAndSlug(roomSlug.value, categorySlug.value)
+      category.value = await categoryApi.getCategoryByRoomAndSlug(roomSlug.value, categorySlug.value)
       await fetchProducts()
     } catch (e: any) {
       if (isNotFoundError(e, ['room not found', 'category not found'])) {
@@ -97,7 +97,7 @@ export function useCategoryData() {
     if (!category.value || error.value) return
     loadingProducts.value = true
     try {
-      const res = await categoryService.getCategoryProducts(
+      const res = await categoryApi.getCategoryProducts(
         category.value.slug,
         {
           page: page.value,

@@ -2,6 +2,7 @@
  * Utility functions for managing preview data
  * Preview data is stored in localStorage to persist across page navigation
  */
+import { logger } from '@/utils/logger'
 
 const PREVIEW_PREFIX = 'preview_'
 
@@ -14,7 +15,7 @@ export function savePreviewData(type: PreviewType, slug: string, data: any) {
     // Set expiration (1 hour)
     localStorage.setItem(`${key}_expires`, String(Date.now() + 60 * 60 * 1000))
   } catch (e) {
-    console.error('Failed to save preview data:', e)
+    logger.error('Failed to save preview data:', e)
   }
 }
 
@@ -30,7 +31,7 @@ export function getPreviewData(type: PreviewType, slug: string): any | null {
     const data = localStorage.getItem(key)
     return data ? JSON.parse(data) : null
   } catch (e) {
-    console.error('Failed to get preview data:', e)
+    logger.error('Failed to get preview data:', e)
     return null
   }
 }
@@ -41,7 +42,7 @@ export function clearPreviewData(type: PreviewType, slug: string) {
     localStorage.removeItem(key)
     localStorage.removeItem(`${key}_expires`)
   } catch (e) {
-    console.error('Failed to clear preview data:', e)
+    logger.error('Failed to clear preview data:', e)
   }
 }
 
@@ -54,6 +55,6 @@ export function clearAllPreviewData() {
       }
     })
   } catch (e) {
-    console.error('Failed to clear all preview data:', e)
+    logger.error('Failed to clear all preview data:', e)
   }
 }

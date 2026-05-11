@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 

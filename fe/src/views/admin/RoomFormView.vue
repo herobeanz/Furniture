@@ -48,9 +48,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { savePreviewData } from '@/utils/preview'
 import FormField from '@/components/ui/FormField.vue'
 import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
@@ -86,7 +87,7 @@ onMounted(async () => {
       form.seoTitle = r.seoTitle || ''
       form.seoDescription = r.seoDescription || ''
     } catch (e) {
-      console.error(e)
+      logger.error(e)
     }
   }
 })
@@ -127,7 +128,7 @@ async function save() {
     }
     router.push('/admin/rooms')
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     alert('Lưu thất bại.')
   } finally {
     saving.value = false

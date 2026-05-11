@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -27,6 +29,7 @@ export class AuthService {
     });
     const payload = { sub: admin.id, username: admin.username };
     const accessToken = this.jwtService.sign(payload);
+    this.logger.log(`Admin login: ${admin.username}`);
     return {
       accessToken,
       admin: {

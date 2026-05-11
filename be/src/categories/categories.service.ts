@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import type { CreateCategoryDto } from './dto/create-category.dto';
@@ -71,6 +71,8 @@ function serializeProduct(p: any) {
 
 @Injectable()
 export class CategoriesService {
+  private readonly logger = new Logger(CategoriesService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {

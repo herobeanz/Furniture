@@ -86,9 +86,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { blogService, type BlogPost } from '@/services/blog.service'
+import { blogApi, type BlogPost } from '@/services/api/blog'
 import { ITEMS_PER_PAGE } from '@/constants/admin'
 
 const items = ref<BlogPost[]>([])
@@ -137,7 +138,7 @@ async function handleBulkDelete() {
   if (selectedItems.value.length === 0) return
   if (!confirm(`Xóa ${selectedItems.value.length} bài viết đã chọn?`)) return
   try {
-    await Promise.all(selectedItems.value.map((id) => blogService.deletePost(id)))
+    await Promise.all(selectedItems.value.map((id) => blogApi.deletePost(id)))
     items.value = items.value.filter((p) => !selectedItems.value.includes(p.id))
     selectedItems.value = []
   } catch (e: any) {
@@ -148,7 +149,7 @@ async function handleBulkDelete() {
 async function deletePost(id: number, title: string) {
   if (!confirm(`Bạn có chắc muốn xóa bài viết "${title}"?`)) return
   try {
-    await blogService.deletePost(id)
+    await blogApi.deletePost(id)
     items.value = items.value.filter((p) => p.id !== id)
   } catch (e: any) {
     alert('Xóa thất bại: ' + (e?.response?.data?.message || e?.message || 'Lỗi không xác định'))
@@ -158,9 +159,9 @@ async function deletePost(id: number, title: string) {
 onMounted(async () => {
   loading.value = true
   try {
-    items.value = await blogService.getAdminPosts()
+    items.value = await blogApi.getAdminPosts()
   } catch (e) {
-    console.error('Failed to load blog posts:', e)
+    logger.error('Failed to load blog posts:', e)
     items.value = []
   } finally {
     loading.value = false

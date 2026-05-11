@@ -78,9 +78,10 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/utils/logger'
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import apiClient from '@/services/api.client'
+import apiClient from '@/services/api/client'
 import { ITEMS_PER_PAGE } from '@/constants/admin'
 
 const items = ref<any[]>([])
@@ -143,7 +144,7 @@ async function handleBulkDelete() {
     items.value = items.value.filter((x) => !selectedItems.value.includes(x.id))
     selectedItems.value = []
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     alert('Xóa thất bại.')
   }
 }
@@ -154,7 +155,7 @@ async function remove(id: number) {
     await apiClient.delete(`/categories/${id}`)
     items.value = items.value.filter((x) => x.id !== id)
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     alert('Xóa thất bại.')
   }
 }

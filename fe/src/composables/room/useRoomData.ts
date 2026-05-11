@@ -1,9 +1,9 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { roomService, type Room } from '@/services/room.service'
+import { roomApi, type Room } from '@/services/api/rooms'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
-import type { Category } from '@/services/category.service'
+import type { Category } from '@/services/api/categories'
 
 /**
  * Composable for Room page data fetching and state management
@@ -46,7 +46,7 @@ export function useRoomData() {
     }
     
     try {
-      room.value = await roomService.getRoom(roomSlug.value)
+      room.value = await roomApi.getRoom(roomSlug.value)
       await fetchCategories()
     } catch (e: any) {
       if (isNotFoundError(e, ['room not found'])) {
@@ -64,7 +64,7 @@ export function useRoomData() {
     if (!room.value || error.value) return
     loadingCategories.value = true
     try {
-      categories.value = await roomService.getRoomCategories(roomSlug.value)
+      categories.value = await roomApi.getRoomCategories(roomSlug.value)
     } catch (e: any) {
       categories.value = []
     } finally {

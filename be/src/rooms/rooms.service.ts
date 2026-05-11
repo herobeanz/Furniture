@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateRoomDto } from './dto/create-room.dto';
 import type { UpdateRoomDto } from './dto/update-room.dto';
@@ -27,6 +27,8 @@ function serializeRoom(r: any) {
 
 @Injectable()
 export class RoomsService {
+  private readonly logger = new Logger(RoomsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
