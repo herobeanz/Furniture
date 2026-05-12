@@ -38,45 +38,96 @@ function isHot(p: Product) {
 <style scoped>
 .product-grid {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  animation: fadeInUp 0.6s ease-out;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .product-grid.cols-2 {
   grid-template-columns: repeat(2, 1fr);
 }
+
 .product-grid.cols-3 {
   grid-template-columns: repeat(3, 1fr);
 }
+
 .product-grid.cols-4 {
   grid-template-columns: repeat(4, 1fr);
 }
+
+/* Large Desktop */
+@media (max-width: 1440px) {
+  .product-grid {
+    gap: 1.375rem;
+  }
+}
+
+/* Desktop */
+@media (max-width: 1280px) {
+  .product-grid {
+    gap: 1.25rem;
+  }
+}
+
+/* Tablet Landscape */
 @media (max-width: 1024px) {
+  .product-grid {
+    gap: 1.125rem;
+  }
+  
+  .product-grid.cols-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .product-grid.cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 768px) {
   .product-grid {
     gap: 1rem;
   }
+  
   .product-grid.cols-4,
   .product-grid.cols-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile Landscape */
+@media (max-width: 640px) {
   .product-grid {
     gap: 0.875rem;
   }
 }
 
-@media (max-width: 600px) {
+/* Mobile Portrait */
+@media (max-width: 480px) {
   .product-grid {
     gap: 0.75rem;
   }
+  
   .product-grid.cols-2,
   .product-grid.cols-3,
   .product-grid.cols-4 {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 480px) {
+/* Small Mobile */
+@media (max-width: 360px) {
   .product-grid {
     gap: 0.625rem;
   }
