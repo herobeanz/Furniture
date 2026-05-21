@@ -36,13 +36,7 @@ function closePreview() {
       router.push('/admin/blog')
     } else if (adminPath.includes('/bo-suu-tap/')) {
       router.push('/admin/collections')
-    } else if (adminPath.includes('/page/')) {
-      router.push('/admin/cms-pages')
-    } else if (adminPath.match(/^\/[^/]+$/)) {
-      // Room preview
-      router.push('/admin/rooms')
     } else if (adminPath.match(/^\/[^/]+\/[^/]+$/)) {
-      // Category preview
       router.push('/admin/categories')
     } else {
       router.push('/admin/dashboard')

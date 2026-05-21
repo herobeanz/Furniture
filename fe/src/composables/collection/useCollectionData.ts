@@ -29,9 +29,14 @@ export function useCollectionData() {
       salePrice: cp.salePrice,
       thumbnail: cp.thumbnail,
       images: cp.thumbnail ? [cp.thumbnail] : [],
+      material: cp.material,
+      categoryId: cp.categoryId,
+      category: cp.category,
       breadcrumb: cp.breadcrumb,
-    } as Product
+    } as unknown as Product
   }
+
+  const categories = computed(() => collection.value?.categories ?? [])
 
   async function fetchCollection() {
     if (!collectionSlug.value) return
@@ -73,13 +78,12 @@ export function useCollectionData() {
   watch(collectionSlug, fetchCollection, { immediate: true })
 
   return {
-    // State
     collection,
     products,
+    categories,
     loading,
     error,
     isNotFound,
-    // Computed
     collectionSlug,
   }
 }

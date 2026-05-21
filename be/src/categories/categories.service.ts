@@ -25,18 +25,18 @@ function toNumber(value: Decimal | null | undefined): number | undefined {
   return Number(value);
 }
 
-function serializeCategory(c: any) {
+function serializeCategory(c: any, productCount?: number) {
   return {
     id: c.id,
     name: c.name,
     slug: c.slug,
     description: c.description ?? undefined,
     thumbnail: c.thumbnail ?? undefined,
-    roomId: c.room_id ?? c.roomId,
     orderIndex: c.order_index ?? c.orderIndex,
     isActive: c.is_active ?? c.isActive,
     seoTitle: c.seo_title ?? c.seoTitle ?? undefined,
     seoDescription: c.seo_description ?? c.seoDescription ?? undefined,
+    productCount: productCount ?? c._count?.products ?? 0,
   };
 }
 
@@ -83,19 +83,8 @@ export class CategoriesService {
     return list.map(serializeCategory);
   }
 
-  /** Menu phân cấp: Room (Phòng) → Category (Sofa, Giường...) → Product (sản phẩm cụ thể). */
+  /** Danh sách category phẳng cho menu Sản phẩm (mỗi node không có children). */
   async findTree(): Promise<CategoryTreeNode[]> {
-    const rooms = await this.prisma.room.findMany({
-      where: { is_active: true },
-      orderBy: [{ order_index: 'asc' }, { name: 'asc' }],
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        order_index: true,
-      },
-    });
-
     const categories = await this.prisma.category.findMany({
       where: { is_active: true },
       orderBy: [{ order_index: 'asc' }, { name: 'asc' }],
@@ -103,48 +92,27 @@ export class CategoriesService {
         id: true,
         name: true,
         slug: true,
-        room_id: true,
         order_index: true,
       },
     });
 
-    const byRoomId = new Map<number, CategoryTreeNode[]>();
-    categories.forEach((cat: any) => {
-      const roomId = cat.room_id ?? cat.roomId;
-      if (!byRoomId.has(roomId)) {
-        byRoomId.set(roomId, []);
-      }
-      byRoomId.get(roomId)!.push({
-        id: cat.id,
-        name: cat.name,
-        slug: cat.slug,
-        orderIndex: cat.order_index ?? cat.orderIndex,
-        children: [], // Products sẽ được load khi vào trang category
-      });
-    });
-
-    return rooms.map((room: any) => ({
-      id: room.id,
-      name: room.name,
-      slug: room.slug,
-      orderIndex: room.order_index ?? room.orderIndex,
-      children: byRoomId.get(room.id) || [],
+    return categories.map((cat: any) => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      orderIndex: cat.order_index ?? cat.orderIndex,
+      children: [],
     }));
-  }
-
-  async findByRoomId(roomId: number) {
-    const list = await this.prisma.category.findMany({
-      where: { room_id: roomId, is_active: true },
-      orderBy: [{ order_index: 'asc' }, { name: 'asc' }],
-    });
-    return list.map(serializeCategory);
   }
 
   async findAllAdmin() {
     const list = await this.prisma.category.findMany({
       orderBy: [{ order_index: 'asc' }, { name: 'asc' }],
+      include: {
+        _count: { select: { products: true } },
+      },
     });
-    return list.map(serializeCategory);
+    return list.map((c) => serializeCategory(c, c._count.products));
   }
 
   async findById(id: number) {
@@ -155,73 +123,31 @@ export class CategoriesService {
     return serializeCategory(category);
   }
 
-  async findBySlug(slug: string, roomSlug?: string) {
-    const where: { slug: string; is_active: boolean; room?: { slug: string } } = {
-      slug,
-      is_active: true,
-    };
-    if (roomSlug) {
-      where.room = { slug: roomSlug };
-    }
+  async findBySlug(slug: string) {
     const category = await this.prisma.category.findFirst({
-      where,
-      include: {
-        room: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
+      where: { slug, is_active: true },
     });
     if (!category) throw new NotFoundException(`Category not found: ${slug}`);
     const result = serializeCategory(category) as ReturnType<typeof serializeCategory> & {
       breadcrumb?: { name: string; slug: string }[];
     };
-    const breadcrumb = [
-      { name: category.room.name, slug: category.room.slug },
-      { name: category.name, slug: category.slug },
-    ];
-    result.breadcrumb = breadcrumb;
+    result.breadcrumb = [{ name: category.name, slug: category.slug }];
     return result;
   }
 
   /** Lấy tất cả products trong category. */
   async findProductsByCategorySlug(
     slug: string,
-    roomSlug?: string,
     page = 1,
     limit = 20,
     sort = 'createdAt',
     order: 'asc' | 'desc' = 'desc',
   ) {
-    const where: { slug: string; is_active: boolean; room?: { slug: string } } = {
-      slug,
-      is_active: true,
-    };
-    if (roomSlug) {
-      where.room = { slug: roomSlug };
-    }
     const category = await this.prisma.category.findFirst({
-      where,
-      select: { id: true },
+      where: { slug, is_active: true },
+      select: { id: true, name: true, slug: true },
     });
     if (!category) throw new NotFoundException(`Category not found: ${slug}`);
-
-    // Get category with room for breadcrumb
-    const categoryWithRoom = await this.prisma.category.findUnique({
-      where: { id: category.id },
-      include: {
-        room: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
-    });
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
@@ -245,13 +171,10 @@ export class CategoriesService {
       const result = serializeProduct(p) as ReturnType<typeof serializeProduct> & {
         breadcrumb?: { name: string; slug: string }[];
       };
-      if (categoryWithRoom) {
-        result.breadcrumb = [
-          { name: categoryWithRoom.room.name, slug: categoryWithRoom.room.slug },
-          { name: categoryWithRoom.name, slug: categoryWithRoom.slug },
-          { name: p.name, slug: p.slug },
-        ];
-      }
+      result.breadcrumb = [
+        { name: category.name, slug: category.slug },
+        { name: p.name, slug: p.slug },
+      ];
       return result;
     });
 
@@ -264,18 +187,8 @@ export class CategoriesService {
   }
 
   async create(dto: CreateCategoryDto) {
-    // Verify room exists
-    const room = await this.prisma.room.findUnique({
-      where: { id: dto.roomId },
-    });
-    if (!room) {
-      throw new NotFoundException(`Room not found: ${dto.roomId}`);
-    }
-
     let slug = dto.slug?.trim() || slugify(dto.name);
-    const existing = await this.prisma.category.findFirst({
-      where: { slug, room_id: dto.roomId },
-    });
+    const existing = await this.prisma.category.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now().toString(36)}`;
     const category = await this.prisma.category.create({
       data: {
@@ -283,7 +196,6 @@ export class CategoriesService {
         slug,
         description: dto.description?.trim() ?? null,
         thumbnail: dto.thumbnail?.trim() ?? null,
-        room_id: dto.roomId,
         order_index: dto.orderIndex ?? 0,
         seo_title: dto.seoTitle?.trim() ?? null,
         seo_description: dto.seoDescription?.trim() ?? null,
@@ -296,23 +208,10 @@ export class CategoriesService {
     const existing = await this.prisma.category.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException(`Category not found: ${id}`);
 
-    if (dto.roomId) {
-      const room = await this.prisma.room.findUnique({
-        where: { id: dto.roomId },
-      });
-      if (!room) {
-        throw new NotFoundException(`Room not found: ${dto.roomId}`);
-      }
-    }
-
     let slug = dto.slug?.trim();
-    const existingRoomId = (existing as any).room_id ?? (existing as any).roomId;
-    const roomId = dto.roomId ?? existingRoomId;
     if (slug && slug !== existing.slug) {
-      const taken = await this.prisma.category.findFirst({
-        where: { slug, room_id: roomId },
-      });
-      if (taken) slug = `${slug}-${Date.now().toString(36)}`;
+      const taken = await this.prisma.category.findUnique({ where: { slug } });
+      if (taken && taken.id !== id) slug = `${slug}-${Date.now().toString(36)}`;
     } else {
       slug = existing.slug;
     }
@@ -323,7 +222,6 @@ export class CategoriesService {
         ...(slug != null && { slug }),
         ...(dto.description !== undefined && { description: dto.description?.trim() ?? null }),
         ...(dto.thumbnail !== undefined && { thumbnail: dto.thumbnail?.trim() ?? null }),
-        ...(dto.roomId !== undefined && { room_id: dto.roomId }),
         ...(dto.orderIndex !== undefined && { order_index: dto.orderIndex }),
         ...(dto.seoTitle !== undefined && { seo_title: dto.seoTitle?.trim() ?? null }),
         ...(dto.seoDescription !== undefined && { seo_description: dto.seoDescription?.trim() ?? null }),
@@ -335,5 +233,20 @@ export class CategoriesService {
   async remove(id: number) {
     await this.prisma.category.delete({ where: { id } });
     return { deleted: true };
+  }
+
+  async reorder(categories: { id: number; orderIndex: number }[]) {
+    if (!categories.length) return { updated: 0 };
+
+    await this.prisma.$transaction(
+      categories.map((item) =>
+        this.prisma.category.update({
+          where: { id: item.id },
+          data: { order_index: item.orderIndex },
+        }),
+      ),
+    );
+
+    return { updated: categories.length };
   }
 }

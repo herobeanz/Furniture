@@ -1,68 +1,55 @@
-import { ref, onMounted } from 'vue'
-import apiClient from '@/services/api/client'
+import { ref } from 'vue'
+import { reportApi, type DashboardData } from '@/services/api/reports'
 
-export interface DashboardStats {
-  products: number
-  categories: number
-  inquiries: number
-  cms: number
-}
+import {
+  inquiryStatusLabel as inquiryStatusLabelFn,
+  inquiryStatusClass as inquiryStatusClassFn,
+} from '@/constants/inquiry-status'
 
-export interface RecentInquiry {
-  id: number
-  name: string
-  phone: string
-  createdAt: string
-  status: string
-}
-
-/**
- * Composable for Admin Dashboard data
- */
 export function useAdminDashboard() {
-  const stats = ref<DashboardStats>({ products: 0, categories: 0, inquiries: 0, cms: 0 })
-  const recent = ref<RecentInquiry[]>([])
+  const data = ref<DashboardData | null>(null)
   const loading = ref(true)
   const error = ref('')
+  const chartDays = ref<7 | 30>(7)
 
-  function formatDate(s: string): string {
-    return new Date(s).toLocaleDateString('vi-VN')
+  function formatTrend(percent: number): string {
+    const sign = percent > 0 ? '+' : ''
+    return `${sign}${percent}%`
   }
 
-  async function loadDashboardData() {
+  function trendClass(percent: number): string {
+    if (percent > 0) return 'trend-up'
+    if (percent < 0) return 'trend-down'
+    return 'trend-neutral'
+  }
+
+  async function loadDashboardData(days: 7 | 30 = chartDays.value) {
     loading.value = true
     error.value = ''
+    chartDays.value = days
     try {
-      const [productsRes, categoriesRes, inquiriesRes, cmsRes] = await Promise.all([
-        apiClient.get('/products/list/all').catch(() => []),
-        apiClient.get('/categories/list/all').catch(() => []),
-        apiClient.get('/inquiries', { params: { limit: 5 } }).catch(() => ({ data: [], total: 0 })),
-        apiClient.get('/cms').catch(() => []),
-      ])
-      stats.value = {
-        products: Array.isArray(productsRes) ? (productsRes as any[]).length : 0,
-        categories: Array.isArray(categoriesRes) ? (categoriesRes as any[]).length : 0,
-        inquiries: (inquiriesRes as any).total ?? 0,
-        cms: Array.isArray(cmsRes) ? (cmsRes as any[]).length : 0,
-      }
-      recent.value = (inquiriesRes as any).data ?? []
-    } catch (e: any) {
-      error.value = e?.message || 'Không thể tải dữ liệu.'
+      data.value = await reportApi.getDashboard(days)
+    } catch (e: unknown) {
+      const message =
+        e && typeof e === 'object' && 'message' in e
+          ? String((e as { message?: string }).message)
+          : 'Không thể tải dữ liệu dashboard.'
+      error.value = message
+      data.value = null
     } finally {
       loading.value = false
     }
   }
 
-  onMounted(() => {
-    loadDashboardData()
-  })
-
   return {
-    stats,
-    recent,
+    data,
     loading,
     error,
-    formatDate,
+    chartDays,
     loadDashboardData,
+    inquiryStatusLabel: inquiryStatusLabelFn,
+    inquiryStatusClass: inquiryStatusClassFn,
+    formatTrend,
+    trendClass,
   }
 }

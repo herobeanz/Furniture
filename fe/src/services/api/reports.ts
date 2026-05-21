@@ -1,56 +1,55 @@
 import apiClient from './client'
 import { unwrapResponseData } from './response'
 
-export interface OverviewStats {
-  totals: {
-    rooms: number
-    categories: number
-    products: number
-    inquiries: number
-    collections: number
-    cmsPages: number
-  }
-  inquiries: {
-    total: number
-    new: number
-    recent: number
-    byStatus: Record<string, number>
-    bySource: Record<string, number>
-  }
-  products: {
-    total: number
-    active: number
-  }
+export interface DashboardStatCard {
+  value: number
+  changePercent: number
+  compareLabel: string
 }
 
-export interface InquiriesStats {
-  total: number
-  last30Days: number
-  last7Days: number
-  byStatus: Record<string, number>
-  bySource: Record<string, number>
-}
-
-export interface ProductsStats {
-  total: number
-  active: number
-  inactive: number
-  byRoom: Record<string, number>
+export interface DashboardData {
+  cards: {
+    newInquiries: DashboardStatCard
+    products: DashboardStatCard
+    weeklyInquiries: DashboardStatCard
+    customers: DashboardStatCard
+  }
+  activityChart: {
+    labels: string[]
+    data: number[]
+    days: number
+  }
+  recentInquiries: Array<{
+    id: number
+    name: string
+    phone: string
+    message: string
+    status: string
+    productName: string | null
+    createdAt: string
+  }>
+  latestProducts: Array<{
+    id: number
+    name: string
+    categoryName: string
+    price: number
+    isContactPrice: boolean
+    thumbnail: string | null
+    isActive: boolean
+    createdAt: string
+  }>
+  productsByCategory: Array<{
+    name: string
+    count: number
+    percent: number
+  }>
 }
 
 export const reportApi = {
-  async getOverview(): Promise<OverviewStats> {
-    const response = await apiClient.get('/reports/overview')
-    return unwrapResponseData<OverviewStats>(response)
-  },
-
-  async getInquiriesStats(): Promise<InquiriesStats> {
-    const response = await apiClient.get('/reports/inquiries')
-    return unwrapResponseData<InquiriesStats>(response)
-  },
-
-  async getProductsStats(): Promise<ProductsStats> {
-    const response = await apiClient.get('/reports/products')
-    return unwrapResponseData<ProductsStats>(response)
+  async getDashboard(chartDays: 7 | 30 = 7): Promise<DashboardData> {
+    const response = await apiClient.get('/reports/dashboard', {
+      params: { chartDays },
+    })
+    return unwrapResponseData<DashboardData>(response)
   },
 }

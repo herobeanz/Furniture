@@ -8,8 +8,13 @@ import {
   Min,
   IsBoolean,
   IsDateString,
+  IsArray,
+  ValidateNested,
+  ArrayMaxSize,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ProductStatus } from '@prisma/client';
+import { ProductImageItemDto } from './product-image-item.dto';
 
 export class CreateProductDto {
   @IsInt()
@@ -31,6 +36,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
   shortDescription?: string;
 
   @IsOptional()
@@ -96,11 +102,20 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(60)
   seoTitle?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(160)
   seoDescription?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @ValidateNested({ each: true })
+  @Type(() => ProductImageItemDto)
+  images?: ProductImageItemDto[];
 
    @IsOptional()
    @IsBoolean()

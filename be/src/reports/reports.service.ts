@@ -7,201 +7,234 @@ export class ReportsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async getOverview() {
+  private percentChange(current: number, previous: number): number {
+    if (previous === 0) {
+      return current > 0 ? 100 : 0;
+    }
+    return Math.round(((current - previous) / previous) * 1000) / 10;
+  }
+
+  private startOfDay(date: Date): Date {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  private formatChartLabel(date: Date): string {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${day}/${month}`;
+  }
+
+  async getDashboard(chartDays = 7) {
+    const days = chartDays === 30 ? 30 : 7;
+    const now = new Date();
+    const todayStart = this.startOfDay(now);
+
+    const weekAgo = new Date(todayStart);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const twoWeeksAgo = new Date(todayStart);
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+    const monthAgo = new Date(todayStart);
+    monthAgo.setMonth(monthAgo.getMonth() - 1);
+    const twoMonthsAgo = new Date(todayStart);
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    const chartStart = new Date(todayStart);
+    chartStart.setDate(chartStart.getDate() - (days - 1));
+
     const [
-      totalRooms,
-      totalCategories,
-      totalProducts,
-      totalInquiries,
-      totalCollections,
-      totalCmsPages,
-      newInquiries,
+      newInquiriesCount,
+      newInquiriesThisWeek,
+      newInquiriesLastWeek,
       activeProducts,
+      productsAddedThisMonth,
+      productsAddedLastMonth,
+      inquiriesThisWeek,
+      inquiriesLastWeek,
+      distinctPhones,
+      phonesThisMonth,
+      phonesLastMonth,
+      recentInquiriesRaw,
+      latestProductsRaw,
+      productsByCategory,
+      chartInquiries,
     ] = await Promise.all([
-      this.prisma.room.count({ where: { is_active: true } }),
-      this.prisma.category.count({ where: { is_active: true } }),
-      this.prisma.product.count({ where: { is_active: true } }),
-      this.prisma.inquiry.count(),
-      this.prisma.collection.count({ where: { is_active: true } }),
-      this.prisma.cmsPage.count({ where: { is_active: true } }),
+      this.prisma.inquiry.count({ where: { status: 'new' } }),
+      this.prisma.inquiry.count({
+        where: { created_at: { gte: weekAgo } },
+      }),
       this.prisma.inquiry.count({
         where: {
-          status: 'new',
+          created_at: { gte: twoWeeksAgo, lt: weekAgo },
         },
+      }),
+      this.prisma.product.count({ where: { is_active: true } }),
+      this.prisma.product.count({
+        where: { created_at: { gte: monthAgo } },
       }),
       this.prisma.product.count({
         where: {
-          is_active: true,
+          created_at: { gte: twoMonthsAgo, lt: monthAgo },
         },
+      }),
+      this.prisma.inquiry.count({
+        where: { created_at: { gte: weekAgo } },
+      }),
+      this.prisma.inquiry.count({
+        where: {
+          created_at: { gte: twoWeeksAgo, lt: weekAgo },
+        },
+      }),
+      this.prisma.inquiry.groupBy({ by: ['phone'], _count: { id: true } }),
+      this.prisma.inquiry.findMany({
+        where: { created_at: { gte: monthAgo } },
+        select: { phone: true },
+        distinct: ['phone'],
+      }),
+      this.prisma.inquiry.findMany({
+        where: {
+          created_at: { gte: twoMonthsAgo, lt: monthAgo },
+        },
+        select: { phone: true },
+        distinct: ['phone'],
+      }),
+      this.prisma.inquiry.findMany({
+        orderBy: { created_at: 'desc' },
+        take: 4,
+        include: {
+          product: { select: { name: true } },
+        },
+      }),
+      this.prisma.product.findMany({
+        orderBy: { created_at: 'desc' },
+        take: 4,
+        include: {
+          category: { select: { name: true } },
+        },
+      }),
+      this.prisma.product.groupBy({
+        by: ['category_id'],
+        _count: { id: true },
+        where: { is_active: true },
+      }),
+      this.prisma.inquiry.findMany({
+        where: { created_at: { gte: chartStart } },
+        select: { created_at: true },
       }),
     ]);
 
-    // Get inquiries by status
-    const inquiriesByStatus = await this.prisma.inquiry.groupBy({
-      by: ['status'],
-      _count: {
-        id: true,
-      },
-    });
-
-    const statusCounts = inquiriesByStatus.reduce(
-      (acc, item) => {
-        acc[item.status] = item._count.id;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    // Get recent inquiries (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const recentInquiries = await this.prisma.inquiry.count({
-      where: {
-        created_at: {
-          gte: sevenDaysAgo,
-        },
-      },
-    });
-
-    // Get inquiries by source
-    const inquiriesBySource = await this.prisma.inquiry.groupBy({
-      by: ['source'],
-      _count: {
-        id: true,
-      },
-    });
-
-    const sourceCounts = inquiriesBySource.reduce(
-      (acc, item) => {
-        acc[item.source] = item._count.id;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    return {
-      totals: {
-        rooms: totalRooms,
-        categories: totalCategories,
-        products: totalProducts,
-        inquiries: totalInquiries,
-        collections: totalCollections,
-        cmsPages: totalCmsPages,
-      },
-      inquiries: {
-        total: totalInquiries,
-        new: newInquiries,
-        recent: recentInquiries,
-        byStatus: statusCounts,
-        bySource: sourceCounts,
-      },
-      products: {
-        total: totalProducts,
-        active: activeProducts,
-      },
-    };
-  }
-
-  async getInquiriesStats() {
-    const total = await this.prisma.inquiry.count();
-
-    const byStatus = await this.prisma.inquiry.groupBy({
-      by: ['status'],
-      _count: {
-        id: true,
-      },
-    });
-
-    const bySource = await this.prisma.inquiry.groupBy({
-      by: ['source'],
-      _count: {
-        id: true,
-      },
-    });
-
-    // Last 30 days
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const last30Days = await this.prisma.inquiry.count({
-      where: {
-        created_at: {
-          gte: thirtyDaysAgo,
-        },
-      },
-    });
-
-    // Last 7 days
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const last7Days = await this.prisma.inquiry.count({
-      where: {
-        created_at: {
-          gte: sevenDaysAgo,
-        },
-      },
-    });
-
-    return {
-      total,
-      last30Days,
-      last7Days,
-      byStatus: byStatus.reduce(
-        (acc, item) => {
-          acc[item.status] = item._count.id;
-          return acc;
-        },
-        {} as Record<string, number>,
-      ),
-      bySource: bySource.reduce(
-        (acc, item) => {
-          acc[item.source] = item._count.id;
-          return acc;
-        },
-        {} as Record<string, number>,
-      ),
-    };
-  }
-
-  async getProductsStats() {
-    const total = await this.prisma.product.count();
-    const active = await this.prisma.product.count({
-      where: { is_active: true },
-    });
-    const inactive = total - active;
-
-    // Products by room
-    const productsByRoom = await this.prisma.product.groupBy({
-      by: ['category_id'],
-      _count: {
-        id: true,
-      },
-    });
-
-    // Get category and room info
-    const categoryIds = productsByRoom.map((p) => p.category_id);
+    const categoryIds = productsByCategory.map((p) => p.category_id);
     const categories = await this.prisma.category.findMany({
       where: { id: { in: categoryIds } },
-      include: { room: true },
+      select: { id: true, name: true },
     });
 
-    const byRoom = categories.reduce(
-      (acc, cat) => {
-        const count = productsByRoom.find((p) => p.category_id === cat.id)?._count.id || 0;
-        const roomName = cat.room.name;
-        acc[roomName] = (acc[roomName] || 0) + count;
-        return acc;
-      },
-      {} as Record<string, number>,
+    const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+    const totalInCategory = productsByCategory.reduce(
+      (sum, row) => sum + row._count.id,
+      0,
     );
 
+    const byCategory = productsByCategory
+      .map((row) => {
+        const count = row._count.id;
+        const name = categoryMap.get(row.category_id) ?? 'Khác';
+        return {
+          name,
+          count,
+          percent:
+            totalInCategory > 0
+              ? Math.round((count / totalInCategory) * 1000) / 10
+              : 0,
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+
+    const chartLabels: string[] = [];
+    const chartData: number[] = [];
+    for (let i = 0; i < days; i++) {
+      const day = new Date(chartStart);
+      day.setDate(chartStart.getDate() + i);
+      chartLabels.push(this.formatChartLabel(day));
+      const nextDay = new Date(day);
+      nextDay.setDate(day.getDate() + 1);
+      chartData.push(
+        chartInquiries.filter(
+          (inq) =>
+            inq.created_at >= day && inq.created_at < nextDay,
+        ).length,
+      );
+    }
+
+    const toNumber = (value: { toNumber?: () => number } | number | null) => {
+      if (value == null) return 0;
+      if (typeof value === 'number') return value;
+      return Number(value);
+    };
+
     return {
-      total,
-      active,
-      inactive,
-      byRoom,
+      cards: {
+        newInquiries: {
+          value: newInquiriesCount,
+          changePercent: this.percentChange(
+            newInquiriesThisWeek,
+            newInquiriesLastWeek,
+          ),
+          compareLabel: 'so với tuần trước',
+        },
+        products: {
+          value: activeProducts,
+          changePercent: this.percentChange(
+            productsAddedThisMonth,
+            productsAddedLastMonth,
+          ),
+          compareLabel: 'sản phẩm mới so với tháng trước',
+        },
+        weeklyInquiries: {
+          value: inquiriesThisWeek,
+          changePercent: this.percentChange(
+            inquiriesThisWeek,
+            inquiriesLastWeek,
+          ),
+          compareLabel: 'so với tuần trước',
+        },
+        customers: {
+          value: distinctPhones.length,
+          changePercent: this.percentChange(
+            phonesThisMonth.length,
+            phonesLastMonth.length,
+          ),
+          compareLabel: 'so với tháng trước',
+        },
+      },
+      activityChart: {
+        labels: chartLabels,
+        data: chartData,
+        days,
+      },
+      recentInquiries: recentInquiriesRaw.map((inq) => ({
+        id: inq.id,
+        name: inq.name,
+        phone: inq.phone,
+        message: inq.message,
+        status: inq.status,
+        productName: inq.product?.name ?? null,
+        createdAt: inq.created_at.toISOString(),
+      })),
+      latestProducts: latestProductsRaw.map((p) => ({
+        id: p.id,
+        name: p.name,
+        categoryName: p.category?.name ?? '—',
+        price: toNumber(p.sale_price) || toNumber(p.price),
+        isContactPrice: p.is_contact_price,
+        thumbnail: p.thumbnail,
+        isActive: p.is_active,
+        createdAt: p.created_at.toISOString(),
+      })),
+      productsByCategory: byCategory,
     };
   }
+
 }

@@ -4,6 +4,7 @@
       v-for="p in products"
       :key="p.id"
       :product="p"
+      :variant="variant"
       :show-sale-tag="showSaleTag"
       :show-hot-tag="showHotTag && isHot(p)"
     />
@@ -11,27 +12,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import ProductCard from './ProductCard.vue'
-import type { Product } from '@/services/api/products'
+import { computed } from "vue";
+import ProductCard from "./ProductCard.vue";
+import type { Product } from "@/services/api/products";
 
 const props = withDefaults(
   defineProps<{
-    products: Product[]
-    columns?: 2 | 3 | 4
-    showSaleTag?: boolean
-    showHotTag?: boolean
-    hotCount?: number
+    products: Product[];
+    columns?: 2 | 3 | 4;
+    variant?: "default" | "compact";
+    showSaleTag?: boolean;
+    showHotTag?: boolean;
+    hotCount?: number;
   }>(),
-  { columns: 4, showSaleTag: true, showHotTag: false, hotCount: 0 }
-)
+  { columns: 4, variant: "default", showSaleTag: true, showHotTag: false, hotCount: 0 },
+);
 
-const columnsClass = computed(() => `cols-${props.columns}`)
+const columnsClass = computed(() => `cols-${props.columns}`);
 
 function isHot(p: Product) {
-  if (props.hotCount <= 0) return false
-  const index = props.products.findIndex((x) => x.id === p.id)
-  return index >= 0 && index < props.hotCount
+  if (props.hotCount <= 0) return false;
+  const index = props.products.findIndex((x) => x.id === p.id);
+  return index >= 0 && index < props.hotCount;
 }
 </script>
 
@@ -84,11 +86,11 @@ function isHot(p: Product) {
   .product-grid {
     gap: 1.125rem;
   }
-  
+
   .product-grid.cols-4 {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .product-grid.cols-3 {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -99,7 +101,7 @@ function isHot(p: Product) {
   .product-grid {
     gap: 1rem;
   }
-  
+
   .product-grid.cols-4,
   .product-grid.cols-3 {
     grid-template-columns: repeat(2, 1fr);
@@ -118,7 +120,7 @@ function isHot(p: Product) {
   .product-grid {
     gap: 0.75rem;
   }
-  
+
   .product-grid.cols-2,
   .product-grid.cols-3,
   .product-grid.cols-4 {

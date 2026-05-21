@@ -1,27 +1,43 @@
 :root {
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
   font-weight: 400;
-  color: #1a1a1a;
-  background-color: #ffffff;
+  color: #1f2937;
+  background-color: #f9fafb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Premium color palette */
-  --color-primary: #8b7355;
-  --color-primary-hover: #6d5a43;
-  --color-primary-light: #a89080;
-  --color-accent: #d4af37;
-  --color-text: #2c2c2c;
+  /* Đồ Gỗ Hùng Cường — amber / wood luxury */
+  --color-primary: #92400e;
+  --color-primary-hover: #78350f;
+  --color-primary-light: #b45309;
+  --color-primary-dark: #78350f;
+  --color-accent: #d97706;
+  --color-star: #f59e0b;
+  --color-heading: #111827;
+  --color-text: #374151;
   --color-text-muted: #6b7280;
   --color-text-light: #9ca3af;
   --color-border: #e5e7eb;
   --color-border-light: #f3f4f6;
-  --color-bg-alt: #fafaf9;
+  --color-bg-alt: #fcfbfa;
   --color-bg-secondary: #f5f5f4;
-  --header-height: 80px;
+  --color-hero-bg: #f7f4f0;
+  --color-page-bg: #f9fafb;
+  --color-footer-bg: #1c1917;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --text-section-title: 1.5rem;
+
+  /* Font Awesome — khớp Tailwind text-lg / text-xl / text-2xl */
+  --icon-size-xs: 0.75rem; /* 12px — mũi tên link, badge nhỏ */
+  --icon-size-sm: 1rem; /* 16px — chevron nav */
+  --icon-size-md: 1.25rem; /* 20px — text-xl, value bar */
+  --icon-size-lg: 1.5rem; /* 24px — text-2xl, card giá trị */
+  --icon-size-xl: 1.75rem; /* 28px — stats, icon nổi bật */
+  --header-height: 72px;
   --container: 1280px;
   
   /* Shadows */
@@ -45,6 +61,75 @@
 body {
   min-height: 100vh;
   color: var(--color-text);
+  background-color: var(--color-page-bg);
+}
+
+.font-serif,
+.heading-display,
+.section-heading {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-heading);
+}
+
+.section-heading {
+  font-size: var(--text-section-title);
+}
+
+.section-heading--center {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.section-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0.25rem 0 0;
+}
+
+.section-shell {
+  padding: 4rem 0;
+}
+
+.section-shell--muted {
+  background: var(--color-bg-alt);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.section-shell--white {
+  background: #fff;
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.section-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+}
+
+.section-link:hover {
+  text-decoration: underline;
+  color: var(--color-primary);
+}
+
+.section-link i {
+  font-size: var(--icon-size-xs);
 }
 
 a {

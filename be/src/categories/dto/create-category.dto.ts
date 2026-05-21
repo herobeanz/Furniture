@@ -1,9 +1,6 @@
 import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
 
 export class CreateCategoryDto {
-  @IsInt()
-  roomId: number;
-
   @IsString()
   @MaxLength(255)
   name: string;

@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router'
 import { productApi, type Product } from '@/services/api/products'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
+import { getCategoryPath, getProductPath } from '@/utils/navigation'
 
 /**
  * Composable for Product page data fetching and state management
@@ -10,7 +11,7 @@ import { getPreviewData } from '@/utils/preview'
 export function useProductData() {
   const route = useRoute()
   const productSlug = computed(() => (route.params.productSlug as string) ?? '')
-  const isPreview = computed(() => route.name === 'product-preview')
+  const isPreview = computed(() => route.path.endsWith('/preview'))
 
   const product = ref<Product | null>(null)
   const related = ref<Product[]>([])
@@ -28,10 +29,16 @@ export function useProductData() {
   })
 
   const breadcrumb = computed(() => {
-    if (!product.value?.breadcrumb) return []
-    return product.value.breadcrumb.map((item, index) => {
-      const path = product.value!.breadcrumb!.slice(0, index + 1).map(b => b.slug).join('/')
-      return { name: item.name, path: `/${path}` }
+    if (!product.value?.breadcrumb?.length) return []
+    const items = product.value.breadcrumb
+    return items.map((item, index) => {
+      if (index === 0) {
+        return { name: item.name, path: getCategoryPath({ slug: item.slug }) }
+      }
+      if (index === items.length - 1 && product.value) {
+        return { name: item.name, path: getProductPath(product.value) }
+      }
+      return { name: item.name, path: getCategoryPath({ slug: item.slug }) }
     })
   })
 
@@ -59,7 +66,7 @@ export function useProductData() {
     try {
       const [p, rel] = await Promise.all([
         productApi.getProduct(productSlug.value),
-        productApi.getRelatedProducts(productSlug.value, 4),
+        productApi.getRelatedProducts(productSlug.value, 12),
       ])
       product.value = p
       related.value = Array.isArray(rel) ? rel : []

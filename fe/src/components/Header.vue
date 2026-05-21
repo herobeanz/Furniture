@@ -2,110 +2,85 @@
   <header class="site-header">
     <div class="container header-inner">
       <RouterLink to="/" class="logo">
-        <span v-if="logoUrl" class="logo-mark">
-          <img :src="logoUrl" :alt="BRAND_NAME" class="logo-img" />
+        <span class="logo-mark" aria-hidden="true">{{ SITE.brand.logoMark }}</span>
+        <span class="logo-text-stack">
+          <span class="logo-line logo-line--sm">{{ SITE.brand.logoLineSm }}</span>
+          <span class="logo-line logo-line--lg">{{ SITE.brand.logoLineLg }}</span>
         </span>
-        <span class="logo-text">{{ BRAND_NAME }}</span>
       </RouterLink>
       <nav class="nav-menu">
-        <RouterLink to="/">Trang chủ</RouterLink>
-        <RouterLink to="/blog">Blog</RouterLink>
-        <div class="nav-dropdown">
-          <span class="nav-dropdown-trigger">
-            Sản phẩm
-            <span class="nav-arrow">▾</span>
-          </span>
-          <div class="nav-dropdown-menu nav-dropdown-menu-products">
-            <template v-for="node in categoryTree" :key="node.id">
-              <RouterLink :to="'/' + node.slug" class="nav-dropdown-item">{{ node.name }}</RouterLink>
-              <template v-for="child in node.children" :key="child.id">
-                <RouterLink :to="'/' + node.slug + '/' + child.slug" class="nav-dropdown-item sub">{{ child.name }}</RouterLink>
-              </template>
-            </template>
-          </div>
-        </div>
-        <div class="nav-dropdown" v-if="collections.length > 0">
-          <span class="nav-dropdown-trigger">
-            Bộ sưu tập
-            <span class="nav-arrow">▾</span>
-          </span>
-          <div class="nav-dropdown-menu nav-dropdown-menu-collections">
-            <RouterLink
-              v-for="collection in collections"
-              :key="collection.id"
-              :to="'/bo-suu-tap/' + collection.slug"
-              class="nav-dropdown-item"
-            >
-              {{ collection.name }}
-            </RouterLink>
-          </div>
-        </div>
-        <div class="nav-dropdown">
-          <span class="nav-dropdown-trigger">
-            Trang
-            <span class="nav-arrow">▾</span>
-          </span>
-          <div class="nav-dropdown-menu nav-dropdown-menu-pages">
-            <RouterLink to="/page/lien-he" class="nav-dropdown-item">Liên hệ</RouterLink>
-            <RouterLink
-              v-for="page in cmsPages"
-              :key="page.id"
-              :to="'/page/' + page.slug"
-              class="nav-dropdown-item"
-            >
-              {{ page.title }}
-            </RouterLink>
-          </div>
-        </div>
+        <RouterLink
+          v-for="item in MAIN_NAV_ITEMS"
+          :key="item.to"
+          :to="item.to"
+          class="nav-link"
+        >
+          {{ item.label }}
+        </RouterLink>
       </nav>
       <div class="header-actions">
-        <button type="button" class="icon-button search-toggle" aria-label="Tìm kiếm" @click="openSearch">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
+        <button
+          type="button"
+          class="icon-button search-toggle"
+          aria-label="Tìm kiếm"
+          @click="openSearch"
+        >
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true" />
         </button>
       </div>
     </div>
 
     <!-- Search overlay -->
-    <div v-if="showSearchOverlay" class="search-overlay">
-      <div class="search-overlay-inner container">
-        <button type="button" class="overlay-close" aria-label="Đóng tìm kiếm" @click="closeSearch">
+    <div
+      v-if="showSearchOverlay"
+      class="search-overlay"
+      @click.self="closeSearch"
+    >
+      <div class="search-modal">
+        <!-- Close Button -->
+        <button
+          type="button"
+          class="close-btn"
+          aria-label="Đóng tìm kiếm"
+          @click="closeSearch"
+        >
           ×
         </button>
 
-        <h2 class="search-overlay-title">Search For Products</h2>
+        <!-- Title -->
+        <h2 class="search-title">Search For Products</h2>
 
-        <div class="search-overlay-input-wrap">
+        <!-- Search Box -->
+        <div class="search-box">
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search for products"
-            class="search-overlay-input"
+            class="search-input"
             @keyup.enter="handleSearch"
           />
-          <button type="button" class="search-overlay-btn" aria-label="Tìm kiếm" @click="handleSearch">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
+          <button
+            type="button"
+            class="search-btn"
+            aria-label="Tìm kiếm"
+            @click="handleSearch"
+          >
+            🔍
           </button>
         </div>
 
-        <div v-if="popularCategories.length" class="search-overlay-popular">
-          <p class="popular-label">Popular searches</p>
-          <div class="popular-chips">
-            <RouterLink
-              v-for="item in popularCategories"
-              :key="item.path"
-              :to="item.path"
-              class="popular-chip"
-              @click="closeSearch"
-            >
-              {{ item.name }}
-            </RouterLink>
-          </div>
+        <!-- Popular Searches -->
+        <div v-if="popularCategories.length" class="popular-searches">
+          <span class="label">Popular searches</span>
+          <RouterLink
+            v-for="item in popularCategories"
+            :key="item.path"
+            :to="item.path"
+            class="popular-btn"
+            @click="closeSearch"
+          >
+            {{ item.name }}
+          </RouterLink>
         </div>
       </div>
     </div>
@@ -113,71 +88,52 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { useHeader } from '@/composables/common/useHeader'
-import { BRAND_NAME } from '@/constants/brand'
-import BrandLogo from '@/assets/Logo.jpg'
+import { computed, ref } from "vue";
+import { RouterLink } from "vue-router";
+import { useHeader } from "@/composables/common/useHeader";
+import { getCategoryPath } from "@/utils/navigation";
+import { MAIN_NAV_ITEMS } from "@/constants/main-nav";
+import { SITE } from "@/constants/site";
 
-// Presentational component: uses composable for logic
-const { searchQuery, categoryTree, collections, cmsPages, onSearch } = useHeader()
+const { searchQuery, navCategories, onSearch } = useHeader();
 
-// Dùng trực tiếp file logo trong src/assets/Logo.jpg
-const logoUrl = BrandLogo
+const showSearchOverlay = ref(false);
 
-const showSearchOverlay = ref(false)
+function categoryPath(slug: string) {
+  return getCategoryPath({ slug });
+}
 
-const popularCategories = computed(() => {
-  const items: { name: string; path: string }[] = []
-
-  const source = (categoryTree as unknown as { value?: any[] }).value ?? categoryTree ?? []
-
-  for (const node of source as any[]) {
-    if (node.children && node.children.length > 0) {
-      for (const child of node.children) {
-        items.push({
-          name: child.name,
-          path: `/${node.slug}/${child.slug}`,
-        })
-      }
-    } else {
-      items.push({
-        name: node.name,
-        path: `/${node.slug}`,
-      })
-    }
-  }
-
-  return items.slice(0, 8)
-})
+const popularCategories = computed(() =>
+  navCategories.value.slice(0, 8).map((cat) => ({
+    name: cat.name,
+    path: categoryPath(cat.slug),
+  }))
+);
 
 function openSearch() {
-  showSearchOverlay.value = true
+  showSearchOverlay.value = true;
 }
 
 function closeSearch() {
-  showSearchOverlay.value = false
+  showSearchOverlay.value = false;
 }
 
 function handleSearch() {
-  if (!searchQuery.value?.trim()) return
-  onSearch()
-  closeSearch()
+  if (!searchQuery.value?.trim()) return;
+  onSearch();
+  closeSearch();
 }
 </script>
 
 <style scoped>
 /* Main header */
 .site-header {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--color-border-light);
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
   position: sticky;
   top: 0;
   z-index: 100;
   padding: 1rem 0;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
 }
 
 .header-inner {
@@ -190,47 +146,44 @@ function handleSearch() {
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
-  color: var(--color-primary);
+  gap: 0.5rem;
   text-decoration: none;
-  transition: transform var(--transition-base);
-}
-
-.logo:hover {
-  transform: scale(1.02);
-  color: var(--color-primary-hover);
+  color: inherit;
 }
 
 .logo-mark {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid var(--color-border-light);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
-  transition: all var(--transition-base);
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.125rem;
+  border-radius: 2px;
 }
 
-.logo:hover .logo-mark {
-  border-color: var(--color-primary-light);
-  box-shadow: var(--shadow-md);
+.logo-text-stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
-.logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.logo-line {
+  font-weight: 700;
+  display: block;
 }
 
-.logo-text {
-  white-space: nowrap;
-  font-weight: 600;
+.logo-line--sm {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  color: #78350f;
+}
+
+.logo-line--lg {
+  font-size: 0.9375rem;
+  color: var(--color-primary);
 }
 
 .nav-menu {
@@ -242,17 +195,18 @@ function handleSearch() {
 }
 
 .nav-menu > a,
-.nav-dropdown {
+.nav-link {
   font-weight: 500;
-  font-size: 0.9375rem;
-  color: var(--color-text);
+  font-size: 0.875rem;
+  color: #374151;
   text-decoration: none;
   position: relative;
   transition: color var(--transition-fast);
 }
 
-.nav-menu > a::after {
-  content: '';
+.nav-menu > a::after,
+.nav-link::after {
+  content: "";
   position: absolute;
   bottom: -4px;
   left: 0;
@@ -263,127 +217,17 @@ function handleSearch() {
 }
 
 .nav-menu > a:hover::after,
-.nav-menu > a.router-link-active::after {
+.nav-menu > a.router-link-active::after,
+.nav-link:hover::after,
+.nav-link.router-link-active::after {
   width: 100%;
 }
 
 .nav-menu > a:hover,
-.nav-menu > a.router-link-active {
+.nav-menu > a.router-link-active,
+.nav-link:hover,
+.nav-link.router-link-active {
   color: var(--color-primary);
-}
-
-.nav-dropdown {
-  position: relative;
-}
-
-.nav-dropdown-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  background: none;
-  border: none;
-  font: inherit;
-  padding: 0.5rem 0;
-  transition: color var(--transition-fast);
-}
-
-.nav-dropdown-trigger:hover,
-.nav-dropdown-trigger.router-link-active {
-  color: var(--color-primary);
-}
-
-.nav-arrow {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  transition: transform var(--transition-fast);
-}
-
-.nav-dropdown:hover .nav-arrow {
-  transform: rotate(180deg);
-}
-
-.nav-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 50%;
-  transform: translateX(-50%) translateY(-8px);
-  min-width: 220px;
-  padding: 0.75rem 0;
-  background: #fff;
-  border: 1px solid var(--color-border-light);
-  border-radius: 12px;
-  box-shadow: var(--shadow-xl);
-  opacity: 0;
-  visibility: hidden;
-  transition: all var(--transition-base);
-  z-index: 50;
-}
-
-.nav-dropdown:hover .nav-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-.nav-dropdown-menu-products {
-  min-width: 240px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.nav-dropdown-menu-products::-webkit-scrollbar {
-  width: 6px;
-}
-
-.nav-dropdown-menu-products::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-.nav-dropdown-item {
-  display: block;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.9375rem;
-  color: var(--color-text);
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  position: relative;
-}
-
-.nav-dropdown-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  background: var(--color-primary);
-  transition: height var(--transition-fast);
-  border-radius: 0 3px 3px 0;
-}
-
-.nav-dropdown-item:hover::before {
-  height: 60%;
-}
-
-.nav-dropdown-item.sub {
-  padding-left: 2rem;
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-
-.nav-dropdown-item:hover {
-  background: var(--color-bg-alt);
-  color: var(--color-primary);
-  padding-left: 1.5rem;
-}
-
-.nav-dropdown-item.sub:hover {
-  padding-left: 2.25rem;
 }
 
 .header-actions {
@@ -407,7 +251,7 @@ function handleSearch() {
 }
 
 .icon-button::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -425,6 +269,11 @@ function handleSearch() {
   color: var(--color-primary);
 }
 
+.icon-button i {
+  font-size: var(--icon-size-md);
+  line-height: 1;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .nav-menu {
@@ -436,16 +285,16 @@ function handleSearch() {
   .header-inner {
     gap: 2rem;
   }
-  
+
   .nav-menu {
     gap: 1.25rem;
     font-size: 0.875rem;
   }
-  
+
   .logo {
     font-size: 1.35rem;
   }
-  
+
   .logo-mark {
     width: 42px;
     height: 42px;
@@ -456,27 +305,27 @@ function handleSearch() {
   .site-header {
     padding: 0.875rem 0;
   }
-  
+
   .header-inner {
     flex-wrap: wrap;
     gap: 1rem;
   }
-  
+
   .logo {
     font-size: 1.25rem;
     order: 1;
   }
-  
+
   .logo-mark {
     width: 38px;
     height: 38px;
   }
-  
+
   .header-actions {
     order: 2;
     margin-left: auto;
   }
-  
+
   .nav-menu {
     order: 3;
     width: 100%;
@@ -485,15 +334,7 @@ function handleSearch() {
     padding-top: 0.5rem;
     border-top: 1px solid var(--color-border-light);
   }
-  
-  .nav-dropdown-menu {
-    left: 0;
-    transform: translateX(0) translateY(-8px);
-  }
-  
-  .nav-dropdown:hover .nav-dropdown-menu {
-    transform: translateX(0) translateY(0);
-  }
+
 }
 
 @media (max-width: 640px) {
@@ -501,15 +342,10 @@ function handleSearch() {
     gap: 0.75rem;
     font-size: 0.8125rem;
   }
-  
+
   .nav-menu > a,
-  .nav-dropdown-trigger {
+  .nav-link {
     padding: 0.375rem 0.5rem;
-  }
-  
-  .nav-dropdown-menu {
-    min-width: 180px;
-    font-size: 0.875rem;
   }
 }
 
@@ -517,21 +353,21 @@ function handleSearch() {
   .site-header {
     padding: 0.75rem 0;
   }
-  
+
   .logo {
     font-size: 1.125rem;
   }
-  
+
   .logo-mark {
     width: 36px;
     height: 36px;
   }
-  
+
   .nav-menu {
     gap: 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   .icon-button {
     padding: 0.5rem;
   }
@@ -541,16 +377,18 @@ function handleSearch() {
 .search-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(12px);
-  z-index: 120;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  animation: fadeIn var(--transition-base);
+  align-items: flex-start;
+  padding-top: 80px;
+  z-index: 9999;
+  animation: overlayFadeIn 0.25s ease-out;
 }
 
-@keyframes fadeIn {
+@keyframes overlayFadeIn {
   from {
     opacity: 0;
   }
@@ -559,17 +397,23 @@ function handleSearch() {
   }
 }
 
-.search-overlay-inner {
-  position: relative;
-  max-width: 960px;
+/* Modal */
+.search-modal {
   width: 100%;
-  animation: slideUp var(--transition-slow);
+  max-width: 1000px;
+  background: #fff;
+  padding: 50px 60px;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  animation: modalSlideDown 0.3s ease-out;
+  margin: 0 1rem;
 }
 
-@keyframes slideUp {
+@keyframes modalSlideDown {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-30px);
   }
   to {
     opacity: 1;
@@ -577,195 +421,275 @@ function handleSearch() {
   }
 }
 
-.overlay-close {
+/* Close Button */
+.close-btn {
   position: absolute;
-  top: -1rem;
-  right: 0;
+  top: 20px;
+  right: 25px;
   border: none;
-  background: none;
-  font-size: 2.5rem;
+  background: transparent;
+  font-size: 40px;
   line-height: 1;
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: #999;
   transition: all var(--transition-fast);
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
 }
 
-.overlay-close:hover {
-  color: var(--color-primary);
-  background: var(--color-bg-alt);
+.close-btn:hover {
+  color: #333;
+  background: #f5f5f5;
   transform: rotate(90deg);
 }
 
-.search-overlay-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+/* Title */
+.search-title {
   text-align: center;
-  margin-bottom: 3rem;
-  color: var(--color-text);
+  font-size: 42px;
+  margin-bottom: 40px;
+  font-weight: 700;
+  color: #1a1a1a;
   letter-spacing: -0.02em;
 }
 
-.search-overlay-input-wrap {
-  display: flex;
-  align-items: center;
-  border-radius: 16px;
-  background: #fff;
-  padding: 0.5rem 1rem 0.5rem 2rem;
-  box-shadow: var(--shadow-xl);
-  border: 2px solid var(--color-border-light);
+/* Search Box */
+.search-box {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.search-input {
+  width: 100%;
+  height: 58px;
+  border: 1px solid #eee;
+  border-radius: 999px;
+  padding: 0 60px 0 25px;
+  font-size: 16px;
+  outline: none;
+  background: #f7f7f7;
   transition: all var(--transition-base);
+  color: var(--color-text);
 }
 
-.search-overlay-input-wrap:focus-within {
+.search-input:focus {
+  background: #fff;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(139, 115, 85, 0.1), var(--shadow-xl);
+  box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
 }
 
-.search-overlay-input {
-  flex: 1;
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-btn {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   border: none;
   background: transparent;
-  padding: 1rem 0;
-  font-size: 1.125rem;
-  color: var(--color-text);
-  outline: none;
-}
-
-.search-overlay-input::placeholder {
-  color: var(--color-text-light);
-}
-
-.search-overlay-btn {
-  border: none;
-  background: var(--color-primary);
   cursor: pointer;
-  padding: 0.875rem 1.25rem;
-  display: inline-flex;
+  font-size: 20px;
+  padding: 8px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  border-radius: 12px;
-  transition: all var(--transition-base);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
 }
 
-.search-overlay-btn:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+.search-btn:hover {
+  background: #f0f0f0;
+  transform: translateY(-50%) scale(1.1);
 }
 
-.search-overlay-btn:active {
-  transform: translateY(0);
-}
-
-.search-overlay-popular {
-  margin-top: 3rem;
-}
-
-.popular-label {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  margin-bottom: 1.25rem;
-  font-weight: 600;
-}
-
-.popular-chips {
+/* Popular Searches */
+.popular-searches {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 0.875rem;
+  margin-top: 30px;
 }
 
-.popular-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.625rem 1.5rem;
-  border-radius: 12px;
-  border: 2px solid var(--color-border-light);
+.popular-searches .label {
+  font-weight: 600;
+  color: #222;
+  font-size: 15px;
+  margin-right: 4px;
+}
+
+.popular-btn {
+  border: 1px solid #ddd;
   background: #fff;
-  font-size: 0.9375rem;
-  color: var(--color-text);
-  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
   transition: all var(--transition-base);
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+  display: inline-block;
   font-weight: 500;
 }
 
-.popular-chip:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: var(--color-bg-alt);
+.popular-btn:hover {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .search-modal {
+    max-width: 900px;
+    padding: 45px 50px;
+  }
+
+  .search-title {
+    font-size: 36px;
+    margin-bottom: 35px;
+  }
 }
 
 @media (max-width: 768px) {
-  .search-overlay-title {
-    font-size: 1.875rem;
-    margin-bottom: 2rem;
+  .search-overlay {
+    padding-top: 60px;
   }
 
-  .search-overlay-inner {
-    padding-inline: 1.5rem;
+  .search-modal {
+    max-width: 100%;
+    padding: 40px 30px;
+    margin: 0 1rem;
+    border-radius: 6px;
   }
-  
-  .search-overlay-input {
-    font-size: 1rem;
-    padding: 0.875rem 0;
+
+  .close-btn {
+    top: 15px;
+    right: 15px;
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
   }
-  
-  .search-overlay-input-wrap {
-    padding: 0.375rem 0.75rem 0.375rem 1.5rem;
+
+  .search-title {
+    font-size: 32px;
+    margin-bottom: 30px;
   }
-  
-  .search-overlay-btn {
-    padding: 0.75rem 1rem;
+
+  .search-box {
+    max-width: 100%;
   }
-  
-  .search-overlay-popular {
-    margin-top: 2rem;
+
+  .search-input {
+    height: 52px;
+    font-size: 15px;
+    padding: 0 55px 0 20px;
+  }
+
+  .search-btn {
+    right: 15px;
+    font-size: 18px;
+  }
+
+  .popular-searches {
+    margin-top: 25px;
+    gap: 10px;
+  }
+
+  .popular-searches .label {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .search-overlay {
+    padding-top: 40px;
+  }
+
+  .search-modal {
+    padding: 35px 25px;
+    margin: 0 0.75rem;
+  }
+
+  .search-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+
+  .search-input {
+    height: 48px;
+    font-size: 14px;
+  }
+
+  .popular-searches {
+    gap: 8px;
+  }
+
+  .popular-btn {
+    padding: 7px 15px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
-  .search-overlay-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+  .search-overlay {
+    padding-top: 30px;
   }
-  
-  .overlay-close {
-    width: 40px;
-    height: 40px;
-    font-size: 2rem;
+
+  .search-modal {
+    padding: 30px 20px;
+    margin: 0 0.5rem;
+    border-radius: 4px;
   }
-  
-  .search-overlay-input-wrap {
-    border-radius: 12px;
-    padding: 0.25rem 0.5rem 0.25rem 1rem;
+
+  .close-btn {
+    top: 12px;
+    right: 12px;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
   }
-  
-  .search-overlay-input {
-    font-size: 0.9375rem;
-    padding: 0.75rem 0;
+
+  .search-title {
+    font-size: 24px;
+    margin-bottom: 20px;
   }
-  
-  .search-overlay-btn {
-    padding: 0.625rem 0.875rem;
+
+  .search-input {
+    height: 46px;
+    font-size: 14px;
+    padding: 0 50px 0 18px;
   }
-  
-  .popular-chips {
-    gap: 0.625rem;
+
+  .search-btn {
+    right: 12px;
+    font-size: 16px;
   }
-  
-  .popular-chip {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+
+  .popular-searches {
+    margin-top: 20px;
+    gap: 6px;
+  }
+
+  .popular-searches .label {
+    font-size: 14px;
+  }
+
+  .popular-btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 </style>

@@ -7,9 +7,9 @@ export interface Category {
   slug: string
   description?: string
   thumbnail?: string
-  roomId: number
   orderIndex: number
   isActive: boolean
+  productCount?: number
   seoTitle?: string
   seoDescription?: string
   breadcrumb?: { name: string; slug: string }[]
@@ -34,23 +34,49 @@ export const categoryApi = {
     return unwrapResponseData<CategoryTreeNode[]>(response)
   },
 
-  async getCategory(slug: string, roomSlug?: string): Promise<Category> {
-    const params = roomSlug ? { roomSlug } : undefined
-    const response = await apiClient.get(`/categories/${slug}`, { params })
+  async getCategory(slug: string): Promise<Category> {
+    const response = await apiClient.get(`/categories/${slug}`)
     return unwrapResponseData<Category>(response)
   },
 
-  async getCategoryByRoomAndSlug(roomSlug: string, categorySlug: string): Promise<Category> {
-    const response = await apiClient.get(`/rooms/${roomSlug}/categories`)
-    const categories = unwrapResponseData<Category[]>(response)
-    const category = categories.find((c: Category) => c.slug === categorySlug)
-    if (!category) throw new Error('Category not found')
-    return category
+  async getCategoryProducts(
+    slug: string,
+    params?: Record<string, unknown>
+  ): Promise<{ data: unknown[]; total: number }> {
+    const response = await apiClient.get(`/categories/${slug}/products`, { params })
+    return unwrapResponseData<{ data: unknown[]; total: number }>(response)
   },
 
-  async getCategoryProducts(slug: string, params?: Record<string, unknown>, roomSlug?: string): Promise<any> {
-    const queryParams = { ...params, ...(roomSlug ? { roomSlug } : {}) }
-    const response = await apiClient.get(`/categories/${slug}/products`, { params: queryParams })
-    return unwrapResponseData<any>(response)
+  async listAdmin(): Promise<Category[]> {
+    const response = await apiClient.get('/categories/list/all')
+    return unwrapResponseData<Category[]>(response)
+  },
+
+  async getById(id: number): Promise<Category> {
+    const response = await apiClient.get(`/categories/by-id/${id}`)
+    return unwrapResponseData<Category>(response)
+  },
+
+  async remove(id: number): Promise<void> {
+    await apiClient.delete(`/categories/${id}`)
+  },
+
+  async reorder(categories: { id: number; orderIndex: number }[]): Promise<void> {
+    await apiClient.patch('/categories/reorder', { categories })
+  },
+
+  async create(
+    payload: Omit<Category, 'id' | 'productCount' | 'breadcrumb'>,
+  ): Promise<Category> {
+    const response = await apiClient.post('/categories', payload)
+    return unwrapResponseData<Category>(response)
+  },
+
+  async update(
+    id: number,
+    payload: Partial<Omit<Category, 'id' | 'productCount' | 'breadcrumb'>>,
+  ): Promise<Category> {
+    const response = await apiClient.patch(`/categories/${id}`, payload)
+    return unwrapResponseData<Category>(response)
   },
 }

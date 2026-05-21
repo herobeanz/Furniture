@@ -1,20 +1,33 @@
 <template>
-  <div v-if="hasDetails" class="product-details">
-    <h3 class="details-title">Chi tiết sản phẩm</h3>
-    <ul class="details-list">
-      <li v-if="product.material">
-        <strong>Chất liệu:</strong> {{ product.material }}
-      </li>
-      <li v-if="product.dimensions">
-        <strong>Kích thước:</strong> {{ product.dimensions }}
-      </li>
-      <li v-if="product.color">
-        <strong>Màu sắc:</strong> {{ product.color }}
-      </li>
-      <li v-if="product.warranty">
-        <strong>Bảo hành:</strong> {{ product.warranty }}
-      </li>
-    </ul>
+  <div v-if="hasDetails" class="product-specs">
+    <div v-if="product.material" class="product-spec-row">
+      <span class="product-spec-label">
+        <i class="fa-solid fa-cubes" aria-hidden="true" />
+        Chất liệu:
+      </span>
+      <span class="product-spec-value">{{ product.material }}</span>
+    </div>
+    <div v-if="product.dimensions" class="product-spec-row">
+      <span class="product-spec-label">
+        <i class="fa-solid fa-arrows-left-right" aria-hidden="true" />
+        Kích thước:
+      </span>
+      <span class="product-spec-value">{{ product.dimensions }}</span>
+    </div>
+    <div v-if="product.color" class="product-spec-row">
+      <span class="product-spec-label">
+        <i class="fa-solid fa-palette" aria-hidden="true" />
+        Màu sắc:
+      </span>
+      <span class="product-spec-value">{{ product.color }}</span>
+    </div>
+    <div v-if="product.warranty" class="product-spec-row">
+      <span class="product-spec-label">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true" />
+        Bảo hành:
+      </span>
+      <span class="product-spec-value">{{ product.warranty }}</span>
+    </div>
   </div>
 </template>
 
@@ -22,50 +35,62 @@
 import { computed } from 'vue'
 import type { Product } from '@/services/api/products'
 
-interface Props {
+const props = defineProps<{
   product: Product
-}
+}>()
 
-const props = defineProps<Props>()
-
-const hasDetails = computed(() => {
-  return !!(props.product.material || props.product.dimensions || props.product.color || props.product.warranty)
-})
+const hasDetails = computed(
+  () =>
+    !!(
+      props.product.material ||
+      props.product.dimensions ||
+      props.product.color ||
+      props.product.warranty
+    ),
+)
 </script>
 
 <style scoped>
-.product-details {
-  margin: 1.5rem 0;
-  padding: 1.25rem;
-  background: var(--color-bg-alt, #f8f8f8);
-  border-radius: 8px;
-}
-
-.details-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #1a1a1a;
-}
-
-.details-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.product-specs {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.details-list li {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #333;
+.product-spec-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) 3fr;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
 }
 
-.details-list li strong {
+.product-spec-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.product-spec-label i {
+  font-size: 0.6875rem;
+  color: var(--color-primary);
+  width: 0.875rem;
+  text-align: center;
+}
+
+.product-spec-value {
+  color: var(--color-heading);
   font-weight: 600;
-  color: #1a1a1a;
-  margin-right: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .product-spec-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
 }
 </style>

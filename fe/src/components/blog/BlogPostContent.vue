@@ -18,17 +18,19 @@
     </header>
 
     <div v-if="post.thumbnail" class="post-image">
-      <img :src="post.thumbnail" :alt="post.title" />
+      <img :src="resolveMediaUrl(post.thumbnail)" :alt="post.title" />
     </div>
 
-    <div class="post-content" v-html="formatBlogContent(post.content)"></div>
+    <RichHtmlContent class="post-content" :html="post.content" />
   </article>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate, formatBlogContent } from '@/utils/format'
+import { formatBlogDate } from '@/utils/format'
+import RichHtmlContent from '@/components/common/RichHtmlContent.vue'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
 interface Props {
   post: BlogPost
@@ -85,35 +87,5 @@ defineProps<Props>()
   width: 100%;
   height: auto;
   display: block;
-}
-.post-content {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: #333;
-}
-.post-content :deep(p) {
-  margin-bottom: 1.25rem;
-}
-.post-content :deep(h2) {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  color: #1a1a1a;
-}
-.post-content :deep(h3) {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: #1a1a1a;
-}
-.post-content :deep(ul),
-.post-content :deep(ol) {
-  margin-bottom: 1.25rem;
-  padding-left: 2rem;
-}
-.post-content :deep(li) {
-  margin-bottom: 0.5rem;
 }
 </style>

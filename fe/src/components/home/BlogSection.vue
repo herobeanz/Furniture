@@ -1,112 +1,124 @@
 <template>
-  <section class="home-blog-section">
+  <section class="blog section-shell">
     <div class="container">
-      <h2 class="section-title">Bài viết nổi bật</h2>
-      <div v-if="loading" class="loading">Đang tải...</div>
-      <div v-else-if="posts.length === 0" class="empty">Chưa có bài viết nào.</div>
-      <div v-else class="blog-grid">
-        <article
+      <div class="section-header-row">
+        <h2 class="section-heading">Bài viết nổi bật</h2>
+        <RouterLink to="/blog" class="section-link">
+          Xem tất cả bài viết
+          <i class="fa-solid fa-arrow-right" aria-hidden="true" />
+        </RouterLink>
+      </div>
+
+      <div v-if="loading" class="blog-loading">Đang tải bài viết…</div>
+
+      <div v-else-if="posts.length" class="blog-grid">
+        <RouterLink
           v-for="post in posts"
           :key="post.id"
+          :to="`/blog/${post.slug}`"
           class="blog-card"
-          @click="$emit('goToPost', post.slug)"
         >
-          <div
-            v-if="post.thumbnail"
-            class="blog-image"
-            :style="{ backgroundImage: `url(${post.thumbnail})` }"
-          ></div>
-          <div v-else class="blog-image" :style="{ background: 'linear-gradient(135deg,#e8e8e8,#f5f5f5)' }"></div>
-          <span v-if="post.category" class="blog-cat">{{ post.category }}</span>
+          <div class="blog-image">
+            <img
+              :src="resolveMediaUrl(post.thumbnail) || fallbackImage"
+              :alt="post.title"
+              loading="lazy"
+            />
+          </div>
+          <p v-if="post.publishedAt" class="blog-date">{{ formatBlogDate(post.publishedAt) }}</p>
           <h3 class="blog-title">{{ post.title }}</h3>
-          <p class="blog-meta">
-            <span v-if="post.author">{{ post.author }}</span>
-            <span v-if="post.publishedAt">{{ formatBlogDate(post.publishedAt) }}</span>
-          </p>
-        </article>
+        </RouterLink>
       </div>
+
+      <p v-else class="blog-empty">Chưa có bài viết nổi bật.</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import type { BlogPost } from '../../services/blog.service'
-import { formatBlogDate } from '../../utils/format'
+import { RouterLink } from 'vue-router'
+import type { BlogPost } from '@/services/api/blog'
+import { formatBlogDate } from '@/utils/format'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
-interface Props {
+defineProps<{
   posts: BlogPost[]
   loading?: boolean
-}
-
-withDefaults(defineProps<Props>(), {
-  loading: false,
-})
-
-defineEmits<{
-  goToPost: [slug: string]
 }>()
+
+const fallbackImage =
+  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80'
 </script>
 
 <style scoped>
-.home-blog-section {
-  padding: 2rem 0;
-  background: var(--color-bg-alt);
-}
-.section-title {
-  font-size: 1.35rem;
-  margin-bottom: 1.25rem;
-  text-align: center;
-}
 .blog-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
 }
-.blog-card {
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.blog-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-.blog-image {
-  aspect-ratio: 16/10;
-  background-size: cover;
-  background-position: center;
-}
-.blog-cat {
-  display: inline-block;
-  margin: 0.75rem 1rem 0;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--color-primary);
-}
-.blog-title {
-  font-size: 1rem;
-  margin: 0.35rem 1rem 0;
-  padding-bottom: 0.5rem;
-}
-.blog-meta {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  margin: 0 1rem 1rem;
-}
-.loading,
-.empty {
-  padding: 2rem;
-  text-align: center;
-  color: var(--color-text-muted);
+
+@media (min-width: 768px) {
+  .blog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-@media (max-width: 1024px) {
-  .blog-grid {
-    grid-template-columns: 1fr;
-  }
+.blog-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog-card:hover .blog-title {
+  color: var(--color-primary);
+}
+
+.blog-image {
+  height: 12rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+  background: var(--color-border-light);
+}
+
+.blog-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.blog-card:hover .blog-image img {
+  transform: scale(1.05);
+}
+
+.blog-date {
+  font-size: 0.6875rem;
+  color: var(--color-text-light);
+  margin: 0 0 0.25rem;
+  font-family: var(--font-sans);
+}
+
+.blog-title {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--transition-fast);
+}
+
+.blog-loading,
+.blog-empty {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 2rem 0;
 }
 </style>

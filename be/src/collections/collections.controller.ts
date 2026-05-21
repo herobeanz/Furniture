@@ -15,6 +15,7 @@ import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { AddProductDto } from './dto/add-product.dto';
 import { UpdateProductOrderDto } from './dto/update-product-order.dto';
+import { ReorderCollectionsDto } from './dto/reorder-collections.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('collections')
@@ -63,6 +64,15 @@ export class CollectionsController {
   @ApiResponse({ status: 201, description: 'Collection created' })
   create(@Body() dto: CreateCollectionDto) {
     return this.collectionsService.create(dto);
+  }
+
+  @Patch('reorder')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[Admin] Reorder collections' })
+  @ApiResponse({ status: 200, description: 'Collection order updated' })
+  reorder(@Body() dto: ReorderCollectionsDto) {
+    return this.collectionsService.reorder(dto.collections);
   }
 
   @Patch(':id')

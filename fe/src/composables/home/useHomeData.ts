@@ -1,45 +1,56 @@
 import { ref, computed, watch } from 'vue'
-import { roomApi, type Room } from '../../services/api/rooms'
+import { categoryApi, type Category } from '../../services/api/categories'
 import { productApi, type Product } from '../../services/api/products'
 import { blogApi, type BlogPost } from '../../services/api/blog'
-import type { Category } from '../../services/api/categories'
+import { collectionApi, type Collection } from '../../services/api/collections'
 import { logger } from '../../utils/logger'
 
 /**
  * Composable for home page data fetching and management
  */
 export function useHomeData() {
-  const rooms = ref<Room[]>([])
+  const categories = ref<Category[]>([])
   const products = ref<Product[]>([])
-  const allCategories = ref<Category[]>([])
   const blogPosts = ref<BlogPost[]>([])
+  const featuredCollections = ref<Collection[]>([])
+  const collectionsLoading = ref(true)
   const loading = ref(true)
   const loadingBlogs = ref(false)
   const tabProducts = ref<Product[]>([])
   const tabProductsLoading = ref(false)
   const activeTab = ref('')
 
-  // Computed
-  const rootCategories = computed(() => rooms.value)
-  const heroTiles = computed(() => rooms.value.slice(0, 4))
-  const allDeptCategories = computed(() => allCategories.value)
-  // Chỉ lấy các sản phẩm tham gia Daily Flash Sale, để nguyên toàn bộ danh sách cho carousel
-  const flashProducts = computed(() => products.value.filter((p) => p.isDailyFlashSale))
+  const showcaseCollections = computed(() =>
+    [...featuredCollections.value]
+      .filter((c) => c.isActive !== false)
+      .sort((a, b) => a.orderIndex - b.orderIndex || a.id - b.id)
+      .slice(0, 4)
+  )
+
+  const heroTiles = computed(() => showcaseCollections.value)
+  const rootCategories = computed(() => categories.value)
+
+  async function loadFeaturedCollections() {
+    collectionsLoading.value = true
+    try {
+      featuredCollections.value = await collectionApi.getCollections()
+    } catch (e) {
+      logger.error('Failed to load collections:', e)
+      featuredCollections.value = []
+    } finally {
+      collectionsLoading.value = false
+    }
+  }
 
   async function loadTabProducts() {
     if (!activeTab.value) return
     tabProductsLoading.value = true
     try {
-      const categories = await roomApi.getRoomCategories(activeTab.value)
-      if (categories.length > 0) {
-        const res = await productApi.getProducts({
-          category: categories[0].slug,
-          limit: 8,
-        })
-        tabProducts.value = res.data || []
-      } else {
-        tabProducts.value = []
-      }
+      const res = await productApi.getProducts({
+        category: activeTab.value,
+        limit: 8,
+      })
+      tabProducts.value = res.data || []
     } catch {
       tabProducts.value = []
     } finally {
@@ -47,30 +58,12 @@ export function useHomeData() {
     }
   }
 
-  async function loadAllCategories() {
+  async function loadCategories() {
     try {
-      const categoriesPromises = rooms.value.map((room) =>
-        roomApi.getRoomCategories(room.slug).catch(() => [])
-      )
-      const categoriesArrays = await Promise.all(categoriesPromises)
-      const allCats: Category[] = []
-      categoriesArrays.forEach((cats, index) => {
-        const room = rooms.value[index]
-        if (!room) return
-        cats.forEach((cat: Category) => {
-          allCats.push({
-            ...cat,
-            breadcrumb: [
-              { name: room.name, slug: room.slug },
-              { name: cat.name, slug: cat.slug },
-            ],
-          })
-        })
-      })
-      allCategories.value = allCats
+      categories.value = await categoryApi.getCategories()
     } catch (e) {
       logger.error('Failed to load categories:', e)
-      allCategories.value = []
+      categories.value = []
     }
   }
 
@@ -88,18 +81,16 @@ export function useHomeData() {
 
   async function loadInitialData() {
     try {
-      const [roomsData, res] = await Promise.all([
-        roomApi.getRooms(),
+      const [res] = await Promise.all([
         productApi.getProducts({ limit: 12 }),
+        loadCategories(),
+        loadBlogPosts(),
+        loadFeaturedCollections(),
       ])
-      rooms.value = roomsData
       products.value = res.data || []
 
-      await loadAllCategories()
-      await loadBlogPosts()
-
-      if (rootCategories.value.length && !activeTab.value) {
-        activeTab.value = rootCategories.value[0]?.slug ?? ''
+      if (categories.value.length && !activeTab.value) {
+        activeTab.value = categories.value[0]?.slug ?? ''
       }
     } catch (e) {
       logger.error('Failed to load initial data:', e)
@@ -108,41 +99,37 @@ export function useHomeData() {
     }
   }
 
-  // Watch activeTab to load products
   watch(activeTab, () => {
     loadTabProducts()
   })
 
-  // Watch rootCategories to set initial tab
   watch(
-    () => rootCategories.value.length,
+    () => categories.value.length,
     (len) => {
       if (len && !activeTab.value) {
-        activeTab.value = rootCategories.value[0]?.slug ?? ''
+        activeTab.value = categories.value[0]?.slug ?? ''
       }
     }
   )
 
   return {
-    // State
-    rooms,
+    categories,
     products,
-    allCategories,
     blogPosts,
+    featuredCollections,
+    showcaseCollections,
+    collectionsLoading,
     loading,
     loadingBlogs,
     tabProducts,
     tabProductsLoading,
     activeTab,
-    // Computed
-    rootCategories,
     heroTiles,
-    allDeptCategories,
-    flashProducts,
-    // Methods
+    rootCategories,
     loadInitialData,
+    loadFeaturedCollections,
     loadTabProducts,
-    loadAllCategories,
+    loadCategories,
     loadBlogPosts,
   }
 }

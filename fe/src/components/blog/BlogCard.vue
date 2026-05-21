@@ -1,95 +1,170 @@
 <template>
-  <article class="blog-card" @click="$emit('click')">
-    <div
-      v-if="post.thumbnail"
-      class="blog-image"
-      :style="{ backgroundImage: `url(${post.thumbnail})` }"
-    ></div>
-    <div v-else class="blog-image placeholder"></div>
-    <div class="blog-content">
-      <span v-if="post.category" class="blog-cat">{{ post.category }}</span>
-      <h3 class="blog-title">{{ post.title }}</h3>
-      <p v-if="post.excerpt" class="blog-excerpt">{{ post.excerpt }}</p>
-      <p class="blog-meta">
-        <span v-if="post.author">{{ post.author }}</span>
-        <span v-if="post.publishedAt">{{ formatBlogDate(post.publishedAt) }}</span>
-      </p>
-    </div>
+  <article class="blog-card">
+    <RouterLink :to="`/blog/${post.slug}`" class="blog-card-link">
+      <div class="blog-card-image-wrap">
+        <img
+          :src="resolveMediaUrl(post.thumbnail) || BLOG_FALLBACK_THUMBNAIL"
+          :alt="post.title"
+          class="blog-card-image"
+          loading="lazy"
+        />
+      </div>
+      <div class="blog-card-body">
+        <div class="blog-card-meta">
+          <span v-if="categoryLabel" class="blog-card-category">{{ categoryLabel }}</span>
+          <span v-if="post.publishedAt" class="blog-card-date">{{
+            formatBlogDate(post.publishedAt)
+          }}</span>
+        </div>
+        <h3 class="blog-card-title">{{ post.title }}</h3>
+        <p v-if="excerptText" class="blog-card-excerpt">{{ excerptText }}</p>
+        <span class="blog-card-read">
+          Đọc thêm
+          <i class="fa-solid fa-arrow-right" aria-hidden="true" />
+        </span>
+      </div>
+    </RouterLink>
   </article>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import type { BlogPost } from '@/services/api/blog'
 import { formatBlogDate } from '@/utils/format'
+import { BLOG_FALLBACK_THUMBNAIL } from '@/constants/blog'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
 interface Props {
   post: BlogPost
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
-defineEmits<{
-  click: []
-}>()
+const categoryLabel = computed(() => props.post.category?.trim() ?? '')
+
+const excerptText = computed(() => {
+  const text = props.post.excerpt?.trim()
+  if (text) return text
+  const plain = props.post.content?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  if (!plain) return ''
+  return plain.length > 140 ? `${plain.slice(0, 140)}…` : plain
+})
 </script>
 
 <style scoped>
 .blog-card {
   background: #fff;
-  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base);
+  height: 100%;
 }
+
 .blog-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
-.blog-image {
+
+.blog-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog-card-image-wrap {
+  height: 12rem;
+  overflow: hidden;
+  background: var(--color-border-light);
+}
+
+.blog-card-image {
   width: 100%;
-  height: 200px;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--color-bg-alt);
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
 }
-.blog-image.placeholder {
-  background: linear-gradient(135deg, #e8e8e8, #f5f5f5);
+
+.blog-card:hover .blog-card-image {
+  transform: scale(1.03);
 }
-.blog-content {
-  padding: 1.5rem;
+
+.blog-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
-.blog-cat {
-  display: inline-block;
-  font-size: 0.75rem;
+
+.blog-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.625rem;
   font-weight: 600;
-  text-transform: uppercase;
-  color: var(--color-primary);
+  color: var(--color-text-light);
   margin-bottom: 0.5rem;
-  letter-spacing: 0.5px;
 }
-.blog-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+
+.blog-card-category {
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.blog-card-date {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.blog-card-title {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-heading);
   line-height: 1.4;
-  color: #1a1a1a;
-}
-.blog-excerpt {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.5rem;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.blog-meta {
-  font-size: 0.875rem;
+
+.blog-card-excerpt {
+  font-size: 0.6875rem;
   color: var(--color-text-muted);
-  display: flex;
-  gap: 0.5rem;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blog-card-read {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-heading);
+  display: inline-flex;
   align-items: center;
+  gap: 0.25rem;
+  margin-top: auto;
+  transition: color var(--transition-fast);
+}
+
+.blog-card:hover .blog-card-read {
+  color: var(--color-primary);
+}
+
+.blog-card-read i {
+  font-size: 0.5625rem;
+  line-height: 1;
 }
 </style>

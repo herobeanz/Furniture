@@ -1,8 +1,28 @@
 <template>
   <div class="product-page">
-    <div class="container">
-      <Breadcrumb :items="breadcrumb" />
+    <nav
+      v-if="breadcrumb.length > 0"
+      class="container product-breadcrumb"
+      aria-label="Breadcrumb"
+    >
+      <RouterLink to="/" class="product-breadcrumb-link">Trang chủ</RouterLink>
+      <template v-for="(item, i) in breadcrumb" :key="item.path + i">
+        <i
+          class="fa-solid fa-chevron-right product-breadcrumb-sep"
+          aria-hidden="true"
+        />
+        <RouterLink
+          v-if="i < breadcrumb.length - 1"
+          :to="item.path"
+          class="product-breadcrumb-link"
+        >
+          {{ item.name }}
+        </RouterLink>
+        <span v-else class="product-breadcrumb-current">{{ item.name }}</span>
+      </template>
+    </nav>
 
+    <div class="container product-main">
       <NotFoundView v-if="isNotFound" />
       <ErrorState v-else-if="error" :message="error" />
       <ProductDetailSkeleton v-else-if="loading && !product" />
@@ -10,39 +30,119 @@
       <template v-else-if="product">
         <section class="product-detail">
           <ProductGallery
-            :images="(product.images || []) as string[]"
+            :images="galleryImages"
             :current-image="currentImage || ''"
             :product-name="product.name"
             :selected-index="selectedIndex"
             @select-image="setSelectedImage"
+            @prev="galleryPrev"
+            @next="galleryNext"
           />
           <ProductInfo :product="product" />
         </section>
 
-        <section v-if="related.length > 0" class="related-section">
-          <h2 class="section-title">Sản phẩm liên quan</h2>
-          <ProductGrid
-            :products="related"
-            :columns="4"
-            show-sale-tag
-          />
+        <section
+          v-if="hasRichDescription"
+          class="container product-description-section"
+        >
+          <h2 class="product-description-title">Mô tả chi tiết</h2>
+          <RichHtmlContent :html="product.description" />
         </section>
       </template>
     </div>
+
+    <section v-if="product && !loading" class="container product-trust-section">
+      <div class="product-trust-bar">
+        <div
+          v-for="item in PRODUCT_TRUST_ITEMS"
+          :key="item.title"
+          class="product-trust-item"
+        >
+          <i
+            :class="['fa-solid', item.icon]"
+            class="product-trust-icon"
+            aria-hidden="true"
+          />
+          <div>
+            <h4 class="product-trust-title">{{ item.title }}</h4>
+            <p class="product-trust-desc">{{ item.description }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div
+      v-if="product && related.length > 0"
+      class="container product-related-wrap"
+    >
+      <RelatedProductsCarousel :products="related" />
+    </div>
+
+    <section v-if="product" class="container product-consult-section">
+      <div class="product-consult-bar">
+        <div class="product-consult-copy">
+          <i
+            class="fa-regular fa-comments product-consult-icon"
+            aria-hidden="true"
+          />
+          <div>
+            <h3 class="product-consult-title">Cần tư vấn thêm về sản phẩm?</h3>
+            <p class="product-consult-text">
+              Đội ngũ {{ BRAND_NAME }} luôn sẵn sàng hỗ trợ bạn lựa chọn sản phẩm phù
+              hợp nhất.
+            </p>
+          </div>
+        </div>
+        <div class="product-consult-links">
+          <a
+            v-if="zaloUrl"
+            :href="zaloUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="product-consult-link"
+          >
+            <i class="fa-solid fa-phone" aria-hidden="true" />
+            Zalo
+            <span class="product-consult-hint">Chat ngay</span>
+          </a>
+          <a
+            v-if="facebookUrl"
+            :href="facebookUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="product-consult-link"
+          >
+            <i class="fa-brands fa-facebook-messenger" aria-hidden="true" />
+            Messenger
+            <span class="product-consult-hint">Chat ngay</span>
+          </a>
+          <a :href="telHref" class="product-consult-link">
+            <i class="fa-solid fa-phone-volume" aria-hidden="true" />
+            Hotline
+            <span class="product-consult-phone">{{ phoneDisplay }}</span>
+          </a>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import ProductGrid from '@/components/ProductGrid.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
-import Breadcrumb from '@/components/common/Breadcrumb.vue'
-import ProductGallery from '@/components/product/ProductGallery.vue'
-import ProductInfo from '@/components/product/ProductInfo.vue'
-import ErrorState from '@/components/common/ErrorState.vue'
-import ProductDetailSkeleton from '@/components/skeleton/ProductDetailSkeleton.vue'
-import { useProductData } from '@/composables/product/useProductData'
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import RelatedProductsCarousel from "@/components/product/RelatedProductsCarousel.vue";
+import NotFoundView from "@/views/NotFoundView.vue";
+import ProductGallery from "@/components/product/ProductGallery.vue";
+import ProductInfo from "@/components/product/ProductInfo.vue";
+import ErrorState from "@/components/common/ErrorState.vue";
+import ProductDetailSkeleton from "@/components/skeleton/ProductDetailSkeleton.vue";
+import RichHtmlContent from "@/components/common/RichHtmlContent.vue";
+import { isRichTextEmpty } from "@/utils/richText";
+import { useProductData } from "@/composables/product/useProductData";
+import { useContactInfo } from "@/composables/common/useContactInfo";
+import { BRAND_NAME } from "@/constants/brand";
+import { PRODUCT_TRUST_ITEMS } from "@/constants/product-page";
 
-// Container component: orchestrates data and logic
 const {
   product,
   related,
@@ -50,180 +150,262 @@ const {
   error,
   isNotFound,
   selectedIndex,
-  quantity,
   currentImage,
   breadcrumb,
   setSelectedImage,
-  setQuantity,
-} = useProductData()
+} = useProductData();
+
+const { phoneDisplay, phoneTel: telHref, facebookUrl, zaloUrl } = useContactInfo();
+
+const hasRichDescription = computed(
+  () => product.value != null && !isRichTextEmpty(product.value.description),
+);
+
+const galleryImages = computed(() => {
+  const p = product.value;
+  if (!p) return [] as string[];
+  const list = [...(p.images || [])];
+  if (p.thumbnail && !list.includes(p.thumbnail)) {
+    list.unshift(p.thumbnail);
+  }
+  return list;
+});
+
+function galleryPrev() {
+  const n = galleryImages.value.length;
+  if (n <= 1) return;
+  setSelectedImage((selectedIndex.value - 1 + n) % n);
+}
+
+function galleryNext() {
+  const n = galleryImages.value.length;
+  if (n <= 1) return;
+  setSelectedImage((selectedIndex.value + 1) % n);
+}
+
 </script>
 
 <style scoped>
 .product-page {
-  padding: 1.5rem 0 3rem;
+  padding-bottom: 3rem;
+  background: #faf9f6;
 }
-.breadcrumb {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-  margin-bottom: 1.5rem;
+
+.product-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--color-text-light);
 }
-.breadcrumb .sep {
-  margin: 0 0.5rem;
+
+.product-breadcrumb-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
 }
-.breadcrumb a:hover {
+
+.product-breadcrumb-link:hover {
   color: var(--color-primary);
 }
-.skeleton-text {
+
+.product-breadcrumb-sep {
+  font-size: 0.4375rem;
   opacity: 0.7;
 }
-.error-msg {
-  text-align: center;
-  padding: 2rem;
+
+.product-breadcrumb-current {
   color: var(--color-text-muted);
 }
-.error-msg .btn {
-  margin-top: 1rem;
+
+.product-main {
+  padding: 1rem 0 0.5rem;
 }
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-text-muted);
-}
+
 .product-detail {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
   align-items: start;
 }
-@media (max-width: 900px) {
+
+@media (min-width: 1024px) {
   .product-detail {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem;
   }
 }
-.product-gallery {
-  position: sticky;
-  top: calc(var(--header-height, 60px) + 1rem);
+
+.product-description-section {
+  margin-top: 2.5rem;
+  padding: 2rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
-.gallery-main {
-  aspect-ratio: 1;
-  background: var(--color-bg-alt);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
+
+.product-description-title {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1.25rem;
 }
-.gallery-main img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+
+.product-trust-section {
+  padding: 1rem 0;
 }
-.gallery-main .no-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
+
+.product-trust-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
-.gallery-thumbs {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+
+@media (min-width: 640px) {
+  .product-trust-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
-.thumb {
-  width: 64px;
-  height: 64px;
-  padding: 0;
-  border: 2px solid transparent;
-  border-radius: 6px;
-  overflow: hidden;
-  cursor: pointer;
-  background: var(--color-bg-alt);
+
+@media (min-width: 1024px) {
+  .product-trust-bar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.thumb.active,
-.thumb:hover {
-  border-color: var(--color-primary);
-}
-.product-info {
-  min-width: 0;
-}
-.product-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  line-height: 1.3;
-}
-.product-prices {
+
+.product-trust-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
+  padding-right: 0.5rem;
 }
-.price-current {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-primary);
+
+@media (min-width: 1024px) {
+  .product-trust-item:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+  }
 }
-.price-old {
+
+.product-trust-icon {
   font-size: 1rem;
-  color: #999;
-  text-decoration: line-through;
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
-.sale-badge {
-  font-size: 0.75rem;
+
+.product-trust-title {
+  font-size: 0.6875rem;
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  background: var(--color-primary);
-  color: #fff;
-  border-radius: 4px;
+  color: #111827;
+  margin: 0 0 0.125rem;
 }
-.product-desc {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  white-space: pre-wrap;
+
+.product-trust-desc {
+  font-size: 0.625rem;
+  color: var(--color-text-light);
+  margin: 0;
 }
-.add-to-cart-form {
+
+.product-related-wrap {
+  padding-bottom: 0.25rem;
+}
+
+.product-consult-section {
+  padding: 0 0 1rem;
+}
+
+.product-consult-bar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 768px) {
+  .product-consult-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.product-consult-copy {
+  display: flex;
+  align-items: flex-start;
   gap: 1rem;
 }
-.quantity-wrap {
+
+.product-consult-icon {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.product-consult-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.25rem;
+}
+
+.product-consult-text {
+  font-size: 0.6875rem;
+  color: var(--color-text-light);
+  margin: 0;
+  max-width: 22rem;
+}
+
+.product-consult-links {
   display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@media (min-width: 768px) {
+  .product-consult-links {
+    justify-content: flex-end;
+  }
+}
+
+.product-consult-link {
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  text-decoration: none;
+  transition: color var(--transition-fast);
 }
-.quantity-wrap label {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+
+.product-consult-link:hover {
+  color: var(--color-primary);
 }
-.qty-input {
-  width: 4rem;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 1rem;
-  text-align: center;
+
+.product-consult-hint {
+  font-weight: 400;
+  color: var(--color-text-light);
+  font-size: 0.6875rem;
 }
-.btn-add-cart {
-  padding: 0.75rem 1.5rem;
-}
-.related-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--color-border);
-}
-.section-title {
-  font-size: 1.25rem;
+
+.product-consult-phone {
   font-weight: 700;
-  margin-bottom: 1rem;
+  color: #111827;
+  font-size: 0.6875rem;
 }
 </style>

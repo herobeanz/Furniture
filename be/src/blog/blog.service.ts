@@ -25,9 +25,13 @@ function serializeBlogPost(p: any) {
     seoDescription: p.seo_description ?? p.seoDescription ?? undefined,
     isActive: p.is_active ?? p.isActive,
     isFeatured: p.is_featured ?? p.isFeatured,
-    publishedAt: p.published_at ?? p.publishedAt ?? undefined,
-    createdAt: p.created_at ?? p.createdAt,
-    updatedAt: p.updated_at ?? p.updatedAt,
+    publishedAt:
+      (p.published_at ?? p.publishedAt)?.toISOString?.() ?? undefined,
+    createdAt:
+      (p.created_at ?? p.createdAt)?.toISOString?.() ?? undefined,
+    sortOrder: p.sort_order ?? p.sortOrder ?? 0,
+    updatedAt:
+      (p.updated_at ?? p.updatedAt)?.toISOString?.() ?? undefined,
   };
 }
 
@@ -57,11 +61,7 @@ export class BlogService {
 
   async findAllAdmin() {
     const posts = await this.prisma.blogPost.findMany({
-      orderBy: [
-        { is_featured: 'desc' },
-        { published_at: 'desc' },
-        { created_at: 'desc' },
-      ],
+      orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }],
     });
     return posts.map(serializeBlogPost);
   }
@@ -121,10 +121,17 @@ export class BlogService {
     const existing = await this.prisma.blogPost.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now().toString(36)}`;
 
+    const maxSort = await this.prisma.blogPost.findFirst({
+      orderBy: { sort_order: 'desc' },
+      select: { sort_order: true },
+    });
+    const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
+
     const post = await this.prisma.blogPost.create({
       data: {
         title: dto.title.trim(),
         slug,
+        sort_order: nextSortOrder,
         excerpt: dto.excerpt?.trim() ?? null,
         content: dto.content.trim(),
         thumbnail: dto.thumbnail?.trim() ?? null,
@@ -170,6 +177,19 @@ export class BlogService {
       },
     });
     return serializeBlogPost(post);
+  }
+
+  async reorder(posts: { id: number; sortOrder: number }[]) {
+    if (!posts.length) return { updated: 0 };
+    await this.prisma.$transaction(
+      posts.map((item) =>
+        this.prisma.blogPost.update({
+          where: { id: item.id },
+          data: { sort_order: item.sortOrder },
+        }),
+      ),
+    );
+    return { updated: posts.length };
   }
 
   async remove(id: number) {

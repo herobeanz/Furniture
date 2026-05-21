@@ -3,6 +3,7 @@ import { inquiryApi } from '@/services/api/inquiries'
 import { useToast } from '@/composables/useToast'
 import { extractErrorMessage } from '@/utils/error'
 import { useContactInfo } from '@/composables/common/useContactInfo'
+import { CONTACT_TOPICS } from '@/constants/contact'
 
 /**
  * Composable for Contact form logic
@@ -14,6 +15,7 @@ export function useContactForm() {
     name: '',
     phone: '',
     email: '',
+    topic: '',
     message: '',
   })
 
@@ -28,11 +30,17 @@ export function useContactForm() {
     submitMessage.value = ''
     submitError.value = false
     try {
+      const topicLabel = CONTACT_TOPICS.find((t) => t.value === form.topic)?.label
+      const topicLine =
+        form.topic && topicLabel && topicLabel !== 'Chọn chủ đề'
+          ? `[Chủ đề: ${topicLabel}]\n\n`
+          : ''
+
       await inquiryApi.create({
         name: form.name.trim(),
         phone: form.phone.trim(),
         email: form.email?.trim() || undefined,
-        message: form.message.trim(),
+        message: `${topicLine}${form.message.trim()}`,
         source,
         productId,
       })
@@ -42,6 +50,7 @@ export function useContactForm() {
       form.name = ''
       form.phone = ''
       form.email = ''
+      form.topic = ''
       form.message = ''
       return true
     } catch (e: any) {
@@ -59,6 +68,7 @@ export function useContactForm() {
     form.name = ''
     form.phone = ''
     form.email = ''
+    form.topic = ''
     form.message = ''
     submitMessage.value = ''
     submitError.value = false

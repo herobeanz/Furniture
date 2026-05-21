@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@ne
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ReorderCategoriesDto } from './dto/reorder-categories.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('categories')
@@ -29,7 +30,7 @@ export class CategoriesController {
   }
 
   @Get('tree')
-  @ApiOperation({ summary: 'Get category tree (Room → Category)' })
+  @ApiOperation({ summary: 'Get flat category list for navigation' })
   @ApiResponse({ status: 200, description: 'Category tree retrieved' })
   getTree() {
     return this.categoriesService.findTree();
@@ -54,24 +55,15 @@ export class CategoriesController {
     return this.categoriesService.findById(id);
   }
 
-  @Get('by-room/:roomId')
-  @ApiOperation({ summary: 'Get categories by room ID' })
-  @ApiResponse({ status: 200, description: 'Categories retrieved' })
-  getByRoomId(@Param('roomId', ParseIntPipe) roomId: number) {
-    return this.categoriesService.findByRoomId(roomId);
-  }
-
   @Get(':slug/products')
   @ApiOperation({ summary: 'Get products by category slug' })
   @ApiResponse({ status: 200, description: 'Products retrieved' })
-  @ApiQuery({ name: 'roomSlug', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'sort', required: false })
   @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
   getCategoryProducts(
     @Param('slug') slug: string,
-    @Query('roomSlug') roomSlug?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('sort') sort?: string,
@@ -79,7 +71,6 @@ export class CategoriesController {
   ) {
     return this.categoriesService.findProductsByCategorySlug(
       slug,
-      roomSlug,
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 20,
       sort ?? 'createdAt',
@@ -91,9 +82,8 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Get category by slug' })
   @ApiResponse({ status: 200, description: 'Category retrieved' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  @ApiQuery({ name: 'roomSlug', required: false })
-  getCategory(@Param('slug') slug: string, @Query('roomSlug') roomSlug?: string) {
-    return this.categoriesService.findBySlug(slug, roomSlug);
+  getCategory(@Param('slug') slug: string) {
+    return this.categoriesService.findBySlug(slug);
   }
 
   @Post()
@@ -103,6 +93,15 @@ export class CategoriesController {
   @ApiResponse({ status: 201, description: 'Category created' })
   create(@Body() dto: CreateCategoryDto) {
     return this.categoriesService.create(dto);
+  }
+
+  @Patch('reorder')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[Admin] Reorder categories' })
+  @ApiResponse({ status: 200, description: 'Category order updated' })
+  reorder(@Body() dto: ReorderCategoriesDto) {
+    return this.categoriesService.reorder(dto.categories);
   }
 
   @Patch(':id')

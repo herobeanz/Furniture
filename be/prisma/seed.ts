@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // --- Hero: 4 phòng chính (Rooms) ---
   const HERO_IMAGES = {
     phongKhach: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
     phongNgu: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800',
@@ -15,148 +14,88 @@ async function main() {
     phongTho: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
   };
 
-  // --- Rooms (Phòng) ---
-  const phongKhach = await prisma.room.upsert({
-    where: { slug: 'phong-khach' },
-    update: { thumbnail: HERO_IMAGES.phongKhach },
-    create: {
-      name: 'Phòng khách',
-      slug: 'phong-khach',
-      description: 'Sofa, bàn trà, kệ tivi, ghế bành cho phòng khách',
-      thumbnail: HERO_IMAGES.phongKhach,
-      order_index: 0,
-    },
-  });
-  const phongNgu = await prisma.room.upsert({
-    where: { slug: 'phong-ngu' },
-    update: { thumbnail: HERO_IMAGES.phongNgu },
-    create: {
-      name: 'Phòng ngủ',
-      slug: 'phong-ngu',
-      description: 'Giường, tủ quần áo, bàn trang điểm cho phòng ngủ',
-      thumbnail: HERO_IMAGES.phongNgu,
-      order_index: 1,
-    },
-  });
-  const phongBep = await prisma.room.upsert({
-    where: { slug: 'phong-bep' },
-    update: { thumbnail: HERO_IMAGES.phongBep },
-    create: {
-      name: 'Phòng bếp',
-      slug: 'phong-bep',
-      description: 'Bàn ăn, ghế ăn, kệ bếp cho phòng bếp',
-      thumbnail: HERO_IMAGES.phongBep,
-      order_index: 2,
-    },
-  });
-  const phongTho = await prisma.room.upsert({
-    where: { slug: 'phong-tho' },
-    update: { thumbnail: HERO_IMAGES.phongTho },
-    create: {
-      name: 'Phòng thờ',
-      slug: 'phong-tho',
-      description: 'Bàn thờ, kệ thờ, tủ thờ',
-      thumbnail: HERO_IMAGES.phongTho,
-      order_index: 3,
-    },
-  });
-
-  console.log('  ✓ Rooms');
-
-  // --- Categories (Danh mục trong mỗi phòng) ---
-  // Phòng khách: Sofa, Bàn trà
+  // --- Categories (slug unique toàn site) ---
   const sofaCouches = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongKhach.id, slug: 'sofa-couches' } },
+    where: { slug: 'sofa-couches' },
     update: {},
     create: {
       name: 'Sofa & Ghế bành',
       slug: 'sofa-couches',
       description: 'Sofa và ghế bành cao cấp',
-      room_id: phongKhach.id,
       order_index: 0,
     },
   });
   const coffeeTables = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongKhach.id, slug: 'coffee-tables' } },
+    where: { slug: 'coffee-tables' },
     update: {},
     create: {
       name: 'Bàn trà',
       slug: 'coffee-tables',
       description: 'Bàn trà, bàn kệ phòng khách',
-      room_id: phongKhach.id,
       order_index: 1,
     },
   });
 
-  // Phòng bếp: Bàn ăn, Ghế ăn
   const diningTables = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongBep.id, slug: 'dining-tables' } },
+    where: { slug: 'dining-tables' },
     update: {},
     create: {
       name: 'Bàn ăn',
       slug: 'dining-tables',
       description: 'Bàn ăn, bàn làm việc',
-      room_id: phongBep.id,
-      order_index: 0,
+      order_index: 2,
     },
   });
   const diningChairs = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongBep.id, slug: 'dining-chairs' } },
+    where: { slug: 'dining-chairs' },
     update: {},
     create: {
       name: 'Ghế ăn',
       slug: 'dining-chairs',
       description: 'Ghế ăn, ghế văn phòng',
-      room_id: phongBep.id,
-      order_index: 1,
+      order_index: 3,
     },
   });
 
-  // Phòng ngủ: Giường, Tủ quần áo
   const giuong = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongNgu.id, slug: 'giuong' } },
+    where: { slug: 'giuong' },
     update: {},
     create: {
       name: 'Giường',
       slug: 'giuong',
       description: 'Giường ngủ, giường tầng',
-      room_id: phongNgu.id,
-      order_index: 0,
+      order_index: 4,
     },
   });
   const tuQuanAo = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongNgu.id, slug: 'tu-quan-ao' } },
+    where: { slug: 'tu-quan-ao' },
     update: {},
     create: {
       name: 'Tủ quần áo',
       slug: 'tu-quan-ao',
       description: 'Tủ quần áo, tủ có gương',
-      room_id: phongNgu.id,
-      order_index: 1,
+      order_index: 5,
     },
   });
 
-  // Phòng thờ: Bàn thờ, Kệ thờ
   const banTho = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongTho.id, slug: 'ban-tho' } },
+    where: { slug: 'ban-tho' },
     update: {},
     create: {
       name: 'Bàn thờ',
       slug: 'ban-tho',
       description: 'Bàn thờ, tủ thờ',
-      room_id: phongTho.id,
-      order_index: 0,
+      order_index: 6,
     },
   });
   const keTho = await prisma.category.upsert({
-    where: { room_id_slug: { room_id: phongTho.id, slug: 'ke-tho' } },
+    where: { slug: 'ke-tho' },
     update: {},
     create: {
       name: 'Kệ thờ',
       slug: 'ke-tho',
       description: 'Kệ thờ, kệ tam cấp',
-      room_id: phongTho.id,
-      order_index: 1,
+      order_index: 7,
     },
   });
 
@@ -461,6 +400,80 @@ async function main() {
   });
   const productMap = new Map(collectionProductsSource.map((p) => [p.slug, p]));
 
+  const showcaseCollections = [
+    {
+      name: 'Phòng khách',
+      slug: 'phong-khach',
+      description:
+        'Khám phá các sản phẩm nội thất gỗ tự nhiên cho phòng khách – nơi thể hiện gu thẩm mỹ và đẳng cấp của gia chủ.',
+      thumbnail: HERO_IMAGES.phongKhach,
+      categoryIds: [sofaCouches.id, coffeeTables.id],
+      order_index: 0,
+    },
+    {
+      name: 'Phòng ngủ',
+      slug: 'phong-ngu',
+      description: 'Giường, tủ quần áo và nội thất phòng ngủ cao cấp.',
+      thumbnail: HERO_IMAGES.phongNgu,
+      categoryIds: [giuong.id, tuQuanAo.id],
+      order_index: 1,
+    },
+    {
+      name: 'Phòng bếp',
+      slug: 'phong-bep',
+      description: 'Bàn ăn, ghế ăn và nội thất phòng bếp.',
+      thumbnail: HERO_IMAGES.phongBep,
+      categoryIds: [diningTables.id, diningChairs.id],
+      order_index: 2,
+    },
+    {
+      name: 'Phòng thờ',
+      slug: 'phong-tho',
+      description: 'Bàn thờ, kệ thờ và nội thất phòng thờ trang nghiêm.',
+      thumbnail: HERO_IMAGES.phongTho,
+      categoryIds: [banTho.id, keTho.id],
+      order_index: 3,
+    },
+  ];
+
+  for (const sc of showcaseCollections) {
+    const collection = await prisma.collection.upsert({
+      where: { slug: sc.slug },
+      update: {
+        name: sc.name,
+        description: sc.description,
+        thumbnail: sc.thumbnail,
+        order_index: sc.order_index,
+        is_active: true,
+      },
+      create: {
+        name: sc.name,
+        slug: sc.slug,
+        description: sc.description,
+        thumbnail: sc.thumbnail,
+        order_index: sc.order_index,
+        is_active: true,
+      },
+    });
+    await prisma.collectionProduct.deleteMany({
+      where: { collection_id: collection.id },
+    });
+    const products = await prisma.product.findMany({
+      where: { category_id: { in: sc.categoryIds } },
+      orderBy: { created_at: 'asc' },
+    });
+    for (let i = 0; i < products.length; i++) {
+      await prisma.collectionProduct.create({
+        data: {
+          collection_id: collection.id,
+          product_id: products[i].id,
+          order_index: i,
+        },
+      });
+    }
+  }
+  console.log('  ✓ Showcase collections (phong-*)');
+
   const collectionsData = [
     {
       name: 'Combo phòng khách hiện đại',
@@ -540,6 +553,7 @@ async function main() {
 
   for (let idx = 0; idx < collectionsData.length; idx++) {
     const c = collectionsData[idx];
+    const orderIndex = idx + showcaseCollections.length;
     const collection = await prisma.collection.upsert({
       where: { slug: c.slug },
       update: {
@@ -548,7 +562,7 @@ async function main() {
         thumbnail: c.thumbnail,
         seo_title: c.seo_title,
         seo_description: c.seo_description,
-        order_index: idx,
+        order_index: orderIndex,
         is_active: true,
       },
       create: {
@@ -558,7 +572,7 @@ async function main() {
         thumbnail: c.thumbnail,
         seo_title: c.seo_title,
         seo_description: c.seo_description,
-        order_index: idx,
+        order_index: orderIndex,
         is_active: true,
       },
     });
@@ -585,82 +599,6 @@ async function main() {
     }
   }
   console.log('  ✓ Collections');
-
-  // --- CMS Pages ---
-  const cmsPages = [
-    {
-      slug: 'about',
-      title: 'Về chúng tôi',
-      content: `<h1>Về chúng tôi</h1><p>Đồ gỗ Hùng Cường chuyên cung cấp nội thất gia đình và văn phòng với chất lượng cao, thiết kế hiện đại.</p><p>Liên hệ: support@dogohungcuong.vn</p>`,
-      seo_title: 'Về chúng tôi - Đồ gỗ Hùng Cường',
-      seo_description: 'Giới thiệu về Đồ gỗ Hùng Cường, cửa hàng nội thất gỗ uy tín.',
-    },
-    {
-      slug: 'privacy-policy',
-      title: 'Chính sách bảo mật',
-      content: `<h1>Chính sách bảo mật</h1><p>Chúng tôi cam kết bảo vệ thông tin cá nhân của bạn. Dữ liệu chỉ dùng để xử lý đơn hàng và liên hệ.</p>`,
-      seo_title: 'Chính sách bảo mật',
-      seo_description: 'Chính sách bảo mật thông tin tại Đồ gỗ Hùng Cường.',
-    },
-    {
-      slug: 'terms',
-      title: 'Điều khoản sử dụng',
-      content: `<h1>Điều khoản sử dụng</h1><p>Khi sử dụng website, bạn đồng ý với các điều khoản của chúng tôi. Vui lòng đọc kỹ trước khi gửi yêu cầu.</p>`,
-      seo_title: 'Điều khoản sử dụng',
-      seo_description: 'Điều khoản và điều kiện sử dụng website Đồ gỗ Hùng Cường.',
-    },
-    {
-      slug: 'huong-dan-mua-hang',
-      title: 'Hướng dẫn mua hàng',
-      content: `<h1>Hướng dẫn mua hàng</h1><p>Bạn có thể đặt hàng trực tiếp trên website, gọi hotline hoặc nhắn tin Facebook/Zalo để được tư vấn.</p><p>Sau khi xác nhận đơn, chúng tôi sẽ thông báo thời gian giao hàng cụ thể.</p>`,
-      seo_title: 'Hướng dẫn mua hàng',
-      seo_description: 'Các bước mua hàng tại Đồ gỗ Hùng Cường, đặt hàng nhanh chóng và dễ dàng.',
-    },
-    {
-      slug: 'chinh-sach-van-chuyen',
-      title: 'Chính sách vận chuyển',
-      content: `<h1>Chính sách vận chuyển</h1><p>Đồ gỗ Hùng Cường hỗ trợ giao hàng tận nơi toàn quốc. Nội thành Hà Nội được hỗ trợ phí vận chuyển theo từng đơn hàng.</p>`,
-      seo_title: 'Chính sách vận chuyển',
-      seo_description: 'Thông tin chi tiết về phí và khu vực giao hàng của Đồ gỗ Hùng Cường.',
-    },
-    {
-      slug: 'chinh-sach-bao-hanh',
-      title: 'Chính sách bảo hành',
-      content: `<h1>Chính sách bảo hành</h1><p>Tất cả sản phẩm nội thất gỗ được bảo hành từ 12–36 tháng tùy mẫu. Bảo hành lỗi kỹ thuật, không áp dụng cho hao mòn tự nhiên.</p>`,
-      seo_title: 'Chính sách bảo hành',
-      seo_description: 'Thông tin chi tiết về chế độ bảo hành sản phẩm tại Đồ gỗ Hùng Cường.',
-    },
-    {
-      slug: 'chinh-sach-doi-tra',
-      title: 'Chính sách đổi trả',
-      content: `<h1>Chính sách đổi trả</h1><p>Khách hàng được đổi trả trong vòng 3 ngày nếu sản phẩm bị lỗi do nhà sản xuất hoặc không đúng mô tả.</p>`,
-      seo_title: 'Chính sách đổi trả',
-      seo_description: 'Quy định đổi trả hàng hóa tại Đồ gỗ Hùng Cường.',
-    },
-    {
-      slug: 'huong-dan-bao-quan-go',
-      title: 'Hướng dẫn bảo quản đồ gỗ',
-      content: `<h1>Hướng dẫn bảo quản đồ gỗ</h1><p>Tránh để sản phẩm gỗ tiếp xúc trực tiếp với nắng, mưa và nguồn nhiệt cao. Vệ sinh định kỳ bằng khăn mềm, tránh hóa chất mạnh.</p>`,
-      seo_title: 'Hướng dẫn bảo quản đồ gỗ',
-      seo_description: 'Mẹo bảo quản nội thất gỗ bền đẹp theo thời gian.',
-    },
-  ];
-
-  for (const page of cmsPages) {
-    await prisma.cmsPage.upsert({
-      where: { slug: page.slug },
-      update: {},
-      create: {
-        slug: page.slug,
-        title: page.title,
-        content: page.content,
-        seo_title: page.seo_title,
-        seo_description: page.seo_description,
-        is_active: true,
-      },
-    });
-  }
-  console.log('  ✓ CMS Pages');
 
   // --- Blog Posts ---
   const blogPosts = [

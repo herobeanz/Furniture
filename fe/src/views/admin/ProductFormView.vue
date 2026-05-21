@@ -1,161 +1,294 @@
 <template>
-  <div class="product-form">
-    <h1>{{ isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
-    <form @submit.prevent="onSubmit" class="form-container">
-      <FormField label="Danh mục" :required="true">
-        <UiSelect v-model="form.categoryId" placeholder="Chọn danh mục" :required="true">
-          <option value="0">Chọn danh mục</option>
-          <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </UiSelect>
-      </FormField>
-
-      <FormField label="Tên" :required="true">
-        <UiInput v-model="form.name" placeholder="Enter product name" :required="true" />
-      </FormField>
-
-      <FormField label="SKU" optional hint="Để trống sẽ tự động tạo mã SKU dựa trên danh mục">
-        <UiInput v-model="form.sku" placeholder="Enter SKU (optional)" />
-      </FormField>
-
-      <FormField label="Slug" optional hint="Để trống sẽ tự tạo">
-        <UiInput v-model="form.slug" placeholder="Enter slug" />
-      </FormField>
-
-      <FormField label="Mô tả ngắn" optional>
-        <UiTextarea v-model="form.shortDescription" :rows="2" placeholder="Enter short description" />
-      </FormField>
-
-      <FormField label="Mô tả đầy đủ" optional>
-        <UiTextarea v-model="form.description" :rows="4" placeholder="Enter full description" />
-      </FormField>
-
-      <div class="form-row">
-        <FormField label="Giá" :required="true">
-          <UiInput
-            v-model.number="form.price"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0"
-            :required="true"
-            :disabled="form.isContactPrice"
-          />
-        </FormField>
-        <FormField label="Giá khuyến mãi" optional>
-          <UiInput
-            v-model.number="form.salePrice"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0"
-            :disabled="form.isContactPrice"
-          />
-        </FormField>
+  <div class="product-form-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <RouterLink to="/admin/products" class="back-btn" title="Quay lại">
+          <i class="fa-solid fa-arrow-left" />
+        </RouterLink>
+        <div>
+          <h1 class="page-title">{{ isEdit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
+          <p class="page-breadcrumb">
+            <RouterLink to="/admin/products">Sản phẩm</RouterLink>
+            <i class="fa-solid fa-chevron-right" />
+            <span>{{ isEdit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm' }}</span>
+          </p>
+        </div>
       </div>
-
-      <FormField label="Ảnh đại diện (URL)" optional>
-        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
-      </FormField>
-
-      <FormField label="Ảnh sản phẩm" optional hint="Mỗi URL một dòng. Ảnh đầu tiên sẽ là ảnh chính">
-        <UiTextarea v-model="imagesText" :rows="3" placeholder="https://..." />
-      </FormField>
-
-      <FormField label="Trạng thái" optional>
-        <UiSelect v-model="form.status">
-          <option value="available">available</option>
-          <option value="hidden">hidden</option>
-          <option value="discontinued">discontinued</option>
-        </UiSelect>
-      </FormField>
-
-      <div class="form-row">
-        <FormField label="Chất liệu" optional>
-          <UiInput v-model="form.material" placeholder="Enter material" />
-        </FormField>
-        <FormField label="Kích thước" optional>
-          <UiInput v-model="form.dimensions" placeholder="Enter dimensions" />
-        </FormField>
-      </div>
-
-      <div class="form-row">
-        <FormField label="Màu sắc" optional>
-          <UiInput v-model="form.color" placeholder="Enter color" />
-        </FormField>
-        <FormField label="Bảo hành" optional>
-          <UiInput v-model="form.warranty" placeholder="Enter warranty" />
-        </FormField>
-      </div>
-
-      <div class="form-row">
-        <FormField label="Đã bán (số lượng)" optional>
-          <UiInput v-model.number="form.soldCount" type="number" min="0" step="1" placeholder="0" />
-        </FormField>
-        <FormField label="Đánh giá (0 - 5)" optional>
-          <UiInput v-model.number="form.rating" type="number" min="0" max="5" step="0.1" placeholder="4.8" />
-        </FormField>
-      </div>
-
-      <div class="form-row">
-        <FormField>
-          <UiCheckbox v-model="form.isActive" label="Kích hoạt" />
-        </FormField>
-        <FormField>
-          <UiCheckbox v-model="form.isFeatured" label="Sản phẩm nổi bật" />
-        </FormField>
-        <FormField>
-          <UiCheckbox v-model="form.isHot" label="Sản phẩm hot" />
-        </FormField>
-        <FormField>
-          <UiCheckbox v-model="form.isContactPrice" label="Giá liên hệ (ẩn giá, chỉ hiển thị 'Liên hệ')" />
-        </FormField>
-      </div>
-
-      <div class="form-row">
-        <FormField>
-          <UiCheckbox v-model="form.isDailyFlashSale" label="Tham gia Daily Flash Sale" />
-        </FormField>
-        <FormField label="Thời gian kết thúc Flash Sale" optional>
-          <UiInput
-            v-model="form.flashSaleEndAt"
-            type="datetime-local"
-            placeholder="Chọn thời gian kết thúc"
-            :disabled="!form.isDailyFlashSale"
-          />
-        </FormField>
-      </div>
-
-      <FormField label="SEO Title" optional>
-        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
-      </FormField>
-
-      <FormField label="SEO Description" optional>
-        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
-      </FormField>
-
-      <FormField v-if="error" :error="error" />
-
-      <div class="form-actions">
-        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.name">
+      <div class="page-header-actions">
+        <button
+          type="button"
+          class="btn btn-outline"
+          :disabled="!canPreview"
+          @click="handlePreview"
+        >
+          <i class="fa-regular fa-eye" />
           Xem trước
         </button>
-        <button type="submit" class="btn btn-primary" :disabled="saving">
-          {{ saving ? 'Đang lưu...' : 'Lưu' }}
+        <button
+          type="button"
+          class="btn btn-primary"
+          :disabled="saving"
+          @click="onSubmit"
+        >
+          {{ saving ? 'Đang lưu...' : 'Lưu thay đổi' }}
         </button>
-        <button type="button" class="btn btn-outline" @click="triggerImport">
-          Import file
-        </button>
-        <button type="button" class="btn btn-outline" @click="downloadImportTemplate">
-          Tải template
-        </button>
+      </div>
+    </div>
+
+    <div v-if="loading" class="form-loading">Đang tải...</div>
+
+    <form v-else class="form-layout" @submit.prevent="onSubmit">
+      <div class="form-grid">
+        <div class="form-col form-col--main">
+          <section class="form-card">
+            <h2 class="section-heading">Thông tin sản phẩm</h2>
+
+            <div class="field">
+              <label class="field-label">
+                Tên sản phẩm <span class="required">*</span>
+              </label>
+              <input
+                v-model="form.name"
+                type="text"
+                class="field-input"
+                placeholder="Nhập tên sản phẩm"
+                required
+              />
+            </div>
+
+            <div class="field-grid field-grid--2">
+              <div class="field">
+                <label class="field-label">
+                  SKU (Mã sản phẩm) <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.sku"
+                  type="text"
+                  class="field-input"
+                  placeholder="VD: SFA-SSN-001"
+                  required
+                />
+                <p class="field-hint">Ví dụ: SFA-SSN-001</p>
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  Loại sản phẩm <span class="required">*</span>
+                </label>
+                <div class="select-wrap">
+                  <select v-model.number="form.categoryId" class="field-input field-select" required>
+                    <option :value="0" disabled>Chọn loại sản phẩm</option>
+                    <option v-for="c in categories" :key="c.id" :value="c.id">
+                      {{ c.name }}
+                    </option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down select-icon" />
+                </div>
+              </div>
+            </div>
+
+            <div class="field-grid field-grid--3">
+              <div class="field">
+                <label class="field-label">
+                  Giá bán (đ) <span class="required">*</span>
+                </label>
+                <input
+                  v-model.number="form.price"
+                  type="number"
+                  min="0"
+                  step="1000"
+                  class="field-input field-input--bold"
+                  :disabled="form.isContactPrice"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">Giá khuyến mãi (đ)</label>
+                <input
+                  v-model.number="form.salePrice"
+                  type="number"
+                  min="0"
+                  step="1000"
+                  class="field-input field-input--bold"
+                  :disabled="form.isContactPrice"
+                />
+              </div>
+              <div class="field field--contact">
+                <label class="contact-check">
+                  <input v-model="form.isContactPrice" type="checkbox" class="check-input" />
+                  <span>Hiển thị giá liên hệ</span>
+                </label>
+                <i
+                  class="fa-solid fa-circle-info contact-info"
+                  title="Nếu tích, hệ thống sẽ ẩn giá số và hiển thị chữ 'Liên hệ'"
+                />
+              </div>
+            </div>
+
+            <div class="field-grid field-grid--2">
+              <div class="field">
+                <label class="field-label">
+                  Màu sắc <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.color"
+                  type="text"
+                  class="field-input"
+                  placeholder="VD: Nâu óc chó"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  Chất liệu <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.material"
+                  type="text"
+                  class="field-input"
+                  placeholder="VD: Gỗ sồi Nga tự nhiên 100%"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="field-grid field-grid--3">
+              <div class="field">
+                <label class="field-label">
+                  Kích thước (Dài x Rộng x Cao) <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.dimensions"
+                  type="text"
+                  class="field-input"
+                  placeholder="VD: 240 x 80 x 85 cm"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  Bảo hành <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.warranty"
+                  type="text"
+                  class="field-input"
+                  placeholder="VD: 24 tháng"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  Trạng thái <span class="required">*</span>
+                </label>
+                <label class="radio-label">
+                  <input v-model="form.isActive" type="radio" :value="true" class="radio-input" />
+                  <span>Hiển thị</span>
+                </label>
+                <label class="radio-label radio-label--muted">
+                  <input v-model="form.isActive" type="radio" :value="false" class="radio-input" />
+                  <span>Ẩn</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="featured-check">
+                <input v-model="form.isFeatured" type="checkbox" class="check-input" />
+                <span>Hiển thị sản phẩm này ở mục nổi bật trên trang chủ</span>
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Mô tả ngắn <span class="required">*</span>
+              </label>
+              <div class="field-counter-wrap">
+                <textarea
+                  v-model="form.shortDescription"
+                  rows="3"
+                  class="field-input field-textarea"
+                  placeholder="Mô tả ngắn hiển thị trên danh sách sản phẩm..."
+                  :maxlength="SHORT_DESC_MAX"
+                  required
+                />
+                <span class="field-counter">{{ shortDescCount }}/{{ SHORT_DESC_MAX }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-card">
+            <label class="field-label section-label">
+              Mô tả chi tiết <span class="required">*</span>
+            </label>
+            <RichTextEditor
+              v-model="form.description"
+              :height="500"
+              placeholder="Mô tả chi tiết sản phẩm..."
+            />
+          </section>
+        </div>
+
+        <div class="form-col form-col--side">
+          <section class="form-card">
+            <label class="field-label section-label">
+              Ảnh đại diện <span class="required">*</span>
+            </label>
+            <ImageUploadField v-model="form.thumbnail" variant="hero" :show-preview="false" />
+          </section>
+
+          <section class="form-card">
+            <label class="field-label section-label">
+              Ảnh chi tiết
+              <span class="label-muted">(Tối đa {{ GALLERY_MAX }} ảnh)</span>
+            </label>
+            <ImageGalleryUploadField
+              v-model="productImageUrls"
+              layout="product"
+              :max-images="GALLERY_MAX"
+              hint="JPG, PNG, WEBP, GIF — tối đa 5MB/ảnh. Có thể chọn hoặc kéo thả nhiều ảnh một lần."
+            />
+          </section>
+
+          <section class="form-card">
+            <h3 class="section-heading section-heading--sm">SEO</h3>
+            <div class="field">
+              <label class="field-label">SEO title</label>
+              <div class="field-counter-wrap">
+                <input
+                  v-model="form.seoTitle"
+                  type="text"
+                  class="field-input field-input--counter"
+                  placeholder="Tiêu đề hiển thị trên Google"
+                  :maxlength="SEO_TITLE_MAX"
+                />
+                <span class="field-counter field-counter--input">{{ seoTitleCount }}/{{ SEO_TITLE_MAX }}</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">SEO description</label>
+              <div class="field-counter-wrap">
+                <textarea
+                  v-model="form.seoDescription"
+                  rows="3"
+                  class="field-input field-textarea"
+                  placeholder="Mô tả trang xuất hiện trên kết quả tìm kiếm Google"
+                  :maxlength="SEO_DESC_MAX"
+                />
+                <span class="field-counter">{{ seoDescCount }}/{{ SEO_DESC_MAX }}</span>
+              </div>
+              <p class="field-hint">Mô tả trang xuất hiện trên kết quả tìm kiếm Google.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <p v-if="error" class="form-error">{{ error }}</p>
+
+      <div class="form-footer">
         <RouterLink to="/admin/products" class="btn btn-outline">Hủy</RouterLink>
-        <input
-          ref="importFileInput"
-          type="file"
-          class="import-file-input"
-          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-          @change="onImportFileChange"
-        />
+        <button type="submit" class="btn btn-primary" :disabled="saving">
+          {{ saving ? 'Đang lưu...' : 'Lưu thay đổi' }}
+        </button>
       </div>
     </form>
   </div>
@@ -163,23 +296,37 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger'
+import { slugify } from '@/utils/slugify'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - xlsx types may not be available
-import * as XLSX from 'xlsx'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import apiClient from '@/services/api/client'
+import { productApi } from '@/services/api/products'
+import { categoryApi } from '@/services/api/categories'
 import { savePreviewData } from '@/utils/preview'
-import FormField from '@/components/ui/FormField.vue'
-import { UiInput, UiTextarea, UiSelect, UiCheckbox } from '@/components/ui'
+import ImageUploadField from '@/components/admin/ImageUploadField.vue'
+import ImageGalleryUploadField from '@/components/admin/ImageGalleryUploadField.vue'
+import RichTextEditor from '@/components/admin/RichTextEditor.vue'
+import { isRichTextEmpty } from '@/utils/richText'
+
+const SHORT_DESC_MAX = 200
+const SEO_TITLE_MAX = 60
+const SEO_DESC_MAX = 160
+const GALLERY_MAX = 10
 
 const route = useRoute()
 const router = useRouter()
-const idParam = computed(() => route.params.id as string)
-const id = computed(() => idParam.value && idParam.value !== 'new' ? Number(idParam.value) : null)
-const isEdit = computed(() => !!id.value)
 
-const categories = ref<any[]>([])
+const productId = computed(() => {
+  const raw = route.params.id
+  const value = Array.isArray(raw) ? raw[0] : raw
+  if (!value || value === 'new') return null
+  const id = Number(value)
+  return Number.isFinite(id) ? id : null
+})
+
+const isEdit = computed(() => productId.value !== null)
+
+const loading = ref(false)
+const categories = ref<{ id: number; name: string }[]>([])
 
 const form = reactive({
   categoryId: 0,
@@ -196,29 +343,38 @@ const form = reactive({
   dimensions: '',
   color: '',
   warranty: '',
-  soldCount: 0,
-  rating: undefined as number | undefined,
   isActive: true,
   isFeatured: false,
-  isHot: false,
   isContactPrice: false,
-  isDailyFlashSale: false,
-  flashSaleEndAt: '',
   seoTitle: '',
   seoDescription: '',
 })
 
-const imagesText = ref('')
+const productImageUrls = ref<string[]>([])
 const saving = ref(false)
 const error = ref('')
-const importFileInput = ref<HTMLInputElement | null>(null)
+
+const shortDescCount = computed(() => form.shortDescription.length)
+const seoTitleCount = computed(() => form.seoTitle.length)
+const seoDescCount = computed(() => form.seoDescription.length)
+
+const previewSlug = computed(() => {
+  const trimmed = form.slug?.trim()
+  if (trimmed) return slugify(trimmed)
+  if (form.name.trim()) return slugify(form.name)
+  return ''
+})
+
+const canPreview = computed(() => !!previewSlug.value && !!form.name.trim())
+
+function resolveStatus(): typeof form.status {
+  if (form.status === 'discontinued') return 'discontinued'
+  return form.isActive ? 'available' : 'hidden'
+}
 
 const formPayload = computed(() => {
-  const imageUrls = imagesText.value
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
-  
+  const imageUrls = productImageUrls.value.filter(Boolean).slice(0, GALLERY_MAX)
+
   const images = imageUrls.map((url, index) => ({
     imageUrl: url,
     isPrimary: index === 0,
@@ -226,9 +382,6 @@ const formPayload = computed(() => {
     orderIndex: index,
   }))
 
-  // Chuẩn hóa giá khuyến mãi:
-  // - Nếu người dùng để trống hoặc xóa -> null (xóa sale_price)
-  // - Nếu nhập số hợp lệ -> số đó
   const normalizedSalePrice =
     form.salePrice === undefined || form.salePrice === null || form.salePrice === 0
       ? null
@@ -236,307 +389,575 @@ const formPayload = computed(() => {
 
   return {
     categoryId: form.categoryId,
-    name: form.name,
-    sku: form.sku?.trim() || undefined, // Send undefined if empty to let backend generate
-    slug: form.slug || undefined,
-    shortDescription: form.shortDescription || undefined,
-    description: form.description || undefined,
-    price: form.price,
-    salePrice: normalizedSalePrice,
+    name: form.name.trim(),
+    sku: form.sku.trim(),
+    slug: (() => {
+      const trimmed = form.slug?.trim()
+      if (trimmed) return slugify(trimmed)
+      if (!isEdit.value && form.name.trim()) return slugify(form.name)
+      return undefined
+    })(),
+    shortDescription: form.shortDescription.trim() || undefined,
+    description: form.description.trim() || undefined,
+    price: form.isContactPrice ? 0 : form.price,
+    salePrice: form.isContactPrice ? null : normalizedSalePrice,
     thumbnail: form.thumbnail || undefined,
-    status: form.status,
-    material: form.material || undefined,
-    dimensions: form.dimensions || undefined,
-    color: form.color || undefined,
-    warranty: form.warranty || undefined,
-    soldCount: form.soldCount || 0,
-    rating: form.rating || undefined,
+    status: resolveStatus(),
+    material: form.material.trim() || undefined,
+    dimensions: form.dimensions.trim() || undefined,
+    color: form.color.trim() || undefined,
+    warranty: form.warranty.trim() || undefined,
     isActive: form.isActive,
     isFeatured: form.isFeatured,
-    isHot: form.isHot,
     isContactPrice: form.isContactPrice,
-    isDailyFlashSale: form.isDailyFlashSale,
-    flashSaleEndAt: form.isDailyFlashSale && form.flashSaleEndAt ? form.flashSaleEndAt : undefined,
-    seoTitle: form.seoTitle || undefined,
-    seoDescription: form.seoDescription || undefined,
+    seoTitle: form.seoTitle.trim().slice(0, SEO_TITLE_MAX) || undefined,
+    seoDescription: form.seoDescription.trim().slice(0, SEO_DESC_MAX) || undefined,
     images,
   }
 })
 
+function validateForm(): string | null {
+  if (!form.categoryId) return 'Vui lòng chọn loại sản phẩm.'
+  if (!form.name.trim()) return 'Vui lòng nhập tên sản phẩm.'
+  if (!form.sku.trim()) return 'Vui lòng nhập SKU.'
+  if (!form.isContactPrice && (!form.price || form.price <= 0)) {
+    return 'Vui lòng nhập giá bán.'
+  }
+  if (!form.color.trim()) return 'Vui lòng nhập màu sắc.'
+  if (!form.material.trim()) return 'Vui lòng nhập chất liệu.'
+  if (!form.dimensions.trim()) return 'Vui lòng nhập kích thước.'
+  if (!form.warranty.trim()) return 'Vui lòng nhập bảo hành.'
+  if (!form.shortDescription.trim()) return 'Vui lòng nhập mô tả ngắn.'
+  if (isRichTextEmpty(form.description)) return 'Vui lòng nhập mô tả chi tiết.'
+  if (!form.thumbnail.trim()) return 'Vui lòng tải ảnh đại diện.'
+  if (productImageUrls.value.length > GALLERY_MAX) {
+    return `Tối đa ${GALLERY_MAX} ảnh chi tiết.`
+  }
+  return null
+}
+
 async function fetchCategories() {
   try {
-    const res = await apiClient.get('/categories/list/all')
-    categories.value = Array.isArray(res) ? res : []
+    categories.value = await categoryApi.listAdmin()
   } catch (e) {
     logger.error(e)
   }
 }
 
-// Clear flash sale end time when unchecking Daily Flash Sale
-watch(
-  () => form.isDailyFlashSale,
-  (isEnabled) => {
-    if (!isEnabled) {
-      form.flashSaleEndAt = ''
-    }
+function applyProductToForm(product: Awaited<ReturnType<typeof productApi.getById>>) {
+  form.categoryId = product.categoryId || 0
+  form.name = product.name || ''
+  form.sku = product.sku || ''
+  form.slug = product.slug || ''
+  form.shortDescription = product.shortDescription || ''
+  form.description = product.description || ''
+  form.price = product.price || 0
+  form.salePrice = product.salePrice
+  form.thumbnail = product.thumbnail || ''
+  form.status = (product.status as typeof form.status) || 'available'
+  form.material = product.material || ''
+  form.dimensions = product.dimensions || ''
+  form.color = product.color || ''
+  form.warranty = product.warranty || ''
+  form.isActive = product.isActive ?? true
+  form.isFeatured = product.isFeatured ?? false
+  form.isContactPrice = product.isContactPrice ?? false
+  form.seoTitle = product.seoTitle || ''
+  form.seoDescription = product.seoDescription || ''
+  productImageUrls.value = [...(product.images ?? [])].slice(0, GALLERY_MAX)
+}
+
+async function loadProduct() {
+  if (!isEdit.value || productId.value === null) return
+  loading.value = true
+  try {
+    const product = await productApi.getById(productId.value)
+    applyProductToForm(product)
+  } catch (e) {
+    logger.error(e)
+    alert('Không thể tải dữ liệu sản phẩm.')
+    router.push('/admin/products')
+  } finally {
+    loading.value = false
   }
+}
+
+watch(
+  () => form.name,
+  (name) => {
+    if (isEdit.value) return
+    form.slug = slugify(name)
+  },
 )
+
+watch(productId, () => {
+  if (isEdit.value) {
+    loadProduct()
+  }
+})
 
 onMounted(async () => {
   await fetchCategories()
-  
-  if (isEdit.value && id.value) {
-    try {
-      const product = await apiClient.get(`/products/by-id/${id.value}`) as any
-      form.categoryId = product.categoryId || 0
-      form.name = product.name || ''
-      form.sku = product.sku || ''
-      form.slug = product.slug || ''
-      form.shortDescription = product.shortDescription || ''
-      form.description = product.description || ''
-      form.price = product.price || 0
-      form.salePrice = product.salePrice
-      form.thumbnail = product.thumbnail || ''
-      form.status = product.status || 'available'
-      form.material = product.material || ''
-      form.dimensions = product.dimensions || ''
-      form.color = product.color || ''
-      form.warranty = product.warranty || ''
-      form.soldCount = product.soldCount ?? 0
-      form.rating = product.rating ?? undefined
-      form.isActive = product.isActive ?? true
-      form.isFeatured = product.isFeatured ?? false
-      form.isHot = product.isHot ?? false
-      form.isContactPrice = product.isContactPrice ?? false
-      form.isDailyFlashSale = product.isDailyFlashSale ?? false
-      form.flashSaleEndAt = product.flashSaleEndAt || ''
-      form.seoTitle = product.seoTitle || ''
-      form.seoDescription = product.seoDescription || ''
-      imagesText.value = (product.images ?? []).join('\n')
-    } catch (e) {
-      logger.error(e)
-    }
+  if (isEdit.value) {
+    await loadProduct()
   }
 })
 
 function handlePreview() {
-  if (!form.slug || !form.name) {
-    alert('Vui lòng nhập tên và slug để xem trước.')
+  const slug = previewSlug.value
+  if (!slug || !form.name.trim()) {
+    alert('Vui lòng nhập tên sản phẩm để xem trước.')
     return
   }
-  
-  // Create preview product data
-  const imageUrls = imagesText.value
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
-  
+
+  const imageUrls = productImageUrls.value.filter(Boolean)
+
   const previewProduct = {
-    id: id.value || 999999, // Temporary ID for preview
+    id: productId.value ?? 999999,
     name: form.name,
-    slug: form.slug,
+    slug,
     sku: form.sku,
     description: form.description || '',
     shortDescription: form.shortDescription || '',
     price: form.price,
     salePrice: form.salePrice,
     thumbnail: form.thumbnail || '',
-    images: imageUrls.length > 0 ? imageUrls : (form.thumbnail ? [form.thumbnail] : []),
+    images: imageUrls.length > 0 ? imageUrls : form.thumbnail ? [form.thumbnail] : [],
     categoryId: form.categoryId,
-    status: form.status,
+    status: resolveStatus(),
     material: form.material || '',
     dimensions: form.dimensions || '',
     color: form.color || '',
     warranty: form.warranty || '',
     isActive: form.isActive,
     isFeatured: form.isFeatured,
-    isHot: form.isHot,
-    isDailyFlashSale: form.isDailyFlashSale,
-    flashSaleEndAt: form.flashSaleEndAt || '',
-    soldCount: form.soldCount,
-    rating: form.rating,
+    isContactPrice: form.isContactPrice,
     seoTitle: form.seoTitle || '',
     seoDescription: form.seoDescription || '',
   }
-  
-  // Save to localStorage
-  savePreviewData('product', form.slug, previewProduct)
-  
-  // Navigate to preview in same app
-  router.push(`/san-pham/${form.slug}/preview`)
+
+  savePreviewData('product', slug, previewProduct)
+  router.push(`/san-pham/${slug}/preview`)
 }
 
 async function onSubmit() {
+  const validationError = validateForm()
+  if (validationError) {
+    error.value = validationError
+    return
+  }
+
   saving.value = true
   error.value = ''
   try {
-    if (isEdit.value && id.value) {
-      await apiClient.patch(`/products/${id.value}`, formPayload.value)
+    if (isEdit.value && productId.value !== null) {
+      await productApi.update(productId.value, formPayload.value)
     } else {
-      await apiClient.post('/products', formPayload.value)
+      await productApi.create(formPayload.value)
     }
     router.push('/admin/products')
-  } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Lưu thất bại.'
+  } catch (e: unknown) {
+    const err = e as { response?: { data?: { message?: string } }; message?: string }
+    error.value = err?.response?.data?.message || err?.message || 'Lưu thất bại.'
   } finally {
     saving.value = false
   }
 }
-
-function triggerImport() {
-  importFileInput.value?.click()
-}
-
-function onImportFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = () => {
-    const wb = XLSX.read(reader.result as ArrayBuffer, { type: 'array' })
-    const sheetName = wb.SheetNames[0]
-    const sheet = wb.Sheets[sheetName]
-    const rows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: '' })
-    if (!rows.length) {
-      alert('File import không có dữ liệu.')
-      return
-    }
-    const row = rows[0]
-
-    form.name = row.product_name || row.name || form.name
-    form.slug = row.slug || form.slug
-    form.sku = row.sku || form.sku
-    form.shortDescription = row.short_description || row.shortDescription || form.shortDescription
-    form.description = row.description || form.description
-    form.price = row.price ? Number(row.price) : form.price
-    form.salePrice = row.sale_price ? Number(row.sale_price) : form.salePrice
-    form.thumbnail = row.thumbnail || form.thumbnail
-    form.material = row.material || form.material
-    form.dimensions = row.dimensions || form.dimensions
-    form.color = row.color || form.color
-    form.warranty = row.warranty || form.warranty
-    form.isActive = row.is_active ? row.is_active.toLowerCase() !== 'false' : form.isActive
-    form.isFeatured = row.is_featured ? row.is_featured.toLowerCase() === 'true' : form.isFeatured
-    form.isHot = row.is_hot ? row.is_hot.toLowerCase() === 'true' : form.isHot
-    form.isDailyFlashSale = row.is_daily_flash_sale
-      ? row.is_daily_flash_sale.toLowerCase() === 'true'
-      : form.isDailyFlashSale
-    form.flashSaleEndAt = row.flash_sale_end_at || form.flashSaleEndAt
-    form.seoTitle = row.seo_title || row.seoTitle || form.seoTitle
-    form.seoDescription = row.seo_description || row.seoDescription || form.seoDescription
-
-    if (row.images) {
-      imagesText.value = String(row.images)
-        .split('|')
-        .map((s: string) => s.trim())
-        .filter((s: string) => !!s)
-        .join('\n')
-    }
-
-    alert('Đã import dữ liệu sản phẩm vào form. Vui lòng kiểm tra lại trước khi lưu.')
-  }
-  reader.readAsArrayBuffer(file)
-  input.value = ''
-}
-
-function downloadImportTemplate() {
-  const headers = [
-    'product_name',
-    'slug',
-    'sku',
-    'price',
-    'sale_price',
-    'thumbnail',
-    'images',
-    'short_description',
-    'description',
-    'material',
-    'dimensions',
-    'color',
-    'warranty',
-    'is_active',
-    'is_featured',
-    'is_hot',
-    'is_daily_flash_sale',
-    'flash_sale_end_at',
-  ]
-
-  const example = [
-    'Sofa da cao cấp 3 chỗ',
-    'sofa-da-cao-cap-3-cho',
-    'SOFA-3C-001',
-    '18900000',
-    '22900000',
-    'https://example.com/thumbnail.jpg',
-    'https://example.com/img1.jpg|https://example.com/img2.jpg',
-    'Sofa da bò Ý, thiết kế hiện đại, êm ái',
-    'Mô tả chi tiết sản phẩm...',
-    'Da bò Ý, gỗ sồi',
-    '220x95x88 cm',
-    'Nâu đậm',
-    '2 năm',
-    'true',
-    'false',
-    'true',
-    'false',
-    '',
-  ]
-
-  const worksheetData = [headers, example]
-  const ws = XLSX.utils.aoa_to_sheet(worksheetData)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Template')
-
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
-  const blob = new Blob([wbout], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `product-import-template-${form.slug || 'new'}.xlsx`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
 </script>
 
 <style scoped>
-.product-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+.product-form-page {
+  font-size: 0.75rem;
+  color: #1f2937;
 }
 
-.product-form h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.page-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.back-btn {
+  width: 2rem;
+  height: 2rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.back-btn:hover {
   color: #111827;
 }
 
-.form-container {
+.page-title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #030712;
+  line-height: 1.3;
+}
+
+.page-breadcrumb {
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #9ca3af;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.page-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.page-breadcrumb a:hover {
+  color: var(--color-primary);
+}
+
+.page-breadcrumb i {
+  font-size: 0.5rem;
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-self: flex-end;
+}
+
+@media (min-width: 640px) {
+  .page-header-actions {
+    align-self: center;
+  }
+}
+
+.form-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .form-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+}
+
+.form-col {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+.form-card {
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
 }
 
-.form-actions {
+.section-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.625rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.section-heading--sm {
+  margin-bottom: 1rem;
+}
+
+.section-label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.label-muted {
+  font-weight: 400;
+  color: #9ca3af;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.field-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.field-grid--2 {
+  grid-template-columns: 1fr;
+}
+
+.field-grid--3 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .field-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .field-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.field {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  font-weight: 700;
+  color: #374151;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.field-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1f2937;
+  transition: border-color 0.15s;
+}
+
+.field-input--bold {
+  font-weight: 700;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.field-input:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.field-hint {
+  font-size: 0.625rem;
+  font-weight: 400;
+  color: #9ca3af;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.field-select {
+  appearance: none;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.select-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.5625rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.field--contact {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
   padding-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .field--contact {
+    padding-top: 1.75rem;
+  }
+}
+
+.contact-check,
+.featured-check,
+.radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+
+.check-input,
+.radio-input {
+  width: 0.875rem;
+  height: 0.875rem;
+  accent-color: var(--color-primary);
+}
+
+.contact-info {
+  font-size: 0.625rem;
+  color: #9ca3af;
+  cursor: help;
+}
+
+.radio-label--muted {
+  margin-top: 0.25rem;
+}
+
+.field-counter-wrap {
+  position: relative;
+}
+
+.field-counter {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  font-size: 0.625rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.field-counter--input {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.field-input--counter {
+  padding-right: 3.25rem;
+}
+
+.editor-body {
+  border: 1px solid var(--color-border);
+  border-radius: 0 0 0.25rem 0.25rem;
+  background: #fff;
+  padding: 0.75rem;
+}
+
+.editor-textarea {
+  border: none;
+  padding: 0;
+  min-height: 12rem;
+  resize: vertical;
+}
+
+.editor-textarea:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.editor-stats {
+  text-align: right;
+  font-size: 0.625rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+.form-error {
+  color: #dc2626;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
 }
-.import-file-input {
-  display: none;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: #fff;
+  border-color: var(--color-border);
+  color: #374151;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.btn-primary {
+  background: #5c3c24;
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #492f1b;
 }
 </style>

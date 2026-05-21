@@ -1,13 +1,13 @@
 <template>
   <div class="home-page">
-    <HeroSection :rooms="rooms" :products="products" />
-    <ValuePropsSection />
-    <FlashSaleSection
-      :products="flashProducts"
-      :loading="loading"
+    <HeroSection
+      :collections="showcaseCollections"
+      :products="products"
     />
-    <!-- <CategoriesSection :categories="allDeptCategories" :products="products" /> -->
-    <!-- <SaleBannerSection /> -->
+    <FeaturedCollectionsSection
+      :collections="featuredCollections"
+      :loading="collectionsLoading"
+    />
     <TopProductsSection
       :categories="rootCategories"
       :products="tabProducts"
@@ -16,77 +16,66 @@
       @change-tab="activeTab = $event"
     />
     <ReviewsCarousel :reviews="mockReviews" />
-    <BlogSection
-      :posts="blogPosts"
-      :loading="loadingBlogs"
-      @go-to-post="goToBlogPost"
-    />
+    <BlogSection :posts="blogPosts" :loading="loadingBlogs" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import HeroSection from '../components/home/HeroSection.vue'
-import ValuePropsSection from '../components/home/ValuePropsSection.vue'
-import FlashSaleSection from '../components/home/FlashSaleSection.vue'
-import CategoriesSection from '../components/home/CategoriesSection.vue'
-import SaleBannerSection from '../components/home/SaleBannerSection.vue'
+import FeaturedCollectionsSection from '../components/home/FeaturedCollectionsSection.vue'
 import TopProductsSection from '../components/home/TopProductsSection.vue'
 import BlogSection from '../components/home/BlogSection.vue'
-import ReviewsCarousel from '../components/ReviewsCarousel.vue'
+import ReviewsCarousel, { type Review } from '../components/ReviewsCarousel.vue'
 import { useHomeData } from '../composables/home/useHomeData'
 
-const router = useRouter()
-
-// Composables
 const {
-  rooms,
   products,
-  allDeptCategories,
   blogPosts,
-  loading,
+  featuredCollections,
+  showcaseCollections,
+  collectionsLoading,
   loadingBlogs,
   tabProducts,
   tabProductsLoading,
   activeTab,
   rootCategories,
-  flashProducts,
   loadInitialData,
 } = useHomeData()
 
-// Mock data
-const mockReviews = [
+const mockReviews: Review[] = [
   {
-    text: 'Phục vụ rất nhiệt tình, sản phẩm đúng mô tả. Tôi rất hài lòng.',
-    name: 'Mạnh Hùng',
-    location: 'Ninh Bình',
-  },
-  {
-    text: 'Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ lâu dài.',
-    name: 'Lan Nguyễn',
+    id: '1',
+    author: 'Nguyễn Minh Tuấn',
     location: 'Hà Nội',
+    content:
+      'Chất lượng sản phẩm vượt mong đợi. Gỗ đẹp, chắc chắn và tinh tế trong từng chi tiết.',
   },
   {
-    text: 'Chất lượng tốt, giá hợp lý. Recommend cho mọi người.',
-    name: 'Công Minh',
-    location: 'Hải Phòng',
+    id: '2',
+    author: 'Trần Thị Mai',
+    location: 'Đà Nẵng',
+    content: 'Dịch vụ rất chuyên nghiệp, giao hàng nhanh và hỗ trợ lắp đặt tận nơi nhiệt tình.',
   },
   {
-    text: 'Sản phẩm đẹp, chất lượng cao. Đúng như hình ảnh.',
-    name: 'Nguyễn Mai Hương',
-    location: 'Thái Bình',
+    id: '3',
+    author: 'Lê Hoàng Nam',
+    location: 'TP. Hồ Chí Minh',
+    content: 'Không gian nhà tôi đẹp hơn hẳn từ khi dùng nội thất gỗ của Hùng Cường.',
   },
   {
-    text: 'Dịch vụ chăm sóc khách hàng tuyệt vời. Cảm ơn shop!',
-    name: 'Tuấn Vũ',
-    location: 'Hòa Bình',
+    id: '4',
+    author: 'Mạnh Hùng',
+    location: 'Ninh Bình',
+    content: 'Phục vụ rất nhiệt tình, sản phẩm đúng mô tả. Tôi rất hài lòng.',
+  },
+  {
+    id: '5',
+    author: 'Lan Nguyễn',
+    location: 'Hà Nội',
+    content: 'Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ lâu dài.',
   },
 ]
-
-function goToBlogPost(slug: string) {
-  router.push(`/blog/${slug}`)
-}
 
 onMounted(() => {
   loadInitialData()
@@ -96,11 +85,5 @@ onMounted(() => {
 <style scoped>
 .home-page {
   padding-bottom: 0;
-}
-
-@media (max-width: 768px) {
-  .home-page {
-    padding-bottom: 0;
-  }
 }
 </style>

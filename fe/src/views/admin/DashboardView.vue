@@ -1,216 +1,652 @@
 <template>
   <div class="dashboard">
-    <div class="page-header">
+    <div class="page-intro">
       <h1>Dashboard</h1>
+      <p>Tổng quan hoạt động của hệ thống</p>
     </div>
-    <div class="summary-cards">
-      <div class="summary-card card-earnings">
-        <div class="card-content">
-          <div class="card-value">{{ stats.products }}</div>
-          <div class="card-label">Sản phẩm</div>
-        </div>
-        <div class="card-icon">📊</div>
-        <div class="card-update">update: {{ currentTime }}</div>
+
+    <div v-if="loading" class="state-message">Đang tải dữ liệu...</div>
+    <div v-else-if="error" class="state-message state-error">{{ error }}</div>
+
+    <template v-else-if="data">
+      <div class="stat-grid">
+        <article class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Yêu cầu mới</span>
+            <div class="stat-value">{{ formatNumber(data.cards.newInquiries.value) }}</div>
+            <p class="stat-trend">
+              <span :class="['trend-badge', trendClass(data.cards.newInquiries.changePercent)]">
+                <i class="fa-solid fa-arrow-trend-up" />
+                {{ formatTrend(data.cards.newInquiries.changePercent) }}
+              </span>
+              <span class="trend-compare">{{ data.cards.newInquiries.compareLabel }}</span>
+            </p>
+          </div>
+          <div class="stat-icon stat-icon-orange">
+            <i class="fa-regular fa-file-lines" />
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Sản phẩm</span>
+            <div class="stat-value">{{ formatNumber(data.cards.products.value) }}</div>
+            <p class="stat-trend">
+              <span :class="['trend-badge', trendClass(data.cards.products.changePercent)]">
+                <i class="fa-solid fa-arrow-trend-up" />
+                {{ formatTrend(data.cards.products.changePercent) }}
+              </span>
+              <span class="trend-compare">{{ data.cards.products.compareLabel }}</span>
+            </p>
+          </div>
+          <div class="stat-icon stat-icon-amber">
+            <i class="fa-solid fa-box" />
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Yêu cầu tuần này</span>
+            <div class="stat-value">{{ formatNumber(data.cards.weeklyInquiries.value) }}</div>
+            <p class="stat-trend">
+              <span
+                :class="['trend-badge', trendClass(data.cards.weeklyInquiries.changePercent)]"
+              >
+                <i class="fa-solid fa-arrow-trend-up" />
+                {{ formatTrend(data.cards.weeklyInquiries.changePercent) }}
+              </span>
+              <span class="trend-compare">{{ data.cards.weeklyInquiries.compareLabel }}</span>
+            </p>
+          </div>
+          <div class="stat-icon stat-icon-blue">
+            <i class="fa-regular fa-eye" />
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-body">
+            <span class="stat-label">Khách hàng</span>
+            <div class="stat-value">{{ formatNumber(data.cards.customers.value) }}</div>
+            <p class="stat-trend">
+              <span :class="['trend-badge', trendClass(data.cards.customers.changePercent)]">
+                <i class="fa-solid fa-arrow-trend-up" />
+                {{ formatTrend(data.cards.customers.changePercent) }}
+              </span>
+              <span class="trend-compare">{{ data.cards.customers.compareLabel }}</span>
+            </p>
+          </div>
+          <div class="stat-icon stat-icon-purple">
+            <i class="fa-regular fa-user" />
+          </div>
+        </article>
       </div>
-      <div class="summary-card card-views">
-        <div class="card-content">
-          <div class="card-value">{{ stats.inquiries }}+</div>
-          <div class="card-label">Yêu cầu</div>
-        </div>
-        <div class="card-icon">📋</div>
-        <div class="card-update">update: {{ currentTime }}</div>
+
+      <div class="panel-grid panel-grid-top">
+        <section class="panel panel-chart">
+          <div class="panel-head">
+            <h3>Yêu cầu theo ngày</h3>
+            <div class="chart-select-wrap">
+              <select
+                class="chart-select"
+                :value="chartDays"
+                @change="onChartDaysChange"
+              >
+                <option :value="7">7 ngày qua</option>
+                <option :value="30">30 ngày qua</option>
+              </select>
+              <i class="fa-solid fa-chevron-down chart-select-icon" />
+            </div>
+          </div>
+          <AdminLineChart
+            :labels="data.activityChart.labels"
+            :data="data.activityChart.data"
+          />
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Yêu cầu mới nhất</h3>
+            <RouterLink to="/admin/inquiries" class="panel-link">Xem tất cả</RouterLink>
+          </div>
+          <div v-if="data.recentInquiries.length === 0" class="empty-inline">
+            Chưa có yêu cầu.
+          </div>
+          <ul v-else class="inquiry-list">
+            <li v-for="inq in data.recentInquiries" :key="inq.id" class="inquiry-item">
+              <div>
+                <h4>{{ inq.name }}</h4>
+                <p>
+                  {{ formatPhoneDisplay(inq.phone) }}
+                  <span v-if="inquirySubtitle(inq)" class="inquiry-topic">
+                    · {{ inquirySubtitle(inq) }}
+                  </span>
+                </p>
+              </div>
+              <div class="inquiry-meta">
+                <span :class="['status-pill', inquiryStatusClass(inq.status)]">
+                  {{ inquiryStatusLabel(inq.status) }}
+                </span>
+                <p>{{ formatRelativeTimeVi(inq.createdAt) }}</p>
+              </div>
+            </li>
+          </ul>
+        </section>
       </div>
-      <div class="summary-card card-tasks">
-        <div class="card-content">
-          <div class="card-value">{{ stats.categories }}</div>
-          <div class="card-label">Danh mục</div>
-        </div>
-        <div class="card-icon">📁</div>
-        <div class="card-update">update: {{ currentTime }}</div>
+
+      <div class="panel-grid panel-grid-bottom">
+        <section class="panel panel-wide">
+          <div class="panel-head">
+            <h3>Sản phẩm mới nhất</h3>
+            <RouterLink to="/admin/products" class="panel-link">Xem tất cả</RouterLink>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th>Danh mục</th>
+                  <th>Giá</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="data.latestProducts.length === 0">
+                  <td colspan="5" class="empty-cell">Chưa có sản phẩm.</td>
+                </tr>
+                <tr v-for="product in data.latestProducts" :key="product.id">
+                  <td>
+                    <div class="product-cell">
+                      <div class="product-thumb">
+                        <img
+                          v-if="product.thumbnail"
+                          :src="resolveMediaUrl(product.thumbnail)"
+                          :alt="product.name"
+                        />
+                        <i v-else class="fa-solid fa-image" />
+                      </div>
+                      {{ product.name }}
+                    </div>
+                  </td>
+                  <td>{{ product.categoryName }}</td>
+                  <td class="price-cell">{{ productPriceLabel(product) }}</td>
+                  <td>
+                    <span
+                      :class="[
+                        'status-tag',
+                        product.isActive ? 'status-visible' : 'status-hidden',
+                      ]"
+                    >
+                      {{ product.isActive ? 'Hiển thị' : 'Ẩn' }}
+                    </span>
+                  </td>
+                  <td class="date-cell">{{ formatProductDate(product.createdAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3 class="panel-title-only">Thống kê theo danh mục</h3>
+          <AdminCategoryChart :items="data.productsByCategory" />
+        </section>
       </div>
-      <div class="summary-card card-downloads">
-        <div class="card-content">
-          <div class="card-value">{{ stats.cms }}</div>
-          <div class="card-label">Trang CMS</div>
-        </div>
-        <div class="card-icon">📄</div>
-        <div class="card-update">update: {{ currentTime }}</div>
-      </div>
-    </div>
-    <section class="recent-inquiries">
-      <h2>Yêu cầu gần đây</h2>
-      <div v-if="loading">Đang tải...</div>
-      <div v-else-if="recent.length === 0">Chưa có yêu cầu.</div>
-      <table v-else class="data-table">
-        <thead>
-          <tr>
-            <th>Ngày</th>
-            <th>Họ tên</th>
-            <th>Điện thoại</th>
-            <th>Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="i in recent" :key="i.id">
-            <td>{{ formatDate(i.createdAt) }}</td>
-            <td>{{ i.name }}</td>
-            <td>{{ i.phone }}</td>
-            <td><span class="badge">{{ i.status }}</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <RouterLink to="/admin/inquiries" class="link-more">Xem tất cả →</RouterLink>
-    </section>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAdminDashboard } from '@/composables/admin/useAdminDashboard'
+import AdminLineChart from '@/components/admin/AdminLineChart.vue'
+import AdminCategoryChart from '@/components/admin/AdminCategoryChart.vue'
+import { formatPhoneDisplay } from '@/constants/site'
+import { formatRelativeTimeVi } from '@/utils/relativeTime'
+import { formatPrice } from '@/utils/format'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
-// Container component: orchestrates data and logic
-const { stats, recent, loading, formatDate } = useAdminDashboard()
-
-const currentTime = ref('')
-let timeInterval: ReturnType<typeof setInterval> | null = null
+const {
+  data,
+  loading,
+  error,
+  chartDays,
+  loadDashboardData,
+  inquiryStatusLabel,
+  inquiryStatusClass,
+  formatTrend,
+  trendClass,
+} = useAdminDashboard()
 
 onMounted(() => {
-  updateTime()
-  timeInterval = setInterval(updateTime, 60000) // Update every minute
+  loadDashboardData()
 })
 
-onUnmounted(() => {
-  if (timeInterval) {
-    clearInterval(timeInterval)
-  }
-})
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('vi-VN').format(value)
+}
 
-function updateTime() {
-  const now = new Date()
-  const hours = String(now.getHours()).padStart(2, '0')
-  const minutes = String(now.getMinutes()).padStart(2, '0')
-  currentTime.value = `${hours}:${minutes}`
+function onChartDaysChange(event: Event) {
+  const value = Number((event.target as HTMLSelectElement).value)
+  loadDashboardData(value === 30 ? 30 : 7)
+}
+
+function inquirySubtitle(inq: {
+  productName: string | null
+  message: string
+}): string {
+  if (inq.productName) return inq.productName
+  const msg = inq.message?.trim()
+  if (!msg) return ''
+  return msg.length > 48 ? `${msg.slice(0, 48)}…` : msg
+}
+
+function productPriceLabel(product: {
+  price: number
+  isContactPrice: boolean
+}): string {
+  if (product.isContactPrice) return 'Liên hệ'
+  return formatPrice(product.price)
+}
+
+function formatProductDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('vi-VN')
 }
 </script>
 
 <style scoped>
 .dashboard {
-  max-width: 1400px;
+  padding: 1.5rem 2rem 2rem;
 }
-.page-header {
-  margin-bottom: 1.5rem;
-}
-.page-header h1 {
-  font-size: 1.75rem;
+
+.page-intro h1 {
   margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #030712;
 }
-.summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+
+.page-intro p {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  color: #9ca3af;
 }
-.summary-card {
+
+.state-message {
+  margin-top: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
   background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+}
+
+.state-error {
+  color: #b91c1c;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stat-card {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.stat-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.stat-trend {
+  margin: 0.25rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.trend-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.trend-up {
+  color: #059669;
+  background: #ecfdf5;
+}
+
+.trend-down {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.trend-neutral {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.trend-compare {
+  font-size: 0.625rem;
+  color: #9ca3af;
+}
+
+.stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.stat-icon-amber {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.stat-icon-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.stat-icon-purple {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+.panel-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.panel-grid-top {
+  grid-template-columns: 1fr;
+}
+
+.panel-grid-bottom {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .panel-grid-top {
+    grid-template-columns: 7fr 5fr;
+  }
+
+  .panel-grid-bottom {
+    grid-template-columns: 8fr 4fr;
+  }
+}
+
+.panel {
+  background: #fff;
+  padding: 1.25rem;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+}
+
+.panel-head {
+  display: flex;
   justify-content: space-between;
-  min-height: 140px;
-}
-.card-earnings {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-  color: #fff;
-}
-.card-views {
-  background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
-  color: #fff;
-}
-.card-tasks {
-  background: linear-gradient(135deg, #ff8787 0%, #ff6b6b 100%);
-  color: #fff;
-}
-.card-downloads {
-  background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
-  color: #fff;
-}
-.card-content {
-  flex: 1;
-}
-.card-value {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-.card-label {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-.card-icon {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 2.5rem;
-  opacity: 0.2;
-}
-.card-update {
-  font-size: 0.75rem;
-  opacity: 0.8;
-  margin-top: 0.5rem;
-}
-.recent-inquiries {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-.recent-inquiries h2 {
-  font-size: 1.1rem;
+  align-items: center;
   margin-bottom: 1rem;
-  color: #1e293b;
+  gap: 0.5rem;
 }
+
+.panel-head h3,
+.panel-title-only {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.panel-title-only {
+  margin-bottom: 1rem;
+}
+
+.panel-link {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #92400e;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  text-decoration: none;
+}
+
+.panel-link:hover {
+  background: #f9fafb;
+}
+
+.chart-select-wrap {
+  position: relative;
+  font-size: 0.6875rem;
+}
+
+.chart-select {
+  appearance: none;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+  color: #4b5563;
+}
+
+.chart-select:focus {
+  outline: none;
+}
+
+.chart-select-icon {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.5rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.inquiry-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.inquiry-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f9fafb;
+  font-size: 0.75rem;
+}
+
+.inquiry-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.inquiry-item h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.inquiry-item p {
+  margin: 0.125rem 0 0;
+  font-size: 0.625rem;
+  color: #9ca3af;
+}
+
+.inquiry-topic {
+  color: #4b5563;
+}
+
+.inquiry-meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.inquiry-meta p {
+  margin: 0.25rem 0 0;
+}
+
+.status-pill {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.status-new {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-contacted {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-done {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
-}
-.data-table th,
-.data-table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-.data-table th {
-  background: #f8f8f8;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #64748b;
-}
-.data-table tbody tr:hover {
-  background: #f8f8f8;
-}
-.badge {
   font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  background: #e2e8f0;
-  border-radius: 4px;
-  color: #475569;
 }
-.link-more {
-  display: inline-block;
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-  color: #3b82f6;
-  text-decoration: none;
+
+.data-table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #9ca3af;
+  border-bottom: 1px solid #f3f4f6;
+  background: rgba(249, 250, 251, 0.5);
+}
+
+.data-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f9fafb;
+  color: #374151;
   font-weight: 500;
+  vertical-align: middle;
 }
-.link-more:hover {
-  text-decoration: underline;
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.product-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.25rem;
+  background: #f3f4f6;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #9ca3af;
+  font-size: 0.625rem;
+}
+
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.price-cell {
+  font-weight: 600;
+  color: #111827;
+}
+
+.date-cell {
+  color: #9ca3af;
+  font-size: 0.6875rem;
+}
+
+.status-tag {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.125rem;
+}
+
+.status-visible {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-hidden {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.empty-inline,
+.empty-cell {
+  color: #9ca3af;
+  font-size: 0.75rem;
 }
 </style>

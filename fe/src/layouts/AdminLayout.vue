@@ -1,92 +1,105 @@
 <template>
   <div class="admin-layout">
     <aside class="admin-sidebar">
-      <div class="sidebar-brand">
-        <span class="brand-logo">Furniture Admin</span>
-      </div>
-      <nav class="sidebar-nav">
-        <div class="nav-section">
-          <div class="nav-section-title">Navigation</div>
-          <RouterLink to="/admin/dashboard" class="nav-item">
-            <span class="nav-icon">📊</span>
-            <span>Dashboard</span>
-          </RouterLink>
-          <RouterLink to="/admin/inquiries" class="nav-item">
-            <span class="nav-icon">📋</span>
-            <span>Yêu cầu</span>
-          </RouterLink>
-          <RouterLink v-if="admin?.role === 'admin'" to="/admin/reports" class="nav-item">
-            <span class="nav-icon">📊</span>
-            <span>Báo cáo</span>
-          </RouterLink>
-        </div>
-        <div class="nav-section">
-          <div class="nav-section-title">Quản lý</div>
-          <RouterLink to="/admin/rooms" class="nav-item">
-            <span class="nav-icon">🏠</span>
-            <span>Phòng</span>
-          </RouterLink>
-          <RouterLink to="/admin/categories" class="nav-item">
-            <span class="nav-icon">📁</span>
-            <span>Danh mục</span>
-          </RouterLink>
-          <RouterLink to="/admin/products" class="nav-item">
-            <span class="nav-icon">🛋️</span>
-            <span>Sản phẩm</span>
-          </RouterLink>
-          <RouterLink to="/admin/collections" class="nav-item">
-            <span class="nav-icon">📚</span>
-            <span>Bộ sưu tập</span>
-          </RouterLink>
-          <RouterLink to="/admin/cms-pages" class="nav-item">
-            <span class="nav-icon">📄</span>
-            <span>CMS</span>
-          </RouterLink>
-          <RouterLink to="/admin/blog" class="nav-item">
-            <span class="nav-icon">✍️</span>
-            <span>Blog</span>
-          </RouterLink>
-        </div>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-profile" @click="toggleUserMenu" :class="{ active: showUserMenu }">
-          <div class="user-avatar">{{ admin?.username?.[0]?.toUpperCase() || 'A' }}</div>
-          <div class="user-info">
-            <span class="user-name">{{ admin?.username || 'Admin' }}</span>
+      <div>
+        <div class="sidebar-brand">
+          <span class="brand-mark">{{ SITE.brand.logoMark }}</span>
+          <div class="brand-text">
+            <span class="brand-line-sm">{{ SITE.brand.logoLineSm }}</span>
+            <span class="brand-line-lg">{{ SITE.brand.logoLineLg }}</span>
           </div>
-          <!-- <span class="user-dropdown-icon">▼</span> -->
         </div>
-        <div v-if="showUserMenu" class="user-menu">
-          <button type="button" class="menu-item" @click="handleAccountInfo">
-            <span class="menu-icon">👤</span>
-            <span>Thông tin tài khoản</span>
-          </button>
-          <button type="button" class="menu-item" @click="logout">
-            <span class="menu-icon">🚪</span>
-            <span>Đăng xuất</span>
-          </button>
-        </div>
+
+        <nav class="sidebar-nav">
+          <RouterLink
+            v-for="item in ADMIN_NAV_ITEMS"
+            :key="item.to"
+            :to="item.to"
+            class="nav-item"
+            :class="{ active: isNavActive(item) }"
+          >
+            <i :class="item.icon" />
+            <span>{{ item.label }}</span>
+          </RouterLink>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        © {{ copyrightYear }} {{ SITE.brand.name }}.
       </div>
     </aside>
-    <main class="admin-main">
-      <div class="admin-content">
+
+    <div class="admin-shell">
+      <header class="admin-header">
+        <div
+          class="user-dropdown"
+          :class="{ open: showUserMenu }"
+          @click="toggleUserMenu"
+        >
+          <div class="user-avatar">{{ userInitials }}</div>
+          <div class="user-meta">
+            <h4 class="user-title">{{ admin?.username || 'Admin' }}</h4>
+            <p class="user-role">
+              Quản trị viên
+              <i class="fa-solid fa-chevron-down" />
+            </p>
+          </div>
+
+          <div v-if="showUserMenu" class="user-menu" @click.stop>
+            <button type="button" class="menu-item" @click="handleAccountInfo">
+              <i class="fa-regular fa-user" />
+              <span>Thông tin tài khoản</span>
+            </button>
+            <button type="button" class="menu-item" @click="handleChangePassword">
+              <i class="fa-solid fa-key" />
+              <span>Đổi mật khẩu</span>
+            </button>
+            <hr class="menu-divider" />
+            <button type="button" class="menu-item menu-item-danger" @click="logout">
+              <i class="fa-solid fa-arrow-right-from-bracket" />
+              <span>Đăng xuất</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="admin-main">
         <router-view />
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAdminAuthStore } from '@/stores/adminAuth'
+import { SITE } from '@/constants/site'
+import { ADMIN_NAV_ITEMS, type AdminNavItem } from '@/constants/admin-nav'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAdminAuthStore()
 const { admin } = storeToRefs(authStore)
 
 const showUserMenu = ref(false)
+const copyrightYear = new Date().getFullYear()
+
+const userInitials = computed(() => {
+  const name = admin.value?.username?.trim()
+  if (!name) return 'AD'
+  const parts = name.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase()
+})
+
+function isNavActive(item: AdminNavItem): boolean {
+  if (item.match) return item.match(route.path)
+  return route.path === item.to
+}
 
 function toggleUserMenu() {
   showUserMenu.value = !showUserMenu.value
@@ -97,6 +110,11 @@ function handleAccountInfo() {
   router.push('/admin/account')
 }
 
+function handleChangePassword() {
+  showUserMenu.value = false
+  router.push({ path: '/admin/account', query: { tab: 'password' } })
+}
+
 function logout() {
   showUserMenu.value = false
   authStore.logout()
@@ -105,7 +123,7 @@ function logout() {
 
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement
-  if (!target.closest('.sidebar-footer')) {
+  if (!target.closest('.user-dropdown')) {
     showUserMenu.value = false
   }
 }
@@ -123,171 +141,249 @@ onUnmounted(() => {
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #faf9f6;
+  color: #1f2937;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .admin-sidebar {
-  width: 260px;
-  background: #1e293b;
-  color: #fff;
+  width: 16rem;
+  background: #fff;
+  border-right: 1px solid #f3f4f6;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
-  overflow-y: auto;
+  z-index: 30;
 }
+
 .sidebar-brand {
-  padding: 1.5rem 1.5rem;
-  font-weight: 700;
-  font-size: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f9fafb;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-.brand-logo {
+
+.brand-mark {
+  background: #92400e;
   color: #fff;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  padding: 0.375rem;
+  font-size: 1.125rem;
+  border-radius: 0.125rem;
+  line-height: 1;
 }
+
+.brand-text {
+  line-height: 1.2;
+}
+
+.brand-line-sm {
+  display: block;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  color: #78350f;
+}
+
+.brand-line-lg {
+  display: block;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #92400e;
+}
+
 .sidebar-nav {
-  flex: 1;
-  padding: 1rem 0;
-  overflow-y: auto;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
-.nav-section {
-  margin-bottom: 1.5rem;
-}
-.nav-section-title {
-  padding: 0.5rem 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #94a3b8;
-  letter-spacing: 0.5px;
-}
+
 .nav-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  color: #cbd5e1;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
+  transition: background 0.2s, color 0.2s;
 }
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-.nav-item.router-link-active {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border-left: 3px solid #3b82f6;
-}
-.nav-icon {
-  font-size: 1.1rem;
-  width: 20px;
+
+.nav-item i {
+  font-size: 0.875rem;
+  width: 1rem;
   text-align: center;
 }
-.sidebar-footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
+
+.nav-item:hover {
+  background: #f9fafb;
+  color: #78350f;
 }
-.user-profile {
+
+.nav-item.active {
+  background: #f5f2eb;
+  color: #78350f;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #f9fafb;
+  text-align: center;
+  font-size: 0.625rem;
+  color: #9ca3af;
+}
+
+.admin-shell {
+  flex: 1;
+  margin-left: 16rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-header {
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+  height: 4rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.user-dropdown {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s;
+  padding: 0.5rem 0;
 }
-.user-profile:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-.user-profile.active {
-  background: rgba(255, 255, 255, 0.1);
-}
+
 .user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #3b82f6;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: #78350f;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 0.875rem;
-  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
-.user-info {
-  flex: 1;
-  min-width: 0;
+
+.user-meta {
+  text-align: left;
+  display: none;
 }
-.user-name {
-  font-size: 0.875rem;
-  color: #fff;
-  font-weight: 500;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+.user-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
 }
-.user-dropdown-icon {
-  font-size: 0.7rem;
-  color: #94a3b8;
-  transition: transform 0.2s;
-  flex-shrink: 0;
+
+.user-role {
+  margin: 0;
+  font-size: 0.625rem;
+  color: #9ca3af;
 }
-.user-profile.active .user-dropdown-icon {
-  transform: rotate(180deg);
+
+.user-role i {
+  font-size: 0.5rem;
+  margin-left: 0.125rem;
 }
+
 .user-menu {
   position: absolute;
-  bottom: 100%;
-  left: 0;
   right: 0;
-  margin: 0.5rem 0;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  top: 100%;
+  margin-top: 0.25rem;
+  width: 12rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #4b5563;
+  z-index: 40;
 }
+
 .menu-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: none;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
   border: none;
-  color: #cbd5e1;
-  font-size: 0.875rem;
+  background: none;
   cursor: pointer;
-  transition: background 0.2s;
   text-align: left;
 }
+
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: #f9fafb;
 }
-.menu-icon {
-  font-size: 1rem;
-  width: 20px;
-  text-align: center;
+
+.menu-item i {
+  color: #9ca3af;
+  width: 0.875rem;
 }
+
+.menu-item-danger {
+  color: #dc2626;
+}
+
+.menu-item-danger i {
+  color: #dc2626;
+}
+
+.menu-divider {
+  border: none;
+  border-top: 1px solid #f3f4f6;
+  margin: 0;
+}
+
 .admin-main {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin-left: 260px;
-  min-height: 100vh;
 }
-.admin-content {
-  flex: 1;
-  padding: 1.5rem;
-  overflow: auto;
+
+@media (min-width: 640px) {
+  .user-meta {
+    display: block;
+  }
+}
+
+@media (max-width: 1023px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    position: static;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .admin-shell {
+    margin-left: 0;
+  }
 }
 </style>

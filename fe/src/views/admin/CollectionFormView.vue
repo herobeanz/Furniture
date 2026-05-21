@@ -1,121 +1,358 @@
 <template>
-  <div class="collection-form">
-    <h1>{{ isEdit ? 'Sửa bộ sưu tập' : 'Thêm bộ sưu tập' }}</h1>
-    <form @submit.prevent="save" class="form-container">
-      <FormField label="Tên bộ sưu tập" :required="true">
-        <UiInput v-model="form.name" placeholder="Enter collection name" :required="true" />
-      </FormField>
-
-      <FormField label="Slug" :required="true" hint="URL-friendly name, ví dụ: bo-suu-tap-mua-he">
-        <UiInput v-model="form.slug" placeholder="Enter slug" :required="true" />
-      </FormField>
-
-      <FormField label="Mô tả" optional>
-        <UiTextarea v-model="form.description" :rows="3" placeholder="Enter description" />
-      </FormField>
-
-      <FormField label="Ảnh đại diện (URL)" optional>
-        <UiInput v-model="form.thumbnail" type="url" placeholder="Enter image URL" />
-      </FormField>
-
-      <FormField label="Thứ tự hiển thị" optional>
-        <UiInput v-model.number="form.orderIndex" type="number" min="0" placeholder="0" />
-      </FormField>
-
-      <FormField>
-        <UiCheckbox v-model="form.isActive" label="Hiển thị" />
-      </FormField>
-
-      <FormField label="SEO Title" optional>
-        <UiInput v-model="form.seoTitle" placeholder="Enter SEO title" />
-      </FormField>
-
-      <FormField label="SEO Description" optional>
-        <UiTextarea v-model="form.seoDescription" :rows="2" placeholder="Enter SEO description" />
-      </FormField>
-
-      <!-- Products Management Section -->
-      <div v-if="isEdit" class="products-section">
-        <div class="section-header">
-          <h2>Sản phẩm trong bộ sưu tập</h2>
-          <button type="button" class="btn btn-sm btn-primary" @click="showAddProductModal = true">
-            + Thêm sản phẩm
-          </button>
+  <div class="collection-form-page">
+    <div class="page-header">
+      <div class="page-header-left">
+        <RouterLink to="/admin/collections" class="back-btn" title="Quay lại">
+          <i class="fa-solid fa-arrow-left" />
+        </RouterLink>
+        <div>
+          <h1 class="page-title">{{ isEdit ? 'Sửa bộ sưu tập' : 'Thêm bộ sưu tập' }}</h1>
+          <p class="page-breadcrumb">
+            <RouterLink to="/admin/collections">Trang chủ</RouterLink>
+            <i class="fa-solid fa-chevron-right" />
+            <RouterLink to="/admin/collections">Bộ sưu tập</RouterLink>
+            <i class="fa-solid fa-chevron-right" />
+            <span>{{ isEdit ? 'Sửa bộ sưu tập' : 'Thêm bộ sưu tập' }}</span>
+          </p>
         </div>
+      </div>
+      <div class="page-header-actions">
+        <RouterLink to="/admin/collections" class="btn btn-outline">Hủy</RouterLink>
+        <button
+          type="button"
+          class="btn btn-outline"
+          :disabled="!canPreview"
+          @click="handlePreview"
+        >
+          Xem trước
+          <i class="fa-regular fa-eye" />
+        </button>
+        <button type="button" class="btn btn-primary" :disabled="saving" @click="save">
+          {{ saving ? 'Đang lưu...' : 'Lưu' }}
+        </button>
+      </div>
+    </div>
 
-        <div v-if="loadingProducts" class="loading">Đang tải sản phẩm...</div>
-        <div v-else-if="collectionProducts.length === 0" class="empty">
-          <p>Chưa có sản phẩm nào. Nhấn "Thêm sản phẩm" để thêm.</p>
-        </div>
-        <div v-else class="products-list">
-          <div v-for="item in collectionProducts" :key="item.id" class="product-item">
-            <div class="product-info">
-              <RouterLink :to="getProductPath(item)" class="product-link" target="_blank">
-                <img
-                  v-if="item.thumbnail"
-                  :src="item.thumbnail"
-                  :alt="item.name"
-                  class="product-thumb"
+    <div v-if="loading" class="form-loading">Đang tải...</div>
+
+    <form v-else class="form-layout" @submit.prevent="save">
+      <div class="form-grid">
+        <div class="form-col form-col--main">
+          <section class="form-card">
+            <h2 class="section-heading">Thông tin bộ sưu tập</h2>
+
+            <div class="field-grid field-grid--2">
+              <div class="field">
+                <label class="field-label">
+                  Tên bộ sưu tập <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.name"
+                  type="text"
+                  class="field-input"
+                  placeholder="Nhập tên bộ sưu tập"
+                  required
                 />
-                <div v-else class="product-thumb placeholder">📦</div>
-              </RouterLink>
-              <div class="product-details">
-                <RouterLink :to="getProductPath(item)" class="product-name" target="_blank">
-                  {{ item.name }}
-                </RouterLink>
-                <div class="product-meta">{{ formatPrice(item.price) }}</div>
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  Slug (đường dẫn) <span class="required">*</span>
+                </label>
+                <input
+                  v-model="form.slug"
+                  type="text"
+                  class="field-input"
+                  placeholder="duong-dan-bo-suu-tap"
+                  :required="!isEdit"
+                  @input="slugTouched = true"
+                />
+                <p class="field-hint">Slug sẽ được tạo tự động từ tên. Có thể chỉnh sửa.</p>
               </div>
             </div>
-            <div class="product-actions">
-              <input
-                v-model.number="item.orderIndex"
-                type="number"
-                min="0"
-                class="order-input"
-                @change="updateProductOrder"
-              />
+
+            <div class="field-grid field-grid--2">
+              <div class="field">
+                <label class="field-label">
+                  Thứ tự hiển thị <span class="required">*</span>
+                </label>
+                <input
+                  v-model.number="form.orderIndex"
+                  type="number"
+                  min="0"
+                  class="field-input field-input--bold"
+                  required
+                />
+                <p class="field-hint">Số nhỏ hiển thị trước</p>
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  Mô tả ngắn <span class="required">*</span>
+                </label>
+                <div class="field-counter-wrap">
+                  <textarea
+                    v-model="form.shortDescription"
+                    rows="2"
+                    class="field-input field-textarea"
+                    placeholder="Nhập mô tả ngắn gọn về bộ sưu tập (tối đa 200 ký tự)"
+                    :maxlength="SHORT_DESC_MAX"
+                    required
+                  />
+                  <span class="field-counter">{{ shortDescCount }}/{{ SHORT_DESC_MAX }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Mô tả chi tiết</label>
+              <div class="editor-shell">
+                <div class="field-counter-wrap editor-body">
+                  <textarea
+                    v-model="form.detailedDescription"
+                    rows="4"
+                    class="field-input field-textarea editor-textarea"
+                    placeholder="Nhập mô tả chi tiết về bộ sưu tập..."
+                    :maxlength="DETAIL_DESC_MAX"
+                  />
+                  <span class="field-counter">{{ detailDescCount }}/{{ DETAIL_DESC_MAX }}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-card">
+            <h3 class="section-heading">SEO</h3>
+            <div class="field-grid field-grid--2">
+              <div class="field">
+                <label class="field-label">
+                  SEO title
+                </label>
+                <div class="field-counter-wrap">
+                  <input
+                    v-model="form.seoTitle"
+                    type="text"
+                    class="field-input field-input--counter"
+                    placeholder="Nhập SEO title (tối đa 60 ký tự)"
+                    :maxlength="SEO_TITLE_MAX"
+                  />
+                  <span class="field-counter field-counter--input">
+                    {{ seoTitleCount }}/{{ SEO_TITLE_MAX }}
+                  </span>
+                </div>
+                <p class="field-hint">Tiêu đề trang xuất hiện trên kết quả tìm kiếm Google.</p>
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  SEO description
+                </label>
+                <div class="field-counter-wrap">
+                  <textarea
+                    v-model="form.seoDescription"
+                    rows="2"
+                    class="field-input field-textarea"
+                    placeholder="Nhập SEO description (tối đa 160 ký tự)"
+                    :maxlength="SEO_DESC_MAX"
+                  />
+                  <span class="field-counter">{{ seoDescCount }}/{{ SEO_DESC_MAX }}</span>
+                </div>
+                <p class="field-hint">Mô tả trang xuất hiện trên kết quả tìm kiếm Google.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-card products-picker-card">
+            <div class="products-picker-head">
+              <div>
+                <h3 class="products-picker-title">Sản phẩm trong bộ sưu tập</h3>
+                <p class="products-picker-hint">Chọn các sản phẩm thuộc bộ sưu tập này</p>
+              </div>
               <button
                 type="button"
-                class="btn-remove"
-                @click="removeProduct(item.id)"
-                title="Xóa"
+                class="btn btn-outline btn-sm"
+                :disabled="!isEdit"
+                @click="onChooseProducts"
               >
-                ×
+                <i class="fa-solid fa-plus" />
+                Chọn sản phẩm
               </button>
             </div>
-          </div>
+            <p v-if="!isEdit" class="products-save-first">
+              Lưu bộ sưu tập trước, sau đó thêm và sắp xếp sản phẩm.
+            </p>
+          </section>
+
+          <section v-if="isEdit" class="form-card products-table-card">
+            <p v-if="reorderingProducts" class="reorder-hint">
+              <i class="fa-solid fa-spinner fa-spin" />
+              Đang lưu thứ tự sản phẩm...
+            </p>
+
+            <div v-if="loadingProducts" class="inline-loading">Đang tải sản phẩm...</div>
+            <div v-else-if="collectionProducts.length === 0" class="inline-empty">
+              Chưa có sản phẩm. Nhấn &quot;Chọn sản phẩm&quot; để thêm.
+            </div>
+            <div v-else class="table-scroll">
+              <table class="products-table">
+                <thead>
+                  <tr>
+                    <th class="col-drag" aria-label="Sắp xếp" />
+                    <th>Sản phẩm</th>
+                    <th class="col-price">Giá</th>
+                    <th class="col-actions">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(item, index) in collectionProducts"
+                    :key="item.id"
+                    class="data-row"
+                    :class="{
+                      'row-dragging': productDragFrom === index,
+                      'row-drag-over': productDragOver === index && productDragFrom !== index,
+                    }"
+                    @dragover.prevent="onProductDragOver(index, $event)"
+                    @dragenter.prevent="onProductDragOver(index, $event)"
+                    @drop.prevent="onProductDrop(index, $event)"
+                  >
+                    <td class="col-drag">
+                      <span
+                        class="drag-handle"
+                        draggable="true"
+                        title="Kéo để sắp xếp"
+                        @dragstart.stop="onProductDragStart(index, $event)"
+                        @dragend="onProductDragEnd"
+                      >
+                        <i class="fa-solid fa-bars" />
+                      </span>
+                    </td>
+                    <td class="col-product">
+                      <div class="product-cell">
+                        <RouterLink
+                          :to="getProductPath(item)"
+                          class="product-thumb-link"
+                          target="_blank"
+                        >
+                          <img
+                            v-if="item.thumbnail"
+                            :src="resolveMediaUrl(item.thumbnail)"
+                            :alt="item.name"
+                            class="product-thumb"
+                          />
+                          <span v-else class="product-thumb placeholder">📦</span>
+                        </RouterLink>
+                        <RouterLink
+                          :to="getProductPath(item)"
+                          class="product-name"
+                          target="_blank"
+                        >
+                          {{ item.name }}
+                        </RouterLink>
+                      </div>
+                    </td>
+                    <td class="col-price">{{ formatPrice(item.price) }}</td>
+                    <td class="col-actions">
+                      <button
+                        type="button"
+                        class="btn-remove"
+                        title="Xóa khỏi bộ sưu tập"
+                        @mousedown.stop
+                        @click="removeProduct(item.id)"
+                      >
+                        <i class="fa-solid fa-xmark" />
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p v-if="collectionProducts.length" class="table-hint">Kéo thả để sắp xếp thứ tự hiển thị</p>
+          </section>
+        </div>
+
+        <div class="form-col form-col--side">
+          <section class="form-card">
+            <label class="field-label section-label">
+              Ảnh đại diện <span class="required">*</span>
+            </label>
+            <p class="field-hint thumb-intro">
+              Ảnh đại diện sẽ hiển thị trên trang danh sách bộ sưu tập
+            </p>
+            <ImageUploadField
+              v-model="form.thumbnail"
+              :show-preview="false"
+              hint="Định dạng: JPG, PNG, WEBP. Tối đa 5MB. Tỷ lệ khuyến nghị: 16:9"
+            />
+            <label class="preview-block-label">Xem trước ảnh</label>
+            <div class="preview-block">
+              <img
+                v-if="form.thumbnail"
+                :src="resolveMediaUrl(form.thumbnail)"
+                alt="Xem trước ảnh đại diện"
+                class="preview-block-img"
+              />
+              <div v-else class="preview-block-empty">
+                <i class="fa-regular fa-image" />
+              </div>
+            </div>
+          </section>
+
+          <section class="form-card">
+            <label class="field-label section-label">Trạng thái</label>
+
+            <label
+              class="status-option"
+              :class="{ 'status-option--active': form.isActive }"
+            >
+              <span class="status-option-main">
+                <input v-model="form.isActive" type="radio" :value="true" class="radio-input" />
+                <span class="status-option-label">Hiển thị</span>
+              </span>
+              <span class="status-badge status-badge--on">Hiển thị trên website</span>
+            </label>
+
+            <label
+              class="status-option"
+              :class="{ 'status-option--active': !form.isActive }"
+            >
+              <span class="status-option-main">
+                <input v-model="form.isActive" type="radio" :value="false" class="radio-input" />
+                <span class="status-option-label">Ẩn</span>
+              </span>
+              <span class="status-badge status-badge--off">Không hiển thị trên website</span>
+            </label>
+          </section>
         </div>
       </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn btn-outline" @click="handlePreview" :disabled="!form.slug || !form.name">
-          Xem trước
-        </button>
+      <div class="form-footer">
+        <RouterLink to="/admin/collections" class="btn btn-outline">Hủy</RouterLink>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu' }}
         </button>
-        <RouterLink to="/admin/collections" class="btn btn-outline">Hủy</RouterLink>
       </div>
     </form>
 
-    <!-- Add Product Modal -->
     <div v-if="showAddProductModal" class="modal-overlay" @click="showAddProductModal = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Thêm sản phẩm</h3>
-          <button type="button" class="btn-close" @click="showAddProductModal = false">×</button>
+          <h3>Chọn sản phẩm</h3>
+          <button type="button" class="btn-close" @click="showAddProductModal = false">
+            <i class="fa-solid fa-xmark" />
+          </button>
         </div>
         <div class="modal-body">
           <div class="search-box">
             <input
               v-model="productSearch"
               type="text"
+              class="field-input"
               placeholder="Tìm kiếm sản phẩm..."
               @input="searchProducts"
             />
           </div>
-          <div v-if="loadingSearch" class="loading">Đang tìm...</div>
-          <div v-else-if="searchResults.length === 0" class="empty">Không tìm thấy sản phẩm.</div>
+          <div v-if="loadingSearch" class="inline-loading">Đang tìm...</div>
+          <div v-else-if="searchResults.length === 0" class="inline-empty">
+            Nhập ít nhất 2 ký tự để tìm sản phẩm.
+          </div>
           <div v-else class="search-results">
             <div
               v-for="product in searchResults"
@@ -126,7 +363,7 @@
             >
               <img
                 v-if="product.thumbnail"
-                :src="product.thumbnail"
+                :src="resolveMediaUrl(product.thumbnail)"
                 :alt="product.name"
                 class="result-thumb"
               />
@@ -135,7 +372,7 @@
                 <div class="result-name">{{ product.name }}</div>
                 <div class="result-price">{{ formatPrice(product.price) }}</div>
               </div>
-              <span v-if="isProductInCollection(product.id)" class="badge">Đã thêm</span>
+              <span v-if="isProductInCollection(product.id)" class="badge-added">Đã thêm</span>
             </div>
           </div>
         </div>
@@ -146,30 +383,68 @@
 
 <script setup lang="ts">
 import { logger } from '@/utils/logger'
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import apiClient from '@/services/api/client'
+import {
+  collectionApi,
+  type Collection,
+  type CollectionProduct,
+} from '@/services/api/collections'
+import { productApi, type Product } from '@/services/api/products'
 import { formatPrice } from '@/utils/format'
+import { slugify } from '@/utils/slugify'
 import { savePreviewData } from '@/utils/preview'
 import { getProductPath } from '@/utils/navigation'
-import FormField from '@/components/ui/FormField.vue'
-import { UiInput, UiTextarea, UiCheckbox } from '@/components/ui'
+import ImageUploadField from '@/components/admin/ImageUploadField.vue'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
+
+import { COLLECTION_DESCRIPTION_SEP as DESCRIPTION_SEP } from '@/utils/collectionDescription'
+const SHORT_DESC_MAX = 200
+const DETAIL_DESC_MAX = 5000
+const SEO_TITLE_MAX = 60
+const SEO_DESC_MAX = 160
+
+type ProductRow = {
+  id: number
+  name: string
+  slug: string
+  price: number
+  thumbnail?: string
+  orderIndex: number
+  breadcrumb: { name: string; slug: string }[]
+}
 
 const route = useRoute()
 const router = useRouter()
-const id = computed(() => route.params.id as string)
-const isEdit = computed(() => !!id.value)
+
+const collectionId = computed(() => {
+  const raw = route.params.id
+  const value = Array.isArray(raw) ? raw[0] : raw
+  if (!value || value === 'new') return null
+  const id = Number(value)
+  return Number.isFinite(id) ? id : null
+})
+
+const isEdit = computed(() => collectionId.value !== null)
+
+const loading = ref(false)
 const saving = ref(false)
+const slugTouched = ref(false)
 const loadingProducts = ref(false)
+const reorderingProducts = ref(false)
 const showAddProductModal = ref(false)
 const productSearch = ref('')
 const loadingSearch = ref(false)
-const searchResults = ref<any[]>([])
+const searchResults = ref<Product[]>([])
+
+const productDragFrom = ref<number | null>(null)
+const productDragOver = ref<number | null>(null)
 
 const form = reactive({
   name: '',
   slug: '',
-  description: '',
+  shortDescription: '',
+  detailedDescription: '',
   thumbnail: '',
   orderIndex: 0,
   isActive: true,
@@ -177,47 +452,203 @@ const form = reactive({
   seoDescription: '',
 })
 
-const collectionProducts = ref<Array<{
-  id: number
-  name: string
-  slug: string
-  price: number
-  thumbnail?: string
-  orderIndex: number
-  breadcrumb?: { name: string; slug: string }[]
-}>>([])
+const collectionProducts = ref<ProductRow[]>([])
 
-onMounted(async () => {
+const shortDescCount = computed(() => form.shortDescription.length)
+const detailDescCount = computed(() => form.detailedDescription.length)
+const seoTitleCount = computed(() => form.seoTitle.length)
+const seoDescCount = computed(() => form.seoDescription.length)
+
+const canPreview = computed(() => !!form.slug?.trim() && !!form.name?.trim())
+
+function parseDescription(raw: string | undefined | null) {
+  const text = (raw ?? '').trim()
+  if (!text) {
+    return { short: '', detailed: '' }
+  }
+  if (text.includes(DESCRIPTION_SEP)) {
+    const [shortPart, ...rest] = text.split(DESCRIPTION_SEP)
+    return {
+      short: (shortPart ?? '').trim(),
+      detailed: rest.join(DESCRIPTION_SEP).trim(),
+    }
+  }
+  if (text.length <= SHORT_DESC_MAX) {
+    return { short: text, detailed: '' }
+  }
+  return { short: text.slice(0, SHORT_DESC_MAX), detailed: text }
+}
+
+function serializeDescription(): string | undefined {
+  const short = form.shortDescription.trim()
+  const detailed = form.detailedDescription.trim()
+  if (detailed) {
+    return short ? `${short}${DESCRIPTION_SEP}${detailed}` : detailed
+  }
+  return short || undefined
+}
+
+function sortProducts(list: ProductRow[]): ProductRow[] {
+  return [...list].sort(
+    (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || a.id - b.id,
+  )
+}
+
+function mapProductToRow(p: CollectionProduct): ProductRow {
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug || '',
+    price: p.price,
+    thumbnail: p.thumbnail,
+    orderIndex: p.orderIndex ?? 0,
+    breadcrumb: p.breadcrumb?.length ? p.breadcrumb : [],
+  }
+}
+
+function applyCollectionToForm(c: Collection) {
+  form.name = c.name || ''
+  form.slug = c.slug || ''
+  const parsed = parseDescription(c.description)
+  form.shortDescription = parsed.short
+  form.detailedDescription = parsed.detailed
+  form.thumbnail = c.thumbnail || ''
+  form.orderIndex = c.orderIndex ?? 0
+  form.isActive = c.isActive ?? true
+  form.seoTitle = c.seoTitle || ''
+  form.seoDescription = c.seoDescription || ''
+  collectionProducts.value = sortProducts((c.products ?? []).map(mapProductToRow))
+}
+
+async function loadCollection() {
+  if (!isEdit.value || collectionId.value === null) return
+  loading.value = true
+  loadingProducts.value = true
+  try {
+    const c = await collectionApi.getById(collectionId.value)
+    applyCollectionToForm(c)
+    slugTouched.value = true
+  } catch (e) {
+    logger.error(e)
+    alert('Không thể tải dữ liệu bộ sưu tập.')
+    router.push('/admin/collections')
+  } finally {
+    loading.value = false
+    loadingProducts.value = false
+  }
+}
+
+function resetForm() {
+  Object.assign(form, {
+    name: '',
+    slug: '',
+    shortDescription: '',
+    detailedDescription: '',
+    thumbnail: '',
+    orderIndex: 0,
+    isActive: true,
+    seoTitle: '',
+    seoDescription: '',
+  })
+  collectionProducts.value = []
+}
+
+watch(
+  () => form.name,
+  (name) => {
+    if (isEdit.value || slugTouched.value) return
+    form.slug = slugify(name)
+  },
+)
+
+watch(collectionId, () => {
+  slugTouched.value = false
   if (isEdit.value) {
-    await loadCollection()
+    loadCollection()
+  } else {
+    resetForm()
   }
 })
 
-async function loadCollection() {
-  try {
-    const c = await apiClient.get(`/collections/by-id/${id.value}`) as any
-    form.name = c.name || ''
-    form.slug = c.slug || ''
-    form.description = c.description || ''
-    form.thumbnail = c.thumbnail || ''
-    form.orderIndex = c.orderIndex || 0
-    form.isActive = c.isActive ?? true
-    form.seoTitle = c.seoTitle || ''
-    form.seoDescription = c.seoDescription || ''
-    
-    if (c.products) {
-      collectionProducts.value = c.products.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug || '',
-        price: p.price,
-        thumbnail: p.thumbnail,
-        orderIndex: p.orderIndex || 0,
-        breadcrumb: p.breadcrumb || [],
-      }))
+onMounted(() => {
+  if (isEdit.value) {
+    loadCollection()
+  }
+})
+
+function onChooseProducts() {
+  if (!isEdit.value) {
+    alert('Vui lòng lưu bộ sưu tập trước khi chọn sản phẩm.')
+    return
+  }
+  showAddProductModal.value = true
+}
+
+function onProductDragStart(index: number, e: DragEvent) {
+  productDragFrom.value = index
+  productDragOver.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(index))
+    const row = (e.target as HTMLElement).closest('tr')
+    if (row) {
+      e.dataTransfer.setDragImage(row, 24, 20)
     }
+  }
+}
+
+function onProductDragOver(index: number, e: DragEvent) {
+  if (productDragFrom.value === null) return
+  productDragOver.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move'
+  }
+}
+
+async function onProductDrop(index: number, e: DragEvent) {
+  let from = productDragFrom.value
+  if (from === null) {
+    const raw = e.dataTransfer?.getData('text/plain')
+    if (raw !== '') {
+      const parsed = Number(raw)
+      if (!Number.isNaN(parsed)) from = parsed
+    }
+  }
+  onProductDragEnd()
+  if (from === null || from === index || collectionId.value === null) return
+
+  const list = [...collectionProducts.value]
+  const [moved] = list.splice(from, 1)
+  if (!moved) return
+  list.splice(index, 0, moved)
+  collectionProducts.value = list.map((p, i) => ({ ...p, orderIndex: i }))
+
+  await persistProductOrder()
+}
+
+function onProductDragEnd() {
+  productDragFrom.value = null
+  productDragOver.value = null
+}
+
+async function persistProductOrder() {
+  if (collectionId.value === null) return
+  reorderingProducts.value = true
+  const snapshot = collectionProducts.value.map((p) => ({ ...p }))
+  try {
+    await collectionApi.updateProductOrder(
+      collectionId.value,
+      collectionProducts.value.map((p, index) => ({
+        productId: p.id,
+        orderIndex: index,
+      })),
+    )
   } catch (e) {
     logger.error(e)
+    collectionProducts.value = snapshot
+    alert('Không thể lưu thứ tự sản phẩm.')
+  } finally {
+    reorderingProducts.value = false
   }
 }
 
@@ -227,14 +658,15 @@ async function searchProducts() {
     searchResults.value = []
     return
   }
-  
+
   loadingSearch.value = true
   try {
-    const res = await apiClient.get('/products/list/all') as any[]
-    searchResults.value = res
-      .filter((p: any) => 
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.sku?.toLowerCase().includes(query.toLowerCase())
+    const all = await productApi.listAdmin()
+    searchResults.value = all
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.sku?.toLowerCase().includes(query.toLowerCase()),
       )
       .slice(0, 20)
   } catch (e) {
@@ -249,176 +681,127 @@ function isProductInCollection(productId: number): boolean {
   return collectionProducts.value.some((p) => p.id === productId)
 }
 
-async function addProduct(product: any) {
+async function addProduct(product: Product) {
   if (isProductInCollection(product.id)) return
-  
-  if (!isEdit.value || !id.value) {
+
+  if (!isEdit.value || collectionId.value === null) {
     alert('Vui lòng lưu bộ sưu tập trước khi thêm sản phẩm.')
     return
   }
-  
+
   try {
-    await apiClient.post(`/collections/${id.value}/products`, {
-      productId: product.id,
-    })
-    
-    // Fetch full product details to get breadcrumb
-    let breadcrumb: { name: string; slug: string }[] = []
-    let productSlug = product.slug || ''
-    
-    try {
-      const fullProduct = await apiClient.get(`/products/by-id/${product.id}`) as any
-      productSlug = fullProduct.slug || productSlug
-      // Build breadcrumb from product category if available
-      if (fullProduct.categoryId) {
-        const category = await apiClient.get(`/categories/by-id/${fullProduct.categoryId}`) as any
-        if (category?.roomId) {
-          const room = await apiClient.get(`/rooms/by-id/${category.roomId}`) as any
-          if (room && category) {
-            breadcrumb = [
-              { name: room.name, slug: room.slug },
-              { name: category.name, slug: category.slug },
-            ]
-          }
-        }
-      }
-    } catch (e) {
-      logger.warn('Could not fetch full product details for breadcrumb:', e)
+    const orderIndex = collectionProducts.value.length
+    await collectionApi.addProduct(collectionId.value, product.id, orderIndex)
+
+    const breadcrumb: { name: string; slug: string }[] = []
+    if (product.breadcrumb?.length) {
+      breadcrumb.push(...product.breadcrumb)
     }
-    
+
     collectionProducts.value.push({
       id: product.id,
       name: product.name,
-      slug: productSlug,
+      slug: product.slug || '',
       price: product.price,
       thumbnail: product.thumbnail,
-      orderIndex: collectionProducts.value.length,
+      orderIndex,
       breadcrumb,
     })
+
     showAddProductModal.value = false
     productSearch.value = ''
     searchResults.value = []
-  } catch (e: any) {
+  } catch (e: unknown) {
     logger.error(e)
-    alert(e?.response?.data?.message || 'Thêm sản phẩm thất bại.')
+    alert('Thêm sản phẩm thất bại.')
   }
 }
 
 async function removeProduct(productId: number) {
   if (!confirm('Xóa sản phẩm này khỏi bộ sưu tập?')) return
-  
-  if (!isEdit.value || !id.value) return
-  
+  if (!isEdit.value || collectionId.value === null) return
+
   try {
-    await apiClient.delete(`/collections/${id.value}/products/${productId}`)
-    collectionProducts.value = collectionProducts.value.filter((p) => p.id !== productId)
-  } catch (e: any) {
+    await collectionApi.removeProduct(collectionId.value, productId)
+    collectionProducts.value = collectionProducts.value
+      .filter((p) => p.id !== productId)
+      .map((p, index) => ({ ...p, orderIndex: index }))
+    await persistProductOrder()
+  } catch (e: unknown) {
     logger.error(e)
-    alert(e?.response?.data?.message || 'Xóa sản phẩm thất bại.')
+    alert('Xóa sản phẩm thất bại.')
   }
 }
 
-async function updateProductOrder() {
-  if (!isEdit.value || !id.value) return
-  
-  try {
-    await apiClient.patch(`/collections/${id.value}/products/order`, {
-      products: collectionProducts.value.map((p) => ({
-        productId: p.id,
-        orderIndex: p.orderIndex,
-      })),
-    })
-  } catch (e: any) {
-    logger.error(e)
-    // Don't show error for order updates, just log it
+function validateForm(): string | null {
+  if (!form.name.trim()) return 'Vui lòng nhập tên bộ sưu tập.'
+  if (!form.slug.trim() && !form.name.trim()) return 'Vui lòng nhập slug.'
+  if (!form.shortDescription.trim()) return 'Vui lòng nhập mô tả ngắn.'
+  if (!form.thumbnail.trim()) return 'Vui lòng tải ảnh đại diện.'
+  return null
+}
+
+function buildPayload() {
+  const trimmedSlug = form.slug?.trim()
+  return {
+    name: form.name.trim(),
+    slug: trimmedSlug ? slugify(trimmedSlug) : slugify(form.name),
+    description: serializeDescription(),
+    thumbnail: form.thumbnail?.trim() || undefined,
+    orderIndex: Math.max(0, form.orderIndex ?? 0),
+    isActive: form.isActive,
+    seoTitle: form.seoTitle?.trim().slice(0, SEO_TITLE_MAX) || undefined,
+    seoDescription: form.seoDescription?.trim().slice(0, SEO_DESC_MAX) || undefined,
   }
 }
 
 async function handlePreview() {
-  if (!form.slug || !form.name) {
+  if (!canPreview.value) {
     alert('Vui lòng nhập tên và slug để xem trước.')
     return
   }
-  
-  // Ensure all products have breadcrumb before preview
-  const productsWithBreadcrumb = await Promise.all(
-    collectionProducts.value.map(async (p) => {
-      // If product already has breadcrumb with at least 2 items, use it
-      if (p.breadcrumb && p.breadcrumb.length >= 2) {
-        return p
-      }
-      
-      // Otherwise, fetch full product details to get breadcrumb
-      try {
-        const fullProduct = await apiClient.get(`/products/by-id/${p.id}`) as any
-        let breadcrumb: { name: string; slug: string }[] = []
-        
-        // Build breadcrumb from product category if available
-        if (fullProduct.categoryId) {
-          const category = await apiClient.get(`/categories/by-id/${fullProduct.categoryId}`) as any
-          if (category?.roomId) {
-            const room = await apiClient.get(`/rooms/by-id/${category.roomId}`) as any
-            if (room && category && room.slug && category.slug) {
-              breadcrumb = [
-                { name: room.name, slug: room.slug },
-                { name: category.name, slug: category.slug },
-              ]
-            }
-          }
-        }
-        
-        return {
-          ...p,
-          slug: fullProduct.slug || p.slug || '',
-          breadcrumb,
-        }
-      } catch (e) {
-        logger.warn(`Could not fetch breadcrumb for product ${p.id}:`, e)
-        return p
-      }
-    })
-  )
-  
-  // Create preview collection data
+
+  const slug = slugify(form.slug.trim() || form.name)
+
   const previewCollection = {
     collection: {
-      id: id.value || 999999, // Temporary ID for preview
+      id: collectionId.value ?? 999999,
       name: form.name.trim(),
-      slug: form.slug.trim(),
-      description: form.description?.trim() || '',
+      slug,
+      description: serializeDescription() || '',
       thumbnail: form.thumbnail?.trim() || '',
       orderIndex: form.orderIndex || 0,
       isActive: form.isActive,
       seoTitle: form.seoTitle?.trim() || '',
       seoDescription: form.seoDescription?.trim() || '',
     },
-    products: productsWithBreadcrumb, // Include products with breadcrumb
+    products: collectionProducts.value,
   }
-  
-  // Save to localStorage
-  savePreviewData('collection', form.slug, previewCollection)
-  
-  // Navigate to preview in same app
-  router.push(`/bo-suu-tap/${form.slug}/preview`)
+
+  savePreviewData('collection', slug, previewCollection)
+  router.push(`/bo-suu-tap/${slug}/preview`)
 }
 
 async function save() {
+  const validationError = validateForm()
+  if (validationError) {
+    alert(validationError)
+    return
+  }
+
   saving.value = true
   try {
-    if (isEdit.value) {
-      await apiClient.patch(`/collections/${id.value}`, form)
+    const payload = buildPayload()
+    if (isEdit.value && collectionId.value !== null) {
+      await collectionApi.update(collectionId.value, payload)
+      router.push('/admin/collections')
     } else {
-      const result = await apiClient.post('/collections', form) as any
-      // Redirect to edit page to manage products
-      window.location.href = `/admin/collections/${result.id}`
-      return
+      const created = await collectionApi.create(payload)
+      router.push(`/admin/collections/${created.id}`)
     }
-    // Redirect to list
-    window.location.href = '/admin/collections'
-  } catch (e: any) {
+  } catch (e: unknown) {
     logger.error(e)
-    const errorMsg = e?.response?.data?.message || e?.message || 'Lưu thất bại.'
-    alert(errorMsg)
+    alert('Lưu thất bại.')
   } finally {
     saving.value = false
   }
@@ -426,265 +809,699 @@ async function save() {
 </script>
 
 <style scoped>
-.collection-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+.collection-form-page {
+  font-size: 0.75rem;
+  color: #1f2937;
 }
 
-.collection-form h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.page-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.back-btn {
+  width: 2rem;
+  height: 2rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
   color: #111827;
 }
 
-.form-container {
+.page-title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #030712;
+}
+
+.page-breadcrumb {
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #9ca3af;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.page-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.page-breadcrumb a:hover {
+  color: var(--color-primary);
+}
+
+.page-breadcrumb i {
+  font-size: 0.5rem;
+}
+
+.page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-self: flex-end;
+}
+
+@media (min-width: 640px) {
+  .page-header-actions {
+    align-self: center;
+  }
+}
+
+.form-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .form-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.form-col {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.form-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+.form-card {
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
 }
 
-/* Products Section */
-.products-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
+.section-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f9fafb;
 }
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+
+.section-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-grid {
+  display: grid;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
-.section-header h2 {
-  font-size: 1.1rem;
-  margin: 0;
+
+.field-grid--2 {
+  grid-template-columns: 1fr;
 }
-.btn-sm {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
+
+@media (min-width: 640px) {
+  .field-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
-.products-list {
+
+.field {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.375rem;
 }
-.product-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+
+.field-label {
+  font-weight: 700;
+  color: #374151;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.field-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.field-input--bold {
+  font-weight: 700;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 3.5rem;
+}
+
+.field-hint {
+  font-size: 0.625rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.thumb-intro {
+  margin-top: -0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.field-counter-wrap {
+  position: relative;
+}
+
+.field-counter {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  font-size: 0.625rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.field-counter--input {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.field-input--counter {
+  padding-right: 3.25rem;
+}
+
+.editor-shell {
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.editor-body {
+  background: #fff;
   padding: 0.75rem;
-  background: #f8f8f8;
-  border-radius: 6px;
-  border: 1px solid #eee;
 }
-.product-info {
+
+.editor-textarea {
+  border: none;
+  padding: 0;
+  min-height: 7rem;
+}
+
+.editor-textarea:focus {
+  box-shadow: none;
+}
+
+.products-picker-card {
+  padding: 1.25rem 1.5rem;
+}
+
+.products-picker-head {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
-.product-thumb {
-  width: 50px;
-  height: 50px;
+
+.products-picker-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.products-picker-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.6875rem;
+  color: #9ca3af;
+}
+
+.products-save-first {
+  margin: 0.75rem 0 0;
+  font-size: 0.6875rem;
+  color: #b45309;
+  font-weight: 600;
+}
+
+.preview-block-label {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.preview-block {
+  margin-top: 0.375rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #f9fafb;
+}
+
+.preview-block-img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  background: #eee;
 }
-.product-thumb.placeholder {
+
+.preview-block-empty {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #d1d5db;
   font-size: 1.5rem;
 }
-.product-details {
-  flex: 1;
+
+.status-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
-.product-link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
+
+.status-option:last-child {
+  margin-bottom: 0;
 }
-.product-link:hover {
-  opacity: 0.8;
+
+.status-option--active {
+  background: rgba(249, 250, 251, 0.8);
+  border-color: #d1d5db;
 }
-.product-name {
-  font-weight: 500;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-  color: #1a1a1a;
-  text-decoration: none;
-  display: block;
-}
-.product-name:hover {
-  color: var(--color-primary);
-}
-.product-meta {
-  font-size: 0.8rem;
-  color: #666;
-}
-.product-actions {
+
+.status-option-main {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-.order-input {
-  width: 60px;
-  padding: 0.4rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  font-size: 0.85rem;
+
+.status-option-label {
+  font-weight: 700;
+  color: #1f2937;
 }
-.btn-remove {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #fff;
-  color: #c00;
-  font-size: 1.2rem;
-  cursor: pointer;
+
+.radio-input {
+  width: 0.875rem;
+  height: 0.875rem;
+  accent-color: var(--color-primary);
+}
+
+.status-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.125rem;
+  white-space: nowrap;
+}
+
+.status-badge--on {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-badge--off {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.reorder-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.6875rem;
+  color: #78350f;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.inline-loading,
+.inline-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.table-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.625rem;
+  color: #9ca3af;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.products-table thead tr {
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.products-table th,
+.products-table td {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.products-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.data-row.row-dragging {
+  opacity: 0.45;
+}
+
+.data-row.row-drag-over {
+  background: rgba(254, 243, 199, 0.45);
+  box-shadow: inset 0 2px 0 #d97706;
+}
+
+.col-drag {
+  width: 2.5rem;
+}
+
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #9ca3af;
+  cursor: grab;
+  border-radius: 0.25rem;
+}
+
+.drag-handle:hover {
+  color: #78350f;
+  background: #f3f4f6;
+}
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.product-thumb {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  background: #f3f4f6;
+}
+
+.product-thumb.placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.btn-remove:hover {
-  background: #fee;
-  border-color: #c00;
-}
-.loading,
-.empty {
-  padding: 2rem;
-  text-align: center;
-  color: #666;
-  font-size: 0.9rem;
+
+.product-name {
+  font-weight: 600;
+  color: #111827;
+  text-decoration: none;
 }
 
-/* Modal */
+.product-name:hover {
+  color: var(--color-primary);
+}
+
+.col-price {
+  width: 7rem;
+  color: #4b5563;
+}
+
+.col-actions {
+  width: 3rem;
+  text-align: center;
+}
+
+.btn-remove {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
+}
+
+.btn-outline {
+  background: #fff;
+  border-color: var(--color-border);
+  color: #374151;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.btn-primary {
+  background: #5c3c24;
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #492f1b;
+}
+
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
 }
+
 .modal-content {
   background: #fff;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 600px;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 36rem;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-md);
 }
+
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
 }
+
 .modal-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
 }
+
 .btn-close {
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  width: 2rem;
+  height: 2rem;
   border: none;
   background: none;
-  font-size: 1.5rem;
+  color: #6b7280;
   cursor: pointer;
-  color: #666;
+  border-radius: 0.25rem;
 }
+
 .btn-close:hover {
-  color: #000;
+  background: #f3f4f6;
+  color: #111827;
 }
+
 .modal-body {
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
-  flex: 1;
 }
+
 .search-box {
   margin-bottom: 1rem;
 }
-.search-box input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
+
 .search-results {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .search-result-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid #eee;
-  border-radius: 6px;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.15s, background 0.15s;
 }
+
 .search-result-item:hover:not(.disabled) {
-  background: #f8f8f8;
+  background: #f9fafb;
   border-color: var(--color-primary);
 }
+
 .search-result-item.disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .result-thumb {
-  width: 50px;
-  height: 50px;
+  width: 3rem;
+  height: 3rem;
   object-fit: cover;
-  border-radius: 4px;
-  background: #eee;
+  border-radius: 0.25rem;
+  background: #f3f4f6;
+  flex-shrink: 0;
 }
+
 .result-thumb.placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
 }
+
 .result-info {
   flex: 1;
+  min-width: 0;
 }
+
 .result-name {
-  font-weight: 500;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-}
-.result-price {
-  font-size: 0.8rem;
-  color: #666;
-}
-.badge {
-  padding: 0.25rem 0.5rem;
-  background: #0a0;
-  color: #fff;
-  border-radius: 4px;
-  font-size: 0.75rem;
   font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.result-price {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  margin-top: 0.125rem;
+}
+
+.badge-added {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  background: #ecfdf5;
+  color: #047857;
+  border-radius: 0.125rem;
 }
 </style>

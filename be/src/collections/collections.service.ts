@@ -24,6 +24,46 @@ function serializeCollection(c: any) {
     seoDescription: c.seo_description ?? c.seoDescription ?? undefined,
     createdAt: c.created_at ?? c.createdAt,
     updatedAt: c.updated_at ?? c.updatedAt,
+    productCount: c._count?.products ?? c.productCount,
+  };
+}
+
+function serializeCategoryRef(cat: any) {
+  return {
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    orderIndex: cat.order_index ?? cat.orderIndex ?? 0,
+  };
+}
+
+function serializeCollectionProduct(cp: any) {
+  const p = cp.product;
+  const primaryImage = p.images?.[0];
+  const imageUrls =
+    p.images?.map((img: any) => img.image_url ?? img.imageUrl).filter(Boolean) ?? [];
+  const category = p.category ? serializeCategoryRef(p.category) : undefined;
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    sku: p.sku,
+    shortDescription: p.short_description ?? undefined,
+    price: Number(p.price),
+    salePrice: p.sale_price ? Number(p.sale_price) : undefined,
+    thumbnail: primaryImage?.image_url ?? p.thumbnail ?? undefined,
+    images: imageUrls.length ? imageUrls : p.thumbnail ? [p.thumbnail] : [],
+    material: p.material ?? undefined,
+    categoryId: p.category_id ?? p.categoryId,
+    isContactPrice: p.is_contact_price ?? false,
+    orderIndex: cp.order_index,
+    category,
+    breadcrumb: category
+      ? [
+          { name: category.name, slug: category.slug },
+          { name: p.name, slug: p.slug },
+        ]
+      : [],
   };
 }
 
@@ -37,6 +77,9 @@ export class CollectionsService {
     const list = await this.prisma.collection.findMany({
       where: { is_active: true },
       orderBy: [{ order_index: 'asc' }, { name: 'asc' }],
+      include: {
+        _count: { select: { products: true } },
+      },
     });
     return list.map(serializeCollection);
   }
@@ -44,6 +87,9 @@ export class CollectionsService {
   async findAllAdmin() {
     const list = await this.prisma.collection.findMany({
       orderBy: [{ order_index: 'asc' }, { name: 'asc' }],
+      include: {
+        _count: { select: { products: true } },
+      },
     });
     return list.map(serializeCollection);
   }
@@ -60,11 +106,7 @@ export class CollectionsService {
                   where: { is_primary: true },
                   take: 1,
                 },
-                category: {
-                  include: {
-                    room: true,
-                  },
-                },
+                category: true,
               },
             },
           },
@@ -73,30 +115,10 @@ export class CollectionsService {
       },
     });
     if (!collection) throw new NotFoundException(`Collection not found: ${id}`);
-    
+
     const serialized = serializeCollection(collection);
-    return {
-      ...serialized,
-      products: collection.products.map((cp: any) => {
-        const p = cp.product;
-        const primaryImage = p.images?.[0];
-        return {
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          price: Number(p.price),
-          salePrice: p.sale_price ? Number(p.sale_price) : undefined,
-          thumbnail: primaryImage?.image_url ?? p.thumbnail ?? undefined,
-          orderIndex: cp.order_index,
-          breadcrumb: p.category
-            ? [
-                { name: p.category.room.name, slug: p.category.room.slug },
-                { name: p.category.name, slug: p.category.slug },
-              ]
-            : [],
-        };
-      }),
-    };
+    const products = collection.products.map(serializeCollectionProduct);
+    return { ...serialized, productCount: products.length, products };
   }
 
   async findBySlug(slug: string) {
@@ -111,11 +133,7 @@ export class CollectionsService {
                   where: { is_primary: true },
                   take: 1,
                 },
-                category: {
-                  include: {
-                    room: true,
-                  },
-                },
+                category: true,
               },
             },
           },
@@ -123,35 +141,34 @@ export class CollectionsService {
         },
       },
     });
-    if (!collection) throw new NotFoundException(`Collection not found: ${slug}`);
-    
+    if (!collection)
+      throw new NotFoundException(`Collection not found: ${slug}`);
+
     const serialized = serializeCollection(collection);
+    const products = collection.products.map(serializeCollectionProduct);
+    const categoryMap = new Map<number, ReturnType<typeof serializeCategoryRef>>();
+    for (const cp of collection.products) {
+      if (cp.product?.category) {
+        const ref = serializeCategoryRef(cp.product.category);
+        categoryMap.set(ref.id, ref);
+      }
+    }
+    const categories = [...categoryMap.values()].sort(
+      (a, b) => a.orderIndex - b.orderIndex || a.name.localeCompare(b.name),
+    );
     return {
       ...serialized,
-      products: collection.products.map((cp: any) => {
-        const p = cp.product;
-        const primaryImage = p.images?.[0];
-        return {
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          price: Number(p.price),
-          salePrice: p.sale_price ? Number(p.sale_price) : undefined,
-          thumbnail: primaryImage?.image_url ?? p.thumbnail ?? undefined,
-          breadcrumb: p.category
-            ? [
-                { name: p.category.room.name, slug: p.category.room.slug },
-                { name: p.category.name, slug: p.category.slug },
-              ]
-            : [],
-        };
-      }),
+      productCount: products.length,
+      categories,
+      products,
     };
   }
 
   async create(dto: CreateCollectionDto) {
     let slug = dto.slug?.trim() || slugify(dto.name);
-    const existing = await this.prisma.collection.findUnique({ where: { slug } });
+    const existing = await this.prisma.collection.findUnique({
+      where: { slug },
+    });
     if (existing) slug = `${slug}-${Date.now().toString(36)}`;
     const collection = await this.prisma.collection.create({
       data: {
@@ -173,7 +190,9 @@ export class CollectionsService {
     if (!existing) throw new NotFoundException(`Collection not found: ${id}`);
     let slug = dto.slug?.trim();
     if (slug && slug !== existing.slug) {
-      const taken = await this.prisma.collection.findUnique({ where: { slug } });
+      const taken = await this.prisma.collection.findUnique({
+        where: { slug },
+      });
       if (taken) slug = `${slug}-${Date.now().toString(36)}`;
     } else {
       slug = existing.slug;
@@ -183,12 +202,20 @@ export class CollectionsService {
       data: {
         ...(dto.name != null && { name: dto.name.trim() }),
         ...(slug != null && { slug }),
-        ...(dto.description !== undefined && { description: dto.description?.trim() ?? null }),
-        ...(dto.thumbnail !== undefined && { thumbnail: dto.thumbnail?.trim() ?? null }),
+        ...(dto.description !== undefined && {
+          description: dto.description?.trim() ?? null,
+        }),
+        ...(dto.thumbnail !== undefined && {
+          thumbnail: dto.thumbnail?.trim() ?? null,
+        }),
         ...(dto.orderIndex !== undefined && { order_index: dto.orderIndex }),
         ...(dto.isActive !== undefined && { is_active: dto.isActive }),
-        ...(dto.seoTitle !== undefined && { seo_title: dto.seoTitle?.trim() ?? null }),
-        ...(dto.seoDescription !== undefined && { seo_description: dto.seoDescription?.trim() ?? null }),
+        ...(dto.seoTitle !== undefined && {
+          seo_title: dto.seoTitle?.trim() ?? null,
+        }),
+        ...(dto.seoDescription !== undefined && {
+          seo_description: dto.seoDescription?.trim() ?? null,
+        }),
       },
     });
     return serializeCollection(collection);
@@ -199,12 +226,35 @@ export class CollectionsService {
     return { deleted: true };
   }
 
-  async addProduct(collectionId: number, productId: number, orderIndex?: number) {
-    const collection = await this.prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection) throw new NotFoundException(`Collection not found: ${collectionId}`);
-    
-    const product = await this.prisma.product.findUnique({ where: { id: productId } });
-    if (!product) throw new NotFoundException(`Product not found: ${productId}`);
+  async reorder(collections: { id: number; orderIndex: number }[]) {
+    if (!collections.length) return { updated: 0 };
+    await this.prisma.$transaction(
+      collections.map((item) =>
+        this.prisma.collection.update({
+          where: { id: item.id },
+          data: { order_index: item.orderIndex },
+        }),
+      ),
+    );
+    return { updated: collections.length };
+  }
+
+  async addProduct(
+    collectionId: number,
+    productId: number,
+    orderIndex?: number,
+  ) {
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: collectionId },
+    });
+    if (!collection)
+      throw new NotFoundException(`Collection not found: ${collectionId}`);
+
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+    if (!product)
+      throw new NotFoundException(`Product not found: ${productId}`);
 
     // Check if product already in collection
     const existing = await this.prisma.collectionProduct.findUnique({
@@ -280,9 +330,15 @@ export class CollectionsService {
     return { removed: true };
   }
 
-  async updateProductOrder(collectionId: number, products: Array<{ productId: number; orderIndex: number }>) {
-    const collection = await this.prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection) throw new NotFoundException(`Collection not found: ${collectionId}`);
+  async updateProductOrder(
+    collectionId: number,
+    products: Array<{ productId: number; orderIndex: number }>,
+  ) {
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: collectionId },
+    });
+    if (!collection)
+      throw new NotFoundException(`Collection not found: ${collectionId}`);
 
     // Update all products in a transaction
     await this.prisma.$transaction(

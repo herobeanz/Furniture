@@ -1,18 +1,14 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ElasticsearchService } from './elasticsearch.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { ProductStatus } from '@prisma/client';
 import type { CreateProductDto } from './dto/create-product.dto';
 import type { UpdateProductDto } from './dto/update-product.dto';
+import type { ProductImageItemDto } from './dto/product-image-item.dto';
+import { slugify } from '../shared/utils/slugify';
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '');
-}
+const MAX_PRODUCT_GALLERY_IMAGES = 10;
 
 function toNumber(value: Decimal | null | undefined): number | undefined {
   if (value == null) return undefined;
@@ -50,6 +46,9 @@ function serializeProduct(p: any) {
     seoTitle: p.seo_title ?? p.seoTitle ?? undefined,
     seoDescription: p.seo_description ?? p.seoDescription ?? undefined,
     images: imageUrls, // Array of image URL strings
+    sortOrder: p.sort_order ?? p.sortOrder ?? 0,
+    createdAt:
+      (p.created_at ?? p.createdAt)?.toISOString?.() ?? undefined,
   };
 }
 
@@ -64,7 +63,7 @@ export class ProductsService {
 
   async findAllAdmin() {
     const products = await this.prisma.product.findMany({
-      orderBy: { created_at: 'desc' },
+      orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }],
       include: {
         images: {
           orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
@@ -153,17 +152,7 @@ export class ProductsService {
           images: {
             orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
           },
-          category: {
-            include: {
-              room: {
-                select: {
-                  id: true,
-                  name: true,
-                  slug: true,
-                },
-              },
-            },
-          },
+          category: true,
         },
       }),
       productIds ? Promise.resolve(total) : this.prisma.product.count({ where }),
@@ -187,7 +176,6 @@ export class ProductsService {
       const category = p.category;
       if (category) {
         result.breadcrumb = [
-          { name: category.room.name, slug: category.room.slug },
           { name: category.name, slug: category.slug },
           { name: p.name, slug: p.slug },
         ];
@@ -210,17 +198,7 @@ export class ProductsService {
         images: {
           orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
         },
-        category: {
-          include: {
-            room: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-        },
+        category: true,
       },
     });
     if (!product) throw new NotFoundException(`Product not found: ${id}`);
@@ -230,7 +208,6 @@ export class ProductsService {
     const category = (product as any).category;
     if (category) {
       result.breadcrumb = [
-        { name: category.room.name, slug: category.room.slug },
         { name: category.name, slug: category.slug },
         { name: (product as any).name, slug: (product as any).slug },
       ];
@@ -245,17 +222,7 @@ export class ProductsService {
         images: {
           orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
         },
-        category: {
-          include: {
-            room: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-        },
+        category: true,
       },
     });
     if (!product) throw new NotFoundException(`Product not found: ${slug}`);
@@ -265,7 +232,6 @@ export class ProductsService {
     const category = (product as any).category;
     if (category) {
       result.breadcrumb = [
-        { name: category.room.name, slug: category.room.slug },
         { name: category.name, slug: category.slug },
         { name: (product as any).name, slug: (product as any).slug },
       ];
@@ -286,17 +252,7 @@ export class ProductsService {
         images: {
           orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
         },
-        category: {
-          include: {
-            room: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-          },
-        },
+        category: true,
       },
     });
 
@@ -308,7 +264,6 @@ export class ProductsService {
       const category = p.category;
       if (category) {
         result.breadcrumb = [
-          { name: category.room.name, slug: category.room.slug },
           { name: category.name, slug: category.slug },
         ];
       }
@@ -371,6 +326,42 @@ export class ProductsService {
     return `${categoryPrefix}-${timestamp}`;
   }
 
+  private async syncProductImages(
+    productId: number,
+    images: ProductImageItemDto[] | undefined,
+  ): Promise<void> {
+    if (images === undefined) return;
+
+    const items = images
+      .map((img) => ({
+        imageUrl: img.imageUrl?.trim(),
+        isPrimary: img.isPrimary,
+        altText: img.altText?.trim(),
+        orderIndex: img.orderIndex,
+      }))
+      .filter((img) => !!img.imageUrl);
+
+    if (items.length > MAX_PRODUCT_GALLERY_IMAGES) {
+      throw new BadRequestException(
+        `Tối đa ${MAX_PRODUCT_GALLERY_IMAGES} ảnh chi tiết cho mỗi sản phẩm`,
+      );
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productImage.deleteMany({ where: { product_id: productId } });
+      if (!items.length) return;
+      await tx.productImage.createMany({
+        data: items.map((img, index) => ({
+          product_id: productId,
+          image_url: img.imageUrl!,
+          is_primary: img.isPrimary ?? index === 0,
+          alt_text: img.altText ?? null,
+          order_index: img.orderIndex ?? index,
+        })),
+      });
+    });
+  }
+
   async create(dto: CreateProductDto) {
     // Verify category exists
     const category = await this.prisma.category.findUnique({
@@ -380,7 +371,8 @@ export class ProductsService {
       throw new NotFoundException(`Category not found: ${dto.categoryId}`);
     }
 
-    let slug = dto.slug?.trim() || slugify(dto.name);
+    const rawSlug = dto.slug?.trim();
+    let slug = rawSlug ? slugify(rawSlug) : slugify(dto.name);
     const existing = await this.prisma.product.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now().toString(36)}`;
 
@@ -396,11 +388,18 @@ export class ProductsService {
       }
     }
 
+    const maxSort = await this.prisma.product.findFirst({
+      orderBy: { sort_order: 'desc' },
+      select: { sort_order: true },
+    });
+    const nextSortOrder = maxSort ? maxSort.sort_order + 1 : 0;
+
     const product = await this.prisma.product.create({
       data: {
         name: dto.name.trim(),
         slug,
         sku,
+        sort_order: nextSortOrder,
         short_description: dto.shortDescription?.trim() ?? null,
         description: dto.description?.trim() ?? null,
         price: dto.price,
@@ -429,7 +428,18 @@ export class ProductsService {
         },
       },
     });
-    return serializeProduct(product);
+
+    await this.syncProductImages(product.id, dto.images);
+
+    const withImages = await this.prisma.product.findUnique({
+      where: { id: product.id },
+      include: {
+        images: {
+          orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
+        },
+      },
+    });
+    return serializeProduct(withImages ?? product);
   }
 
   async update(id: number, dto: UpdateProductDto) {
@@ -465,7 +475,7 @@ export class ProductsService {
       }
     }
 
-    let slug = dto.slug?.trim();
+    let slug = dto.slug !== undefined ? slugify(dto.slug.trim()) : undefined;
     if (slug && slug !== existing.slug) {
       const taken = await this.prisma.product.findUnique({ where: { slug } });
       if (taken) slug = `${slug}-${Date.now().toString(36)}`;
@@ -509,7 +519,31 @@ export class ProductsService {
         },
       },
     });
-    return serializeProduct(product);
+
+    await this.syncProductImages(id, dto.images);
+
+    const withImages = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        images: {
+          orderBy: [{ is_primary: 'desc' }, { order_index: 'asc' }],
+        },
+      },
+    });
+    return serializeProduct(withImages ?? product);
+  }
+
+  async reorder(products: { id: number; sortOrder: number }[]) {
+    if (!products.length) return { updated: 0 };
+    await this.prisma.$transaction(
+      products.map((item) =>
+        this.prisma.product.update({
+          where: { id: item.id },
+          data: { sort_order: item.sortOrder },
+        }),
+      ),
+    );
+    return { updated: products.length };
   }
 
   async remove(id: number) {

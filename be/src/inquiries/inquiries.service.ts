@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { InquiryStatus } from '@prisma/client';
+import { InquiryStatus, Prisma } from '@prisma/client';
 import type { CreateInquiryDto } from './dto/create-inquiry.dto';
 
 @Injectable()
@@ -53,8 +53,54 @@ export class InquiriesService {
     };
   }
 
-  async findAll(page = 1, limit = 20, status?: InquiryStatus) {
-    const where = status ? { status } : {};
+  private buildListWhere(
+    status?: InquiryStatus,
+    search?: string,
+    dateFrom?: string,
+    dateTo?: string,
+  ): Prisma.InquiryWhereInput {
+    const where: Prisma.InquiryWhereInput = {};
+    if (status) {
+      where.status = status;
+    }
+    const q = search?.trim();
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { phone: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } },
+        { message: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+    if (dateFrom || dateTo) {
+      where.created_at = {};
+      if (dateFrom) {
+        const from = new Date(dateFrom);
+        if (!Number.isNaN(from.getTime())) {
+          from.setHours(0, 0, 0, 0);
+          where.created_at.gte = from;
+        }
+      }
+      if (dateTo) {
+        const to = new Date(dateTo);
+        if (!Number.isNaN(to.getTime())) {
+          to.setHours(23, 59, 59, 999);
+          where.created_at.lte = to;
+        }
+      }
+    }
+    return where;
+  }
+
+  async findAll(
+    page = 1,
+    limit = 20,
+    status?: InquiryStatus,
+    search?: string,
+    dateFrom?: string,
+    dateTo?: string,
+  ) {
+    const where = this.buildListWhere(status, search, dateFrom, dateTo);
     const [data, total] = await Promise.all([
       this.prisma.inquiry.findMany({
         where,

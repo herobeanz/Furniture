@@ -1,5 +1,5 @@
 // Prisma schema - Furniture E-commerce
-// Updated structure: Room > Category > Product
+// Structure: Category > Product; Collection (M2M) for curated groups
 
 generator client {
   provider = "prisma-client-js"
@@ -58,38 +58,13 @@ model Admin {
 }
 
 // ---------------------------------------------------------------------------
-// Rooms (Hero/Phòng - Level 1: Phòng khách, Phòng ngủ, Phòng bếp...)
-// ---------------------------------------------------------------------------
-
-model Room {
-  id              Int         @id @default(autoincrement())
-  name            String
-  slug            String       @unique
-  description     String?      @db.Text
-  thumbnail       String?
-  order_index     Int          @default(0) @map("order_index")
-  is_active       Boolean      @default(true) @map("is_active")
-  seo_title       String?      @db.Text @map("seo_title")
-  seo_description String?      @db.Text @map("seo_description")
-  created_at      DateTime     @default(now()) @map("created_at")
-  updated_at      DateTime     @updatedAt @map("updated_at")
-
-  categories      Category[]
-
-  @@index([slug])
-  @@index([order_index])
-  @@map("rooms")
-}
-
-// ---------------------------------------------------------------------------
-// Categories (Level 2: Sofa, Giường, Tủ, Bàn, Ghế...)
+// Categories (Sofa, Giường, Tủ, Bàn, Ghế...)
 // ---------------------------------------------------------------------------
 
 model Category {
   id              Int           @id @default(autoincrement())
-  room_id         Int           @map("room_id")
   name            String
-  slug            String
+  slug            String        @unique
   description     String?       @db.Text
   thumbnail       String?
   order_index     Int           @default(0) @map("order_index")
@@ -99,18 +74,14 @@ model Category {
   created_at      DateTime      @default(now()) @map("created_at")
   updated_at      DateTime      @updatedAt @map("updated_at")
 
-  room            Room          @relation(fields: [room_id], references: [id], onDelete: Cascade)
   products        Product[]
 
-  @@unique([room_id, slug])
-  @@index([slug])
-  @@index([room_id])
   @@index([order_index])
   @@map("categories")
 }
 
 // ---------------------------------------------------------------------------
-// Products (Level 3)
+// Products
 // ---------------------------------------------------------------------------
 
 model Product {
@@ -140,6 +111,7 @@ model Product {
   flash_sale_end_at  DateTime?     @map("flash_sale_end_at")
   seo_title         String?        @db.Text @map("seo_title")
   seo_description   String?        @db.Text @map("seo_description")
+  sort_order        Int            @default(0) @map("sort_order")
   created_at        DateTime       @default(now()) @map("created_at")
   updated_at        DateTime       @updatedAt @map("updated_at")
 
@@ -155,6 +127,7 @@ model Product {
   @@index([price])
   @@index([is_featured])
   @@index([is_hot])
+  @@index([sort_order])
   @@map("products")
 }
 
@@ -291,6 +264,7 @@ model BlogPost {
   seo_description String?   @db.Text @map("seo_description")
   is_active       Boolean   @default(true) @map("is_active")
   is_featured     Boolean   @default(false) @map("is_featured")
+  sort_order      Int       @default(0) @map("sort_order")
   published_at    DateTime? @map("published_at")
   created_at      DateTime  @default(now()) @map("created_at")
   updated_at      DateTime  @updatedAt @map("updated_at")
@@ -300,5 +274,6 @@ model BlogPost {
   @@index([is_featured])
   @@index([published_at])
   @@index([category])
+  @@index([sort_order])
   @@map("blog_posts")
 }

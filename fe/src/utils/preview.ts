@@ -6,7 +6,7 @@ import { logger } from '@/utils/logger'
 
 const PREVIEW_PREFIX = 'preview_'
 
-export type PreviewType = 'product' | 'blog' | 'cms' | 'collection' | 'category' | 'room'
+export type PreviewType = 'product' | 'blog' | 'collection' | 'category'
 
 export function savePreviewData(type: PreviewType, slug: string, data: any) {
   const key = `${PREVIEW_PREFIX}${type}_${slug}`

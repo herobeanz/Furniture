@@ -1,8 +1,19 @@
 <template>
-  <article class="product-card">
+  <article
+    class="product-card"
+    :class="{ 'product-card--compact': variant === 'compact' }"
+  >
     <RouterLink :to="getProductPath(product)" class="product-card-image">
-      <img v-if="product.images?.length" :src="product.images[0]" :alt="product.name" />
-      <img v-else-if="product.thumbnail" :src="product.thumbnail" :alt="product.name" />
+      <img
+        v-if="product.images?.length"
+        :src="resolveMediaUrl(product.images[0])"
+        :alt="product.name"
+      />
+      <img
+        v-else-if="product.thumbnail"
+        :src="resolveMediaUrl(product.thumbnail)"
+        :alt="product.name"
+      />
       <div v-else class="no-image">Ảnh</div>
       <!-- <span v-if="showSaleTag && hasDiscount" class="tag sale">SALE CỰC SỐC</span> -->
       <!-- <span v-if="showSaleTag && hasDiscount" class="tag discount">{{ discountPercentage }}%</span> -->
@@ -12,28 +23,50 @@
       </div>
     </RouterLink>
     <div class="product-card-info">
-      <div v-if="product.sku" class="product-code">MÃ: {{ product.sku }}</div>
-      <RouterLink :to="getProductPath(product)" class="product-card-name">{{ product.name }}</RouterLink>
+      <div v-if="variant !== 'compact' && product.sku" class="product-code">
+        MÃ: {{ product.sku }}
+      </div>
+      <RouterLink :to="getProductPath(product)" class="product-card-name">{{
+        product.name
+      }}</RouterLink>
+      <p
+        v-if="variant === 'compact' && (product.material || product.shortDescription)"
+        class="product-card-subtitle"
+      >
+        {{ product.material || product.shortDescription }}
+      </p>
       <div class="product-card-prices">
         <span v-if="product.isContactPrice" class="price-contact">Liên hệ</span>
         <template v-else>
-          <span v-if="hasDiscount" class="price-current">{{ formatPrice(product.salePrice!) }}</span>
-          <span v-if="hasDiscount" class="price-old">{{ formatPrice(product.price) }}</span>
-          <span v-else class="price-current">{{ formatPrice(product.price) }}</span>
+          <span v-if="hasDiscount" class="price-current">{{
+            formatPrice(product.salePrice!)
+          }}</span>
+          <span v-if="hasDiscount" class="price-old">{{
+            formatPrice(product.price)
+          }}</span>
+          <span v-else class="price-current">{{
+            formatPrice(product.price)
+          }}</span>
         </template>
       </div>
-      <div class="product-meta-row">
+      <RouterLink
+        v-if="variant === 'compact'"
+        :to="getProductPath(product)"
+        class="product-card-arrow"
+        aria-label="Xem chi tiết"
+      >
+        <i class="fa-solid fa-arrow-right" aria-hidden="true" />
+      </RouterLink>
+      <div v-if="variant !== 'compact'" class="product-meta-row">
         <div class="product-meta sold">
           <span class="meta-icon bag">🛍️</span>
           <span class="meta-text">
-            Đã bán: {{ (product.soldCount ?? 0).toLocaleString('vi-VN') }}+
+            Đã bán: {{ (product.soldCount ?? 0).toLocaleString("vi-VN") }}+
           </span>
         </div>
         <div class="product-meta rating" v-if="product.rating != null">
           <span class="meta-icon star">⭐</span>
-          <span class="meta-text">
-            {{ product.rating.toFixed(1) }}/5
-          </span>
+          <span class="meta-text"> {{ product.rating.toFixed(1) }}/5 </span>
         </div>
       </div>
     </div>
@@ -41,24 +74,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Product } from '@/services/api/products'
-import { formatPrice } from '@/utils/format'
-import { getProductPath } from '@/utils/navigation'
+import { computed } from "vue";
+import type { Product } from "@/services/api/products";
+import { formatPrice } from "@/utils/format";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { getProductPath } from "@/utils/navigation";
 
 const props = withDefaults(
   defineProps<{
-    product: Product
-    showSaleTag?: boolean
-    showHotTag?: boolean
+    product: Product;
+    showSaleTag?: boolean;
+    showHotTag?: boolean;
+    variant?: "default" | "compact";
   }>(),
-  { showSaleTag: true, showHotTag: false }
-)
+  { showSaleTag: true, showHotTag: false, variant: "default" },
+);
 
 // Calculate discount
 const hasDiscount = computed(() => {
-  return props.product.salePrice != null && props.product.salePrice < props.product.price
-})
+  return (
+    props.product.salePrice != null &&
+    props.product.salePrice < props.product.price
+  );
+});
 </script>
 
 <style scoped>
@@ -73,13 +111,19 @@ const hasDiscount = computed(() => {
 }
 
 .product-card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 16px;
   padding: 1px;
-  background: linear-gradient(135deg, var(--color-primary-light), var(--color-accent));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    var(--color-accent)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -93,6 +137,95 @@ const hasDiscount = computed(() => {
 
 .product-card:hover::before {
   opacity: 1;
+}
+
+.product-card--compact {
+  border-radius: 0.5rem;
+  background: rgba(249, 250, 251, 0.5);
+  box-shadow: none;
+}
+
+.product-card--compact::before {
+  display: none;
+}
+
+.product-card--compact:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.product-card--compact .product-card-image {
+  aspect-ratio: auto;
+  height: 10rem;
+  margin: 0.75rem 0.75rem 0;
+  border-radius: 0.375rem;
+  background: #fff;
+}
+
+.product-card--compact .product-card-info {
+  padding: 0.75rem;
+  position: relative;
+}
+
+.product-card--compact .product-card-name {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  -webkit-line-clamp: 1;
+}
+
+.product-card--compact .product-card-subtitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.625rem;
+  color: var(--color-text-light);
+  line-height: 1.3;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-card--compact .product-card-prices {
+  margin-bottom: 0;
+}
+
+.product-card--compact .price-current {
+  font-size: 0.875rem;
+}
+
+.product-card--compact .product-quickview-overlay {
+  display: none;
+}
+
+.product-card-arrow {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: var(--icon-size-xs);
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.product-card-arrow i {
+  line-height: 1;
+}
+
+.product-card-arrow:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
 }
 
 .product-card-image {
@@ -176,7 +309,8 @@ const hasDiscount = computed(() => {
 }
 
 @keyframes tagPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -201,7 +335,8 @@ const hasDiscount = computed(() => {
 }
 
 @keyframes hotGlow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
   }
   50% {
@@ -306,15 +441,15 @@ const hasDiscount = computed(() => {
   .product-card {
     border-radius: 14px;
   }
-  
+
   .product-card-info {
     padding: 1.125rem;
   }
-  
+
   .product-card-name {
     font-size: 0.9375rem;
   }
-  
+
   .price-current {
     font-size: 1.0625rem;
   }
@@ -324,32 +459,32 @@ const hasDiscount = computed(() => {
   .product-card {
     border-radius: 12px;
   }
-  
+
   .product-card-info {
     padding: 1rem;
   }
-  
+
   .product-card-name {
     font-size: 0.9375rem;
     margin-bottom: 0.625rem;
   }
-  
+
   .product-card-prices {
     margin-bottom: 0.75rem;
   }
-  
+
   .price-current {
     font-size: 1rem;
   }
-  
+
   .price-old {
     font-size: 0.875rem;
   }
-  
+
   .product-meta-row {
     padding-top: 0.625rem;
   }
-  
+
   .product-meta {
     font-size: 0.75rem;
   }
@@ -359,68 +494,68 @@ const hasDiscount = computed(() => {
   .product-card {
     border-radius: 10px;
   }
-  
+
   .product-card-info {
     padding: 0.875rem;
   }
-  
+
   .product-code {
     font-size: 0.75rem;
     margin-bottom: 0.375rem;
   }
-  
+
   .product-card-name {
     font-size: 0.875rem;
     line-height: 1.4;
     margin-bottom: 0.5rem;
   }
-  
+
   .product-card-prices {
     gap: 0.5rem;
     margin-bottom: 0.625rem;
   }
-  
+
   .price-current {
     font-size: 0.9375rem;
   }
-  
+
   .price-contact {
     font-size: 0.875rem;
     padding: 0.1875rem 0.625rem;
   }
-  
+
   .price-old {
     font-size: 0.8125rem;
   }
-  
+
   .tag {
     top: 8px;
     font-size: 0.6875rem;
     padding: 0.25rem 0.5rem;
     border-radius: 6px;
   }
-  
+
   .tag.sale,
   .tag.hot {
     left: 8px;
     right: 8px;
   }
-  
+
   .product-quickview-label {
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
   }
-  
+
   .product-meta-row {
     padding-top: 0.5rem;
     gap: 0.5rem;
   }
-  
+
   .product-meta {
     font-size: 0.6875rem;
     gap: 0.25rem;
   }
-  
+
   .product-meta .meta-icon {
     font-size: 0.875rem;
   }
@@ -431,7 +566,7 @@ const hasDiscount = computed(() => {
   .product-card:hover {
     transform: none;
   }
-  
+
   .product-quickview-overlay {
     display: none;
   }

@@ -23,11 +23,22 @@ export function formatBlogDate(dateString?: string): string {
   })
 }
 
+import { resolveRichContentHtml } from '@/utils/richText'
+
 /**
- * Format blog content (convert line breaks to HTML)
+ * Rich HTML from TinyMCE, or plain text with line breaks (legacy).
  */
-export function formatBlogContent(content: string): string {
+export function formatRichContent(content: string): string {
+  if (!content) return ''
+  if (/<[a-z][\s\S]*>/i.test(content)) {
+    return resolveRichContentHtml(content)
+  }
   return content.replace(/\n/g, '<br>')
+}
+
+/** @deprecated Use formatRichContent */
+export function formatBlogContent(content: string): string {
+  return formatRichContent(content)
 }
 
 /**

@@ -1,97 +1,216 @@
 <template>
-  <div class="inquiries-list">
-    <div class="list-header">
-      <h1>Quản lý Yêu cầu</h1>
-      <div class="header-actions">
-        <button type="button" class="btn-delete" @click="handleBulkDelete" :disabled="selectedItems.length === 0">
-          <span class="btn-icon">−</span>
-          Xóa
-        </button>
-        <select v-model="statusFilter" class="filter-select">
-          <option value="">Tất cả trạng thái</option>
-          <option value="new">Mới</option>
-          <option value="contacted">Đã liên hệ</option>
-          <option value="done">Hoàn thành</option>
-        </select>
-      </div>
+  <div class="inquiries-page">
+    <div class="page-intro">
+      <h1>Quản lý yêu cầu</h1>
+      <p>Quản lý tất cả các yêu cầu khách hàng gửi về từ website</p>
     </div>
-    <div v-if="loading" class="loading-state">Đang tải...</div>
-    <div v-else-if="items.length === 0" class="empty-state">Chưa có yêu cầu.</div>
-    <div v-else class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>
-              <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" />
-            </th>
-            <th>Ngày</th>
-            <th>Họ tên</th>
-            <th>Điện thoại</th>
-            <th>Email</th>
-            <th>Nội dung</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="i in paginatedItems" :key="i.id">
-            <td>
-              <input type="checkbox" :checked="selectedItems.includes(i.id)" @change="toggleSelect(i.id)" />
-            </td>
-            <td>{{ formatDate(i.createdAt) }}</td>
-            <td>{{ i.name }}</td>
-            <td>{{ i.phone }}</td>
-            <td>{{ i.email || '—' }}</td>
-            <td class="cell-message">{{ truncate(i.message, 50) }}</td>
-            <td>
-              <select
-                :value="i.status"
-                class="status-select"
-                @change="updateStatus(i.id, ($event.target as HTMLSelectElement).value)"
-              >
-                <option value="new">Mới</option>
-                <option value="contacted">Đã liên hệ</option>
-                <option value="done">Hoàn thành</option>
-              </select>
-            </td>
-            <td class="actions-cell">
-              <button type="button" class="action-btn view" @click="viewDetail(i)" title="Xem chi tiết">
-                👁️
-              </button>
-              <button type="button" class="action-btn cart" @click="viewCart(i)" title="Xem giỏ hàng">
-                🛒
-              </button>
-              <a :href="`tel:${i.phone}`" class="action-btn phone" title="Gọi điện">📞</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="pagination">
-        <div class="pagination-info">
-          Hiển thị {{ paginatedItems.length }} trong tổng số {{ items.length }} mục
+
+    <div class="toolbar">
+      <div class="toolbar-filters">
+        <div class="field-search">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Tìm theo tên, số điện thoại, email..."
+            class="field-input"
+          />
+          <i class="fa-solid fa-magnifying-glass field-icon" />
         </div>
-        <div class="pagination-controls">
-          <button type="button" class="page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
-            Previous
+        <div class="field-dates">
+          <input v-model="dateFrom" type="date" class="field-input field-date" title="Từ ngày" />
+          <span class="date-sep">–</span>
+          <input v-model="dateTo" type="date" class="field-input field-date" title="Đến ngày" />
+        </div>
+        <div class="field-select-wrap">
+          <select v-model="statusFilter" class="field-input field-select">
+            <option value="">Trạng thái: Tất cả</option>
+            <option value="new">Mới</option>
+            <option value="contacted">Đang xử lý</option>
+            <option value="done">Đã xử lý</option>
+          </select>
+          <i class="fa-solid fa-chevron-down field-select-icon" />
+        </div>
+      </div>
+      <button type="button" class="btn-export" :disabled="exporting" @click="handleExport">
+        <i class="fa-solid fa-download" />
+        {{ exporting ? 'Đang xuất...' : 'Xuất danh sách' }}
+      </button>
+    </div>
+
+    <div class="table-panel">
+      <div v-if="loading" class="state-box">Đang tải...</div>
+      <div v-else-if="error" class="state-box state-error">{{ error }}</div>
+      <div v-else-if="items.length === 0" class="state-box">Chưa có yêu cầu phù hợp bộ lọc.</div>
+
+      <template v-else>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-index">#</th>
+                <th class="col-customer">Khách hàng</th>
+                <th>Nội dung yêu cầu</th>
+                <th class="col-contact">Liên hệ</th>
+                <th class="col-time">Thời gian</th>
+                <th class="col-status">Trạng thái</th>
+                <th class="col-actions">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in items" :key="item.id">
+                <td class="col-index">{{ rowNumber(index) }}</td>
+                <td class="col-customer">
+                  <div class="customer-name">{{ item.name }}</div>
+                  <div class="customer-phone">{{ formatPhoneDisplay(item.phone) }}</div>
+                </td>
+                <td class="col-message">
+                  <span class="message-text">{{ item.message }}</span>
+                  <span v-if="item.product?.name" class="message-product">
+                    · {{ item.product.name }}
+                  </span>
+                </td>
+                <td class="col-contact">{{ item.email || '—' }}</td>
+                <td class="col-time">
+                  {{ formatDateTime(item.createdAt).date }}<br />
+                  <span class="time-sub">{{ formatDateTime(item.createdAt).time }}</span>
+                </td>
+                <td class="col-status">
+                  <span :class="['status-pill', inquiryStatusClass(item.status)]">
+                    {{ inquiryStatusLabel(item.status) }}
+                  </span>
+                </td>
+                <td class="col-actions">
+                  <button
+                    type="button"
+                    class="action-btn"
+                    title="Xem chi tiết"
+                    @click="openDetail(item)"
+                  >
+                    <i class="fa-regular fa-eye" />
+                  </button>
+                  <div class="action-menu-wrap">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      title="Thêm thao tác"
+                      @click.stop="toggleMenu(item.id)"
+                    >
+                      <i class="fa-solid fa-ellipsis-vertical" />
+                    </button>
+                    <div v-if="openMenuId === item.id" class="action-menu">
+                      <button type="button" @click="setStatus(item, 'contacted')">
+                        Đánh dấu đang xử lý
+                      </button>
+                      <button type="button" @click="setStatus(item, 'done')">
+                        Đánh dấu đã xử lý
+                      </button>
+                      <a :href="phoneTelHref(item.phone)" class="menu-link" @click="closeMenu">
+                        Gọi điện
+                      </a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <div>
+            Hiển thị {{ rangeStart }}–{{ rangeEnd }} của {{ total }} yêu cầu
+          </div>
+          <div class="footer-controls">
+            <div class="limit-select-wrap">
+              <select
+                class="limit-select"
+                :value="limit"
+                @change="onLimitChange(Number(($event.target as HTMLSelectElement).value))"
+              >
+                <option v-for="size in pageSizeOptions" :key="size" :value="size">
+                  {{ size }} / trang
+                </option>
+              </select>
+              <i class="fa-solid fa-chevron-down limit-select-icon" />
+            </div>
+            <div class="pagination">
+              <button
+                type="button"
+                class="page-btn"
+                :disabled="page <= 1"
+                @click="goToPage(page - 1)"
+              >
+                <i class="fa-solid fa-chevron-left" />
+              </button>
+              <template v-for="(item, idx) in paginationItems" :key="`${item}-${idx}`">
+                <span v-if="item === 'ellipsis'" class="page-ellipsis">…</span>
+                <button
+                  v-else
+                  type="button"
+                  class="page-btn"
+                  :class="{ 'page-btn--active': item === page }"
+                  @click="goToPage(item)"
+                >
+                  {{ item }}
+                </button>
+              </template>
+              <button
+                type="button"
+                class="page-btn"
+                :disabled="page >= totalPages"
+                @click="goToPage(page + 1)"
+              >
+                <i class="fa-solid fa-chevron-right" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <div v-if="detailItem" class="modal-overlay" @click.self="closeDetail">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="inquiry-detail-title">
+        <div class="modal-head">
+          <h2 id="inquiry-detail-title">Chi tiết yêu cầu</h2>
+          <button type="button" class="modal-close" aria-label="Đóng" @click="closeDetail">
+            <i class="fa-solid fa-xmark" />
           </button>
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            type="button"
-            class="page-btn"
-            :class="{ active: page === currentPage }"
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button
-            type="button"
-            class="page-btn"
-            :disabled="currentPage === totalPages"
-            @click="goToPage(currentPage + 1)"
-          >
-            Next
-          </button>
+        </div>
+        <div class="modal-body">
+          <dl class="detail-list">
+            <div><dt>Khách hàng</dt><dd>{{ detailItem.name }}</dd></div>
+            <div><dt>Điện thoại</dt><dd>{{ formatPhoneDisplay(detailItem.phone) }}</dd></div>
+            <div><dt>Email</dt><dd>{{ detailItem.email || '—' }}</dd></div>
+            <div><dt>Nội dung</dt><dd>{{ detailItem.message }}</dd></div>
+            <div v-if="detailItem.product?.name">
+              <dt>Sản phẩm</dt><dd>{{ detailItem.product.name }}</dd>
+            </div>
+            <div><dt>Nguồn</dt><dd>{{ sourceLabel(detailItem.source) }}</dd></div>
+            <div>
+              <dt>Thời gian</dt>
+              <dd>
+                {{ formatDateTime(detailItem.createdAt).date }}
+                {{ formatDateTime(detailItem.createdAt).time }}
+              </dd>
+            </div>
+          </dl>
+          <label class="status-field">
+            <span>Trạng thái</span>
+            <select
+              :value="detailItem.status"
+              class="status-select"
+              @change="onDetailStatusChange"
+            >
+              <option value="new">Mới</option>
+              <option value="contacted">Đang xử lý</option>
+              <option value="done">Đã xử lý</option>
+            </select>
+          </label>
+        </div>
+        <div class="modal-foot">
+          <a :href="phoneTelHref(detailItem.phone)" class="btn-call">
+            <i class="fa-solid fa-phone" /> Gọi khách hàng
+          </a>
+          <button type="button" class="btn-close-modal" @click="closeDetail">Đóng</button>
         </div>
       </div>
     </div>
@@ -99,366 +218,695 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import type { AdminInquiry } from '@/services/api/inquiries'
+import { useAdminInquiries } from '@/composables/admin/useAdminInquiries'
+import {
+  inquiryStatusLabel,
+  inquiryStatusClass,
+} from '@/constants/inquiry-status'
+import { formatPhoneDisplay, phoneTelHref } from '@/constants/site'
 import { logger } from '@/utils/logger'
-import { ref, computed, watch } from 'vue'
-import apiClient from '@/services/api/client'
-import { ITEMS_PER_PAGE } from '@/constants/admin'
 
-const items = ref<any[]>([])
-const loading = ref(true)
-const statusFilter = ref('')
-const selectedItems = ref<number[]>([])
-const currentPage = ref(1)
-const itemsPerPage = ITEMS_PER_PAGE
+const {
+  items,
+  total,
+  loading,
+  error,
+  search,
+  statusFilter,
+  dateFrom,
+  dateTo,
+  page,
+  limit,
+  totalPages,
+  rangeStart,
+  rangeEnd,
+  paginationItems,
+  pageSizeOptions,
+  updateStatus,
+  exportCsv,
+  formatDateTime,
+  goToPage,
+  onLimitChange,
+} = useAdminInquiries()
 
-const totalPages = computed(() => Math.ceil(items.value.length / itemsPerPage))
-const allSelected = computed(() => {
-  if (items.value.length === 0) return false
-  return paginatedItems.value.every((item) => selectedItems.value.includes(item.id))
-})
+const exporting = ref(false)
+const detailItem = ref<AdminInquiry | null>(null)
+const openMenuId = ref<number | null>(null)
 
-const paginatedItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return items.value.slice(start, end)
-})
-
-function formatDate(s: string) {
-  return new Date(s).toLocaleDateString('vi-VN')
+function rowNumber(index: number): number {
+  return (page.value - 1) * limit.value + index + 1
 }
 
-function truncate(text: string, len: number) {
-  if (!text) return ''
-  return text.length <= len ? text : text.slice(0, len) + '...'
-}
-
-function viewDetail(inquiry: any) {
-  const detail = [
-    `Họ tên: ${inquiry.name}`,
-    `Điện thoại: ${inquiry.phone}`,
-    inquiry.email ? `Email: ${inquiry.email}` : '',
-    `Nội dung: ${inquiry.message}`,
-    inquiry.product ? `Sản phẩm: ${inquiry.product.name}` : '',
-    `Nguồn: ${getSourceLabel(inquiry.source)}`,
-    `Trạng thái: ${getStatusLabel(inquiry.status)}`,
-    `Ngày tạo: ${formatDate(inquiry.createdAt)}`,
-  ].filter(Boolean).join('\n')
-  alert(detail)
-}
-
-function viewCart(inquiry: any) {
-  // Hiển thị thông tin giỏ hàng/đơn hàng từ inquiry
-  const cartInfo = [
-    `Khách hàng: ${inquiry.name}`,
-    `SĐT: ${inquiry.phone}`,
-    inquiry.email ? `Email: ${inquiry.email}` : '',
-    `---`,
-    `Nội dung yêu cầu:`,
-    inquiry.message,
-    `---`,
-    inquiry.product ? `Sản phẩm quan tâm: ${inquiry.product.name}` : 'Không có sản phẩm cụ thể',
-    `Nguồn: ${getSourceLabel(inquiry.source)}`,
-    `Trạng thái: ${getStatusLabel(inquiry.status)}`,
-    `Ngày: ${formatDate(inquiry.createdAt)}`,
-  ].filter(Boolean).join('\n')
-  alert(cartInfo)
-}
-
-function getStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    new: 'Mới',
-    contacted: 'Đã liên hệ',
-    done: 'Hoàn thành',
-  }
-  return labels[status] || status
-}
-
-function getSourceLabel(source: string) {
+function sourceLabel(source: string): string {
   const labels: Record<string, string> = {
     product: 'Từ sản phẩm',
     contact: 'Từ trang liên hệ',
-    facebook: 'Từ Facebook',
-    zalo: 'Từ Zalo',
+    facebook: 'Facebook',
+    zalo: 'Zalo',
   }
-  return labels[source] || source
+  return labels[source] ?? source
 }
 
-async function fetchList() {
-  loading.value = true
+function openDetail(item: AdminInquiry) {
+  detailItem.value = item
+  closeMenu()
+}
+
+function closeDetail() {
+  detailItem.value = null
+}
+
+function toggleMenu(id: number) {
+  openMenuId.value = openMenuId.value === id ? null : id
+}
+
+function closeMenu() {
+  openMenuId.value = null
+}
+
+async function setStatus(item: AdminInquiry, status: string) {
+  closeMenu()
   try {
-    const res = await apiClient.get('/inquiries', {
-      params: { limit: 100, status: statusFilter.value || undefined },
-    })
-    items.value = (res as any).data ?? []
+    await updateStatus(item.id, status)
+  } catch {
+    alert('Cập nhật trạng thái thất bại.')
+  }
+}
+
+async function onDetailStatusChange(event: Event) {
+  if (!detailItem.value) return
+  const status = (event.target as HTMLSelectElement).value
+  try {
+    await updateStatus(detailItem.value.id, status)
+    detailItem.value = { ...detailItem.value, status }
+  } catch {
+    alert('Cập nhật trạng thái thất bại.')
+  }
+}
+
+async function handleExport() {
+  exporting.value = true
+  try {
+    await exportCsv()
+  } catch (e) {
+    logger.error(e)
+    alert('Xuất danh sách thất bại.')
   } finally {
-    loading.value = false
+    exporting.value = false
   }
 }
 
-function toggleSelect(id: number) {
-  const index = selectedItems.value.indexOf(id)
-  if (index > -1) {
-    selectedItems.value.splice(index, 1)
-  } else {
-    selectedItems.value.push(id)
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  if (!target.closest('.action-menu-wrap')) {
+    closeMenu()
   }
 }
 
-function toggleSelectAll() {
-  if (allSelected.value) {
-    selectedItems.value = []
-  } else {
-    selectedItems.value = paginatedItems.value.map((item) => item.id)
-  }
-}
-
-function goToPage(page: number) {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    selectedItems.value = []
-  }
-}
-
-async function handleBulkDelete() {
-  if (selectedItems.value.length === 0) return
-  if (!confirm(`Xóa ${selectedItems.value.length} yêu cầu đã chọn?`)) return
-  try {
-    await Promise.all(selectedItems.value.map((id) => apiClient.delete(`/inquiries/${id}`)))
-    items.value = items.value.filter((x) => !selectedItems.value.includes(x.id))
-    selectedItems.value = []
-  } catch (e) {
-    logger.error(e)
-    alert('Xóa thất bại.')
-  }
-}
-
-async function updateStatus(id: number, status: string) {
-  try {
-    await apiClient.patch(`/inquiries/${id}/status`, { status })
-    const item = items.value.find((x) => x.id === id)
-    if (item) item.status = status
-  } catch (e) {
-    logger.error(e)
-    alert('Cập nhật thất bại.')
-  }
-}
-
-watch(statusFilter, () => {
-  currentPage.value = 1
-  selectedItems.value = []
-  fetchList()
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
 })
-watch(() => statusFilter.value, fetchList, { immediate: true })
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style scoped>
-.inquiries-list {
-  background: #f5f5f5;
-  min-height: 100vh;
-  padding: 0;
+.inquiries-page {
+  padding: 1.5rem 2rem 2rem;
 }
 
-.list-header {
-  background: #1e293b;
-  color: #fff;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0;
-}
-
-.list-header h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
+.page-intro h1 {
   margin: 0;
-  color: #fff;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #030712;
 }
 
-.header-actions {
+.page-intro p {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  color: #9ca3af;
+}
+
+.toolbar {
+  margin-top: 1.5rem;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-size: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .toolbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
+  width: 100%;
 }
 
-.btn-delete {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
+@media (min-width: 1024px) {
+  .toolbar-filters {
+    width: auto;
+    flex: 1;
+  }
+}
+
+.field-search {
+  position: relative;
+  flex: 1 1 16rem;
+  min-width: 12rem;
+}
+
+.field-dates {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
+  flex: 1 1 14rem;
+}
+
+.field-date {
+  flex: 1;
+  min-width: 0;
+}
+
+.date-sep {
+  color: #9ca3af;
+  font-size: 0.6875rem;
+}
+
+.field-select-wrap {
+  position: relative;
+  flex: 0 1 10rem;
+  min-width: 9rem;
+}
+
+.field-input {
+  width: 100%;
+  background: rgba(249, 250, 251, 0.5);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: #92400e;
+}
+
+.field-icon {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6875rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.field-select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 1.75rem;
+}
+
+.field-select-icon {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.5625rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.375rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: background 0.2s;
+  width: 100%;
 }
 
-.btn-delete:hover:not(:disabled) {
-  background: #b91c1c;
+.btn-export:hover:not(:disabled) {
+  background: #f9fafb;
 }
 
-.btn-delete:disabled {
-  opacity: 0.5;
+.btn-export:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-.btn-icon {
-  font-size: 1rem;
-  font-weight: bold;
+.btn-export i {
+  color: #78350f;
+  font-size: 0.6875rem;
 }
 
-.filter-select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  font-size: 0.875rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  cursor: pointer;
+@media (min-width: 640px) {
+  .btn-export {
+    width: auto;
+  }
 }
 
-.filter-select option {
-  background: #1e293b;
-  color: #fff;
-}
-
-.loading-state,
-.empty-state {
+.table-panel {
+  margin-top: 1.5rem;
   background: #fff;
-  padding: 2rem;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.state-box {
+  padding: 2.5rem 1rem;
   text-align: center;
-  color: #666;
+  font-size: 0.75rem;
+  color: #6b7280;
 }
 
-.table-container {
-  background: #fff;
-  padding: 1.5rem;
+.state-error {
+  color: #b91c1c;
+}
+
+.table-scroll {
+  overflow-x: auto;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  font-size: 0.75rem;
+}
+
+.data-table thead tr {
+  border-bottom: 1px solid #f3f4f6;
+  background: rgba(249, 250, 251, 0.4);
+  color: #9ca3af;
+  font-size: 0.6875rem;
+  font-weight: 600;
 }
 
 .data-table th,
 .data-table td {
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
 }
 
-.data-table th {
-  background: #f9fafb;
-  font-weight: 600;
-  font-size: 0.875rem;
+.data-table tbody tr {
+  border-bottom: 1px solid #f9fafb;
   color: #374151;
+  font-weight: 500;
+  transition: background 0.15s;
 }
 
 .data-table tbody tr:hover {
-  background: #f9fafb;
+  background: rgba(249, 250, 251, 0.5);
 }
 
-.data-table input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+.col-index {
+  width: 3rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.6875rem;
 }
 
-.cell-message {
-  max-width: 200px;
+.col-customer {
+  width: 12rem;
 }
 
-.status-select {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.85rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  background: #fff;
+.col-contact {
+  width: 12rem;
+  font-size: 0.6875rem;
+  color: #4b5563;
 }
 
-.actions-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.col-time {
+  width: 8rem;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+
+.time-sub {
+  color: #9ca3af;
+  font-size: 0.625rem;
+}
+
+.col-status {
+  width: 7rem;
+}
+
+.col-actions {
+  width: 6rem;
+  text-align: center;
+}
+
+.customer-name {
+  font-weight: 700;
+  color: #111827;
+}
+
+.customer-phone {
+  margin-top: 0.125rem;
+  font-size: 0.625rem;
+  color: #9ca3af;
+}
+
+.col-message {
+  max-width: 20rem;
+}
+
+.message-text {
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.message-product {
+  color: #4b5563;
+}
+
+.status-pill {
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.status-new {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-contacted {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-done {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.col-actions {
+  white-space: nowrap;
 }
 
 .action-btn {
+  border: none;
+  background: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.action-btn:hover {
+  color: #78350f;
+}
+
+.action-menu-wrap {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  margin-left: 0.25rem;
+}
+
+.action-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 0.25rem;
+  min-width: 11rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.action-menu button,
+.action-menu .menu-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  color: #374151;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.1rem;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: background 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   text-decoration: none;
 }
 
-.action-btn.view:hover {
-  background: #dbeafe;
+.action-menu button:hover,
+.action-menu .menu-link:hover {
+  background: #f9fafb;
 }
 
-.action-btn.cart:hover {
-  background: #fef3c7;
+.table-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f9fafb;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
-.action-btn.phone:hover {
-  background: #dcfce7;
+@media (min-width: 640px) {
+  .table-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.footer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.limit-select-wrap {
+  position: relative;
+}
+
+.limit-select {
+  appearance: none;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.limit-select:focus {
+  outline: none;
+}
+
+.limit-select-icon {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.5rem;
+  color: #9ca3af;
+  pointer-events: none;
 }
 
 .pagination {
-  margin-top: 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.pagination-info {
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
 }
 
 .page-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #fff;
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
   color: #374151;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #9ca3af;
+  background: #f9fafb;
 }
 
 .page-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.page-btn.active {
-  background: #3b82f6;
+.page-btn--active {
+  background: #78350f;
+  border-color: #78350f;
   color: #fff;
-  border-color: #3b82f6;
+  font-weight: 700;
 }
 
-.page-btn.active:hover {
-  background: #2563eb;
+.page-ellipsis {
+  padding: 0 0.25rem;
+  color: #9ca3af;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  font-size: 0.75rem;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-head h2 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modal-close {
+  border: none;
+  background: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+.detail-list {
+  margin: 0;
+}
+
+.detail-list > div {
+  margin-bottom: 0.75rem;
+}
+
+.detail-list dt {
+  font-size: 0.625rem;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.detail-list dd {
+  margin: 0.25rem 0 0;
+  color: #374151;
+  line-height: 1.45;
+}
+
+.status-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 1rem;
+}
+
+.status-field span {
+  font-weight: 600;
+  color: #374151;
+}
+
+.status-select {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.modal-foot {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.btn-call {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: #78350f;
+  color: #fff;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.6875rem;
+}
+
+.btn-close-modal {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.6875rem;
+  color: #374151;
 }
 </style>

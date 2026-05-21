@@ -29,6 +29,8 @@ export interface Product {
   seoTitle?: string
   seoDescription?: string
   breadcrumb?: { name: string; slug: string }[]
+  sortOrder?: number
+  createdAt?: string
 }
 
 export interface ProductListResponse {
@@ -62,5 +64,34 @@ export const productApi = {
     const response = await apiClient.get(`/products/${slug}/related`, { params: { limit } })
     const data = unwrapResponseData<Product[]>(response)
     return Array.isArray(data) ? data : []
+  },
+
+  async listAdmin(): Promise<Product[]> {
+    const response = await apiClient.get('/products/list/all')
+    const data = unwrapResponseData<Product[]>(response)
+    return Array.isArray(data) ? data : []
+  },
+
+  async getById(id: number): Promise<Product> {
+    const response = await apiClient.get(`/products/by-id/${id}`)
+    return unwrapResponseData<Product>(response)
+  },
+
+  async create(payload: Record<string, unknown>): Promise<Product> {
+    const response = await apiClient.post('/products', payload)
+    return unwrapResponseData<Product>(response)
+  },
+
+  async update(id: number, payload: Record<string, unknown>): Promise<Product> {
+    const response = await apiClient.patch(`/products/${id}`, payload)
+    return unwrapResponseData<Product>(response)
+  },
+
+  async reorder(products: { id: number; sortOrder: number }[]): Promise<void> {
+    await apiClient.patch('/products/reorder', { products })
+  },
+
+  async remove(id: number): Promise<void> {
+    await apiClient.delete(`/products/${id}`)
   },
 }

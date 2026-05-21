@@ -145,7 +145,7 @@ export class ElasticsearchService {
       is_active: product.is_active,
       created_at: product.created_at?.toISOString() || new Date().toISOString(),
       category_name: product.category?.name || '',
-      room_name: product.category?.room?.name || '',
+      room_name: '',
     };
 
     const url = `${this.config.protocol}://${this.config.host}:${this.config.port}/${this.config.index}/_doc/${product.id}`;

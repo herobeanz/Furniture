@@ -1,23 +1,54 @@
 import { computed } from 'vue'
+import {
+  CONTACT_ADDRESS,
+  CONTACT_ADDRESS_FULL,
+  CONTACT_HOURS_SHORT,
+  formatPhoneDisplay,
+  phoneTelHref,
+  SITE,
+} from '@/constants/site'
 
 /**
- * Centralized contact & social info for the whole app
- * Reads from env, provides sensible defaults.
+ * Thông tin liên hệ & MXH dùng chung toàn app (từ SITE / .env).
  */
 export function useContactInfo() {
-  const phoneNumber = computed(() => import.meta.env.VITE_CONTACT_PHONE || '0357803837')
-  const email = computed(() => import.meta.env.VITE_CONTACT_EMAIL || 'support@dogohungcuong.vn')
-  const facebookUrl = computed(() => import.meta.env.VITE_FACEBOOK_URL || 'https://www.facebook.com/dogohungcuong')
-  const zaloUrl = computed(() => import.meta.env.VITE_ZALO_URL || 'https://zalo.me/0357803837')
+  const phoneNumber = computed(() => SITE.contact.phone)
+  const email = computed(() => SITE.contact.email)
+  const facebookUrl = computed(() => SITE.social.facebook || '')
+  const zaloUrl = computed(() => SITE.social.zalo || '')
+  const instagramUrl = computed(() => SITE.social.instagram || '')
+  const youtubeUrl = computed(() => SITE.social.youtube || '')
+  const mapUrl = computed(() => SITE.contact.mapUrl)
+  const address = computed(() => CONTACT_ADDRESS)
+  const addressFull = computed(() => CONTACT_ADDRESS_FULL)
+  const hoursShort = computed(() => CONTACT_HOURS_SHORT)
 
-  const hasSocialLinks = computed(() => !!(facebookUrl.value || zaloUrl.value))
+  const phoneDisplay = computed(() => formatPhoneDisplay(phoneNumber.value))
+  const phoneTel = computed(() => phoneTelHref(phoneNumber.value))
+
+  const hasSocialLinks = computed(
+    () =>
+      !!(
+        facebookUrl.value ||
+        zaloUrl.value ||
+        instagramUrl.value ||
+        youtubeUrl.value
+      )
+  )
 
   return {
     phoneNumber,
+    phoneDisplay,
+    phoneTel,
     email,
     facebookUrl,
     zaloUrl,
+    instagramUrl,
+    youtubeUrl,
+    mapUrl,
+    address,
+    addressFull,
+    hoursShort,
     hasSocialLinks,
   }
 }
-

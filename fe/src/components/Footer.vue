@@ -4,39 +4,66 @@
       <div class="container footer-cols-inner">
         <!-- Column 1: Brand intro + socials -->
         <div class="footer-col footer-brand">
-          <h3 class="footer-logo">{{ BRAND_NAME }}</h3>
+          <div class="footer-logo-row">
+            <span class="footer-mark" aria-hidden="true">{{ SITE.brand.logoMark }}</span>
+            <span class="footer-logo-text">{{ SITE.brand.footerTitle }}</span>
+          </div>
           <p class="footer-desc">
-            {{ BRAND_NAME }} là cửa hàng nội thất hỗ trợ bạn chọn lựa, bài trí và chăm sóc không gian sống một cách
-            nhanh chóng và chính xác.
+            {{ SITE.brand.tagline }}
           </p>
           <div class="footer-socials">
-            <a href="#" class="social-icon fb" aria-label="Facebook">f</a>
-            <a href="#" class="social-icon ig" aria-label="Instagram">◎</a>
-            <a href="#" class="social-icon tw" aria-label="Twitter">t</a>
-            <a href="#" class="social-icon yt" aria-label="YouTube">▶</a>
+            <a
+              v-if="facebookUrl"
+              :href="facebookUrl"
+              class="social-link"
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><i class="fa-brands fa-facebook"
+            /></a>
+            <a
+              v-if="instagramUrl"
+              :href="instagramUrl"
+              class="social-link"
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><i class="fa-brands fa-instagram"
+            /></a>
+            <a
+              v-if="youtubeUrl"
+              :href="youtubeUrl"
+              class="social-link"
+              aria-label="YouTube"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><i class="fa-brands fa-youtube"
+            /></a>
           </div>
         </div>
 
-        <!-- Column 2: Thông tin (CMS pages tĩnh) -->
         <div class="footer-col">
-          <h4>Thông tin</h4>
+          <h4>Danh mục</h4>
           <ul>
-            <li><a href="/page/gioi-thieu">Giới thiệu</a></li>
-            <li><a href="/page/chinh-sach-bao-mat">Chính sách bảo hành</a></li>
-            <li><a href="/page/chinh-sach-giao-hang">Chính sách giao hàng</a></li>
-            <li><a href="/page/terms">Điều khoản sử dụng</a></li>
-            <li><a href="/page/lien-he">Liên hệ</a></li>
+            <li v-for="item in MAIN_NAV_ITEMS" :key="item.to">
+              <RouterLink :to="item.to">{{ item.label }}</RouterLink>
+            </li>
           </ul>
         </div>
 
-        <!-- Column 3: Nội thất (các loại phòng) -->
         <div class="footer-col">
-          <h4>Nội thất</h4>
+          <h4>Hỗ trợ</h4>
           <ul>
-            <li><a href="/phong-khach">Phòng khách</a></li>
-            <li><a href="/phong-ngu">Phòng ngủ</a></li>
-            <li><a href="/phong-bep">Phòng bếp</a></li>
-            <li><a href="/phong-tho">Phòng thờ</a></li>
+            <li>
+              <RouterLink to="/chinh-sach-bao-hanh">Chính sách bảo hành</RouterLink>
+            </li>
+            <li>
+              <RouterLink to="/chinh-sach-doi-tra">Chính sách đổi trả</RouterLink>
+            </li>
+            <li>
+              <RouterLink to="/huong-dan-mua-hang">Hướng dẫn mua hàng</RouterLink>
+            </li>
+            <!-- <li><a href="/cau-hoi-thuong-gap">Câu hỏi thường gặp</a></li> -->
           </ul>
         </div>
 
@@ -45,27 +72,30 @@
           <h4>Thông tin liên hệ</h4>
           <ul class="footer-contact-list">
             <li>
-              📍
+              <i class="fa-solid fa-phone contact-icon" aria-hidden="true" />
+              <a class="footer-phone" :href="phoneTel">{{ phoneDisplay }}</a>
+            </li>
+            <li>
+              <i class="fa-solid fa-envelope contact-icon" aria-hidden="true" />
+              <a class="footer-email" :href="'mailto:' + email">
+                {{ email }}
+              </a>
+            </li>
+            <li>
+              <i
+                class="fa-solid fa-location-dot contact-icon"
+                aria-hidden="true"
+              />
               <a
+                v-if="mapUrl"
                 class="footer-address"
-                href="https://maps.app.goo.gl/FTVZq3HGJzbsoC9V8"
+                :href="mapUrl"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
               >
-                Làng Nghề Châu Phong, Liên Hà, Đông Anh, Hà Nội
+                {{ addressFull }}
               </a>
-            </li>
-            <li>
-              ☎️
-              <a class="footer-phone" href="tel:+84357803837">
-                (+84) 357803837
-              </a>
-            </li>
-            <li>
-              📧
-              <a class="footer-email" href="mailto:support@dogohungcuong.vn">
-                xuongdogohungcuong@gmail.com
-              </a>
+              <span v-else class="footer-address">{{ addressFull }}</span>
             </li>
           </ul>
         </div>
@@ -74,22 +104,38 @@
 
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <p>Cung cấp bởi © {{ BRAND_NAME }}</p>
+        <p>© {{ currentYear }} {{ BRAND_NAME }}. All rights reserved.</p>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { BRAND_NAME } from '@/constants/brand'
+import { RouterLink } from "vue-router";
+import { BRAND_NAME, SITE } from "@/constants/brand";
+import { MAIN_NAV_ITEMS } from "@/constants/main-nav";
+import { useContactInfo } from "@/composables/common/useContactInfo";
+
+const currentYear = new Date().getFullYear();
+const {
+  phoneDisplay,
+  phoneTel,
+  email,
+  addressFull,
+  mapUrl,
+  facebookUrl,
+  instagramUrl,
+  youtubeUrl,
+} = useContactInfo();
 </script>
 
 <style scoped>
 /* Footer */
 .site-footer {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
-  color: #d1d5db;
+  background: var(--color-footer-bg);
+  color: #a8a29e;
   margin-top: auto;
+  font-size: 0.75rem;
 }
 
 .footer-cols {
@@ -107,18 +153,37 @@ import { BRAND_NAME } from '@/constants/brand'
   max-width: 420px;
 }
 
-.footer-logo {
-  font-size: 1.5rem;
-  font-weight: 700;
+.footer-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 1rem;
   color: #fff;
-  letter-spacing: -0.02em;
+}
+
+.footer-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 2px;
+}
+
+.footer-logo-text {
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
 }
 
 .footer-desc {
-  font-size: 0.9375rem;
-  color: #9ca3af;
-  margin: 0 0 1.5rem;
+  font-size: 0.75rem;
+  color: #78716c;
+  margin: 0 0 1rem;
   line-height: 1.7;
 }
 
@@ -160,7 +225,7 @@ import { BRAND_NAME } from '@/constants/brand'
 }
 
 .footer-col a::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -195,15 +260,13 @@ import { BRAND_NAME } from '@/constants/brand'
 }
 
 .footer-phone {
-  font-weight: 700;
-  color: var(--color-primary-light);
+  font-weight: 600;
+  color: #d6d3d1;
   text-decoration: none;
-  transition: all var(--transition-fast);
 }
 
 .footer-phone:hover {
-  color: var(--color-accent);
-  transform: translateX(4px);
+  color: #fff;
 }
 
 .footer-contact-list {
@@ -234,63 +297,32 @@ import { BRAND_NAME } from '@/constants/brand'
 
 .footer-socials {
   display: flex;
-  justify-content: flex-start;
   gap: 0.75rem;
 }
 
-.social-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  font-weight: 700;
+.social-link {
+  color: #a8a29e;
+  font-size: var(--icon-size-md);
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.social-link:hover {
   color: #fff;
-  text-decoration: none;
-  transition: all var(--transition-base);
-  position: relative;
-  overflow: hidden;
 }
 
-.social-icon::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(0);
-  transition: transform var(--transition-base);
-  border-radius: 12px;
-}
-
-.social-icon:hover::before {
-  transform: scale(1);
-}
-
-.social-icon:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.social-icon.fb {
-  background: linear-gradient(135deg, #1877f2 0%, #0c63d4 100%);
-}
-
-.social-icon.ig {
-  background: linear-gradient(135deg, #f58529 0%, #dd2a7b 50%, #8134af 100%);
-}
-
-.social-icon.tw {
-  background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
-}
-
-.social-icon.yt {
-  background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+.contact-icon {
+  color: #a8a29e;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  font-size: var(--icon-size-sm);
+  line-height: 1;
+  width: 1.125rem;
+  text-align: center;
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #292524;
   padding: 1.5rem 0;
 }
 
@@ -304,8 +336,8 @@ import { BRAND_NAME } from '@/constants/brand'
 
 .footer-bottom-inner p {
   margin: 0;
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.6875rem;
+  color: #57534e;
 }
 
 /* Responsive Design */
@@ -314,7 +346,7 @@ import { BRAND_NAME } from '@/constants/brand'
     grid-template-columns: 1fr 1fr;
     gap: 2.5rem;
   }
-  
+
   .footer-brand {
     max-width: 100%;
   }
@@ -324,32 +356,32 @@ import { BRAND_NAME } from '@/constants/brand'
   .footer-cols {
     padding: 3rem 0 2rem;
   }
-  
+
   .footer-cols-inner {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .footer-brand {
     text-align: center;
   }
-  
+
   .footer-socials {
     justify-content: center;
   }
-  
+
   .footer-contact-col {
     text-align: center;
   }
-  
+
   .footer-contact-list li {
     justify-content: center;
   }
-  
+
   .footer-col {
     text-align: center;
   }
-  
+
   .footer-col a:hover {
     transform: translateX(0);
   }
@@ -359,35 +391,35 @@ import { BRAND_NAME } from '@/constants/brand'
   .footer-cols {
     padding: 2.5rem 0 1.5rem;
   }
-  
+
   .footer-logo {
     font-size: 1.25rem;
   }
-  
+
   .footer-desc {
     font-size: 0.875rem;
   }
-  
+
   .footer-col h4 {
     font-size: 0.9375rem;
     margin-bottom: 1rem;
   }
-  
+
   .footer-col a,
   .footer-contact-list li {
     font-size: 0.875rem;
   }
-  
+
   .social-icon {
     width: 36px;
     height: 36px;
     font-size: 0.9375rem;
   }
-  
+
   .footer-bottom {
     padding: 1.25rem 0;
   }
-  
+
   .footer-bottom-inner p {
     font-size: 0.8125rem;
   }

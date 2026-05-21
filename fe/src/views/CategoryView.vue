@@ -1,19 +1,58 @@
 <template>
   <div class="category-page">
-    <div class="container">
-      <Breadcrumb :items="breadcrumb" />
+    <LoadingState v-if="loading" skeleton />
+    <NotFoundView v-else-if="isNotFound" />
+    <ErrorState v-else-if="error" :message="error" />
 
-      <LoadingState v-if="loading" skeleton />
-      <NotFoundView v-else-if="isNotFound" />
-      <ErrorState v-else-if="error" :message="error" />
-
-      <template v-else-if="category">
-        <CategoryHeader :title="category.name" :description="category.description" />
-        <ProductFilters
-          :total-products="totalProducts"
-          :sort-option="sortOption"
-          @update:sort-option="sortOption = $event"
+    <template v-else-if="category">
+      <nav class="category-breadcrumb container" aria-label="Breadcrumb">
+        <RouterLink to="/" class="category-breadcrumb-link">Trang chủ</RouterLink>
+        <i
+          class="fa-solid fa-chevron-right category-breadcrumb-sep"
+          aria-hidden="true"
         />
+        <RouterLink to="/san-pham" class="category-breadcrumb-link">
+          Sản phẩm
+        </RouterLink>
+        <i
+          class="fa-solid fa-chevron-right category-breadcrumb-sep"
+          aria-hidden="true"
+        />
+        <span class="category-breadcrumb-current">{{ category.name }}</span>
+      </nav>
+
+      <section class="category-hero">
+        <div class="container category-hero-inner">
+          <div class="category-hero-copy">
+            <h1 class="category-hero-title">{{ category.name }}</h1>
+            <p v-if="category.description" class="category-hero-text">
+              {{ category.description }}
+            </p>
+            <p class="category-hero-count">
+              <i
+                :class="['fa-solid', categoryIcon]"
+                class="category-hero-count-icon"
+                aria-hidden="true"
+              />
+              {{ productCountLabel }}
+            </p>
+          </div>
+          <div class="category-hero-visual">
+            <img
+              :src="heroImage"
+              :alt="`Danh mục ${category.name}`"
+              class="category-hero-image"
+              loading="eager"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="category-toolbar-section container">
+        <CategoryProductToolbar v-model:sort-key="sortKey" />
+      </section>
+
+      <section class="category-grid-section container">
         <ProductGridSkeleton v-if="loadingProducts" :columns="4" :count="8" />
         <EmptyState
           v-else-if="products.length === 0"
@@ -21,61 +60,315 @@
         />
         <template v-else>
           <ProductGrid
+            class="category-product-grid"
             :products="products"
             :columns="4"
+            variant="compact"
             show-sale-tag
           />
-          <Pagination :current-page="page" :total-pages="totalPages" @go-page="goPage" />
+
+          <nav
+            v-if="totalPages > 1"
+            class="category-pagination"
+            aria-label="Phân trang sản phẩm"
+          >
+            <button
+              type="button"
+              class="category-page-btn"
+              :disabled="page <= 1"
+              aria-label="Trang trước"
+              @click="goPage(page - 1)"
+            >
+              <i class="fa-solid fa-chevron-left" aria-hidden="true" />
+            </button>
+            <template
+              v-for="(item, index) in paginationItems"
+              :key="`${item}-${index}`"
+            >
+              <span
+                v-if="item === 'ellipsis'"
+                class="category-page-ellipsis"
+                aria-hidden="true"
+              >
+                ...
+              </span>
+              <button
+                v-else
+                type="button"
+                class="category-page-btn"
+                :class="{ 'category-page-btn--active': item === page }"
+                @click="goPage(item)"
+              >
+                {{ item }}
+              </button>
+            </template>
+            <button
+              type="button"
+              class="category-page-btn"
+              :disabled="page >= totalPages"
+              aria-label="Trang sau"
+              @click="goPage(page + 1)"
+            >
+              <i class="fa-solid fa-chevron-right" aria-hidden="true" />
+            </button>
+          </nav>
         </template>
-      </template>
-    </div>
+      </section>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import ProductGrid from '@/components/ProductGrid.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
-import Breadcrumb from '@/components/common/Breadcrumb.vue'
-import CategoryHeader from '@/components/category/CategoryHeader.vue'
-import ProductFilters from '@/components/common/ProductFilters.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import CategoryProductToolbar from '@/components/category/CategoryProductToolbar.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
 import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
 import { useCategoryData } from '@/composables/category/useCategoryData'
+import { categoryStripIcon } from '@/constants/products-page'
+import { PRODUCTS_HERO_IMAGE } from '@/constants/category-page'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
-// Container component: orchestrates data and logic
 const {
   category,
   products,
   totalProducts,
   page,
-  sortOption,
+  sortKey,
   loading,
   loadingProducts,
   error,
   isNotFound,
-  breadcrumb,
   totalPages,
   goPage,
 } = useCategoryData()
+
+const categoryIcon = computed(() =>
+  category.value ? categoryStripIcon(category.value.slug) : 'fa-box',
+)
+
+const heroImage = computed(() => {
+  const thumb = category.value?.thumbnail?.trim()
+  if (thumb) return resolveMediaUrl(thumb)
+  return PRODUCTS_HERO_IMAGE
+})
+
+const productCountLabel = computed(() => `${totalProducts.value} sản phẩm`)
+
+type PaginationItem = number | 'ellipsis'
+
+const paginationItems = computed((): PaginationItem[] => {
+  const total = totalPages.value
+  const current = page.value
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+
+  const items: PaginationItem[] = [1]
+  const windowStart = Math.max(2, current - 1)
+  const windowEnd = Math.min(total - 1, current + 1)
+
+  if (windowStart > 2) {
+    items.push('ellipsis')
+  }
+
+  for (let p = windowStart; p <= windowEnd; p += 1) {
+    items.push(p)
+  }
+
+  if (windowEnd < total - 1) {
+    items.push('ellipsis')
+  }
+
+  items.push(total)
+  return items
+})
 </script>
 
 <style scoped>
 .category-page {
-  padding: 1.5rem 0 3rem;
+  padding-bottom: 0;
+  background: #faf9f6;
 }
 
-@media (max-width: 768px) {
-  .category-page {
-    padding: 1rem 0 2rem;
+.category-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0 0;
+  font-size: 0.6875rem;
+  color: #9ca3af;
+}
+
+.category-breadcrumb-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.category-breadcrumb-link:hover {
+  color: var(--color-primary);
+}
+
+.category-breadcrumb-sep {
+  font-size: 0.4375rem;
+}
+
+.category-breadcrumb-current {
+  color: #4b5563;
+}
+
+.category-hero {
+  position: relative;
+  background: #f5f2eb;
+  padding: 2.5rem 0;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .category-hero {
+    padding: 3.5rem 0;
   }
 }
 
-@media (max-width: 480px) {
-  .category-page {
-    padding: 0.75rem 0 1.5rem;
+.category-hero-inner {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .category-hero-inner {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
+
+  .category-hero-copy {
+    grid-column: span 6;
+  }
+
+  .category-hero-visual {
+    grid-column: span 6;
+  }
+}
+
+.category-hero-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: 0.04em;
+}
+
+.category-hero-text {
+  margin: 0 0 1rem;
+  max-width: 20rem;
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: #4b5563;
+}
+
+.category-hero-count {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  color: #6b7280;
+}
+
+.category-hero-count-icon {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+}
+
+.category-hero-visual {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.category-hero-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.category-toolbar-section {
+  margin-top: 2rem;
+}
+
+.category-grid-section {
+  padding: 0.5rem 0 0;
+}
+
+.category-grid-section :deep(.product-grid) {
+  gap: 1.5rem;
+}
+
+.category-grid-section :deep(.product-card--compact) {
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.category-grid-section :deep(.product-card--compact .product-card-image) {
+  height: 11rem;
+  margin: 0.75rem 0.75rem 0;
+  background: #f9fafb;
+}
+
+.category-grid-section :deep(.product-card--compact:hover .product-card-image img) {
+  transform: scale(1.02);
+}
+
+.category-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 3rem 0;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.category-page-btn {
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.375rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  background: #fff;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.category-page-btn:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.category-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.category-page-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.category-page-ellipsis {
+  padding: 0 0.25rem;
+  color: #9ca3af;
+  user-select: none;
 }
 </style>

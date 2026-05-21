@@ -1,16 +1,8 @@
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCategoryTree } from './useCategoryTree'
 import { collectionApi, type Collection } from '@/services/api/collections'
-import apiClient from '@/services/api/client'
-import { unwrapResponseData } from '@/services/api/response'
 import { logger } from '@/utils/logger'
-
-export interface CmsPage {
-  id: number
-  slug: string
-  title: string
-}
 
 /**
  * Composable for Header component logic
@@ -19,11 +11,16 @@ export function useHeader() {
   const router = useRouter()
   const { categoryTree, loading: categoryTreeLoading } = useCategoryTree()
 
+  /** Danh mục phẳng cho menu Sản phẩm (slug unique toàn site). */
+  const navCategories = computed(() =>
+    [...categoryTree.value].sort(
+      (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || a.name.localeCompare(b.name, 'vi')
+    )
+  )
+
   const searchQuery = ref('')
   const collections = ref<Collection[]>([])
   const loadingCollections = ref(false)
-  const cmsPages = ref<CmsPage[]>([])
-  const loadingCmsPages = ref(false)
 
   async function loadCollections() {
     loadingCollections.value = true
@@ -38,20 +35,6 @@ export function useHeader() {
     }
   }
 
-  async function loadCmsPages() {
-    loadingCmsPages.value = true
-    try {
-      const response = await apiClient.get('/cms/active')
-      const allPages = unwrapResponseData<CmsPage[]>(response)
-      cmsPages.value = allPages.filter(p => p.slug !== 'lien-he')
-    } catch (e) {
-      logger.error('Failed to load CMS pages:', e)
-      cmsPages.value = []
-    } finally {
-      loadingCmsPages.value = false
-    }
-  }
-
   function onSearch() {
     const q = searchQuery.value?.trim()
     if (q) {
@@ -61,17 +44,15 @@ export function useHeader() {
 
   onMounted(() => {
     loadCollections()
-    loadCmsPages()
   })
 
   return {
     searchQuery,
     categoryTree,
+    navCategories,
     categoryTreeLoading,
     collections,
     loadingCollections,
-    cmsPages,
-    loadingCmsPages,
     onSearch,
   }
 }

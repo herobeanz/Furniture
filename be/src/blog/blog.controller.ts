@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@ne
 import { BlogService } from './blog.service';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
+import { ReorderBlogPostsDto } from './dto/reorder-blog-posts.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('blog')
@@ -75,6 +76,15 @@ export class BlogController {
   @ApiResponse({ status: 201, description: 'Blog post created' })
   create(@Body() dto: CreateBlogPostDto) {
     return this.blogService.create(dto);
+  }
+
+  @Patch('reorder')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[Admin] Reorder blog posts' })
+  @ApiResponse({ status: 200, description: 'Blog post sort order updated' })
+  reorder(@Body() dto: ReorderBlogPostsDto) {
+    return this.blogService.reorder(dto.posts);
   }
 
   @Patch(':id')

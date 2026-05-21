@@ -1,2 +1,1 @@
-export const BRAND_NAME = 'Đồ gỗ Hùng Cường'
-
+export { BRAND_NAME, SITE } from '@/constants/site'

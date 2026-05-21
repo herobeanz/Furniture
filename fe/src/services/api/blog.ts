@@ -15,6 +15,7 @@ export interface BlogPost {
   isActive: boolean
   isFeatured: boolean
   publishedAt?: string
+  sortOrder?: number
   createdAt: string
   updatedAt: string
 }
@@ -53,6 +54,10 @@ export const blogApi = {
   async updatePost(id: number, data: Partial<BlogPost>): Promise<BlogPost> {
     const response = await apiClient.patch(`/blog/${id}`, data)
     return unwrapResponseData<BlogPost>(response)
+  },
+
+  async reorder(posts: { id: number; sortOrder: number }[]): Promise<void> {
+    await apiClient.patch('/blog/reorder', { posts })
   },
 
   async deletePost(id: number): Promise<{ deleted: boolean }> {

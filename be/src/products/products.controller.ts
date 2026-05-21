@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@ne
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ReorderProductsDto } from './dto/reorder-products.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('products')
@@ -90,6 +91,15 @@ export class ProductsController {
   @ApiResponse({ status: 201, description: 'Product created' })
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
+  }
+
+  @Patch('reorder')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[Admin] Reorder products (admin list sort)' })
+  @ApiResponse({ status: 200, description: 'Product sort order updated' })
+  reorder(@Body() dto: ReorderProductsDto) {
+    return this.productsService.reorder(dto.products);
   }
 
   @Patch(':id')
