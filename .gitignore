@@ -50,8 +50,10 @@ Thumbs.db
 *.code-workspace
 
 # Uploads
-uploads/
-public/uploads/
+/uploads/
+/public/uploads/
+/be/uploads/
+/fe/public/uploads/
 
 # Database
 *.sqlite
