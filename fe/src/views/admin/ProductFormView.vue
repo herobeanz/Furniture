@@ -306,6 +306,11 @@ import ImageUploadField from '@/components/admin/ImageUploadField.vue'
 import ImageGalleryUploadField from '@/components/admin/ImageGalleryUploadField.vue'
 import RichTextEditor from '@/components/admin/RichTextEditor.vue'
 import { isRichTextEmpty } from '@/utils/richText'
+import {
+  buildProductGalleryList,
+  extractGalleryOnlyUrls,
+} from '@/utils/productGallery'
+import { useAdminFormDraft } from '@/composables/useAdminFormDraft'
 
 const SHORT_DESC_MAX = 200
 const SEO_TITLE_MAX = 60
@@ -326,7 +331,7 @@ const productId = computed(() => {
 const isEdit = computed(() => productId.value !== null)
 
 const loading = ref(false)
-const categories = ref<{ id: number; name: string }[]>([])
+const categories = ref<{ id: number; name: string; slug: string }[]>([])
 
 const form = reactive({
   categoryId: 0,
@@ -354,6 +359,13 @@ const productImageUrls = ref<string[]>([])
 const saving = ref(false)
 const error = ref('')
 
+type ProductFormDraft = {
+  form: typeof form
+  productImageUrls: string[]
+}
+
+const { saveDraft, restoreDraft, clearDraft } = useAdminFormDraft()
+
 const shortDescCount = computed(() => form.shortDescription.length)
 const seoTitleCount = computed(() => form.seoTitle.length)
 const seoDescCount = computed(() => form.seoDescription.length)
@@ -365,7 +377,18 @@ const previewSlug = computed(() => {
   return ''
 })
 
-const canPreview = computed(() => !!previewSlug.value && !!form.name.trim())
+const previewCategorySlug = computed(() => {
+  const cat = categories.value.find((c) => c.id === form.categoryId)
+  return cat?.slug?.trim() || ''
+})
+
+const canPreview = computed(
+  () =>
+    !!previewSlug.value &&
+    !!form.name.trim() &&
+    !!form.categoryId &&
+    !!previewCategorySlug.value,
+)
 
 function resolveStatus(): typeof form.status {
   if (form.status === 'discontinued') return 'discontinued'
@@ -444,6 +467,18 @@ async function fetchCategories() {
   }
 }
 
+function applyFormDraft(draft: ProductFormDraft) {
+  Object.assign(form, draft.form)
+  productImageUrls.value = [...draft.productImageUrls]
+}
+
+function snapshotFormDraft(): ProductFormDraft {
+  return {
+    form: { ...form },
+    productImageUrls: [...productImageUrls.value],
+  }
+}
+
 function applyProductToForm(product: Awaited<ReturnType<typeof productApi.getById>>) {
   form.categoryId = product.categoryId || 0
   form.name = product.name || ''
@@ -464,7 +499,10 @@ function applyProductToForm(product: Awaited<ReturnType<typeof productApi.getByI
   form.isContactPrice = product.isContactPrice ?? false
   form.seoTitle = product.seoTitle || ''
   form.seoDescription = product.seoDescription || ''
-  productImageUrls.value = [...(product.images ?? [])].slice(0, GALLERY_MAX)
+  productImageUrls.value = extractGalleryOnlyUrls(
+    product.thumbnail,
+    product.images ?? [],
+  ).slice(0, GALLERY_MAX)
 }
 
 async function loadProduct() {
@@ -498,6 +536,11 @@ watch(productId, () => {
 
 onMounted(async () => {
   await fetchCategories()
+  const draft = restoreDraft<ProductFormDraft>()
+  if (draft) {
+    applyFormDraft(draft)
+    return
+  }
   if (isEdit.value) {
     await loadProduct()
   }
@@ -505,12 +548,21 @@ onMounted(async () => {
 
 function handlePreview() {
   const slug = previewSlug.value
+  const categorySlug = previewCategorySlug.value
   if (!slug || !form.name.trim()) {
     alert('Vui lòng nhập tên sản phẩm để xem trước.')
     return
   }
+  if (!categorySlug) {
+    alert('Vui lòng chọn loại sản phẩm để xem trước.')
+    return
+  }
 
-  const imageUrls = productImageUrls.value.filter(Boolean)
+  const category = categories.value.find((c) => c.id === form.categoryId)
+  const galleryList = buildProductGalleryList(
+    form.thumbnail,
+    productImageUrls.value,
+  )
 
   const previewProduct = {
     id: productId.value ?? 999999,
@@ -521,8 +573,8 @@ function handlePreview() {
     shortDescription: form.shortDescription || '',
     price: form.price,
     salePrice: form.salePrice,
-    thumbnail: form.thumbnail || '',
-    images: imageUrls.length > 0 ? imageUrls : form.thumbnail ? [form.thumbnail] : [],
+    thumbnail: form.thumbnail?.trim() || galleryList[0] || '',
+    images: galleryList,
     categoryId: form.categoryId,
     status: resolveStatus(),
     material: form.material || '',
@@ -534,10 +586,17 @@ function handlePreview() {
     isContactPrice: form.isContactPrice,
     seoTitle: form.seoTitle || '',
     seoDescription: form.seoDescription || '',
+    breadcrumb: category
+      ? [
+          { name: category.name, slug: category.slug },
+          { name: form.name.trim(), slug },
+        ]
+      : [],
   }
 
   savePreviewData('product', slug, previewProduct)
-  router.push(`/san-pham/${slug}/preview`)
+  saveDraft(snapshotFormDraft())
+  router.push(`/san-pham/${categorySlug}/${slug}/preview`)
 }
 
 async function onSubmit() {
@@ -555,6 +614,7 @@ async function onSubmit() {
     } else {
       await productApi.create(formPayload.value)
     }
+    clearDraft()
     router.push('/admin/products')
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } }; message?: string }

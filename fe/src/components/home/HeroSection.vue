@@ -67,7 +67,7 @@ const valueProps = VALUE_PROPS;
 
 const heroImage = computed(() => {
   const product = props.products?.[0];
-  const img = product?.images?.[0] || product?.thumbnail;
+  const img = product?.thumbnail || product?.images?.[0];
   if (img) return resolveMediaUrl(img);
   const collection =
     props.collections?.find((c) => c.thumbnail) ?? props.collections?.[0];

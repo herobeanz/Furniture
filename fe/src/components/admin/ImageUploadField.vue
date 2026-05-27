@@ -77,7 +77,7 @@
 
       <p v-if="error" class="upload-error">{{ error }}</p>
 
-      <div v-if="modelValue && !showPreview" class="thumb-inline">
+      <div v-if="modelValue && !showPreview && showInlinePreview" class="thumb-inline">
         <img :src="previewSrc" alt="Xem trước" />
         <button type="button" class="remove-btn" title="Xóa ảnh" @click="clearImage">
           <i class="fa-solid fa-xmark" />
@@ -117,6 +117,8 @@ const props = withDefaults(
     modelValue: string
     hint?: string
     showPreview?: boolean
+    /** When false, hides the small preview under the upload zone (use external preview UI). */
+    showInlinePreview?: boolean
     previewLabel?: string
     maxSizeMb?: number
     variant?: 'default' | 'hero'
@@ -124,6 +126,7 @@ const props = withDefaults(
   {
     hint: 'Định dạng: JPG, PNG, WEBP, GIF. Tối đa 5MB',
     showPreview: true,
+    showInlinePreview: true,
     previewLabel: 'Xem trước',
     maxSizeMb: 5,
     variant: 'default',

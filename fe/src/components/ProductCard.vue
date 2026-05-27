@@ -5,13 +5,8 @@
   >
     <RouterLink :to="getProductPath(product)" class="product-card-image">
       <img
-        v-if="product.images?.length"
-        :src="resolveMediaUrl(product.images[0])"
-        :alt="product.name"
-      />
-      <img
-        v-else-if="product.thumbnail"
-        :src="resolveMediaUrl(product.thumbnail)"
+        v-if="cardImage"
+        :src="resolveMediaUrl(cardImage)"
         :alt="product.name"
       />
       <div v-else class="no-image">Ảnh</div>
@@ -78,6 +73,7 @@ import { computed } from "vue";
 import type { Product } from "@/services/api/products";
 import { formatPrice } from "@/utils/format";
 import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { getProductDisplayImage } from "@/utils/productGallery";
 import { getProductPath } from "@/utils/navigation";
 
 const props = withDefaults(
@@ -90,7 +86,10 @@ const props = withDefaults(
   { showSaleTag: true, showHotTag: false, variant: "default" },
 );
 
-// Calculate discount
+const cardImage = computed(() =>
+  getProductDisplayImage(props.product.thumbnail, props.product.images),
+);
+
 const hasDiscount = computed(() => {
   return (
     props.product.salePrice != null &&

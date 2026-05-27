@@ -168,6 +168,7 @@ import { categoryApi } from '@/services/api/categories'
 import { slugify } from '@/utils/slugify'
 import { savePreviewData } from '@/utils/preview'
 import ImageUploadField from '@/components/admin/ImageUploadField.vue'
+import { useAdminFormDraft } from '@/composables/useAdminFormDraft'
 
 const DESC_MAX = 200
 const SEO_TITLE_MAX = 60
@@ -189,6 +190,7 @@ const isEdit = computed(() => categoryId.value !== null)
 const loading = ref(false)
 const saving = ref(false)
 const slugTouched = ref(false)
+
 const form = reactive({
   name: '',
   slug: '',
@@ -200,6 +202,13 @@ const form = reactive({
   seoDescription: '',
 })
 
+type CategoryFormDraft = {
+  form: typeof form
+  slugTouched: boolean
+}
+
+const { saveDraft, restoreDraft, clearDraft } = useAdminFormDraft()
+
 const descriptionCount = computed(() => form.description.length)
 const seoTitleCount = computed(() => form.seoTitle.length)
 const seoDescCount = computed(() => form.seoDescription.length)
@@ -207,6 +216,18 @@ const seoDescCount = computed(() => form.seoDescription.length)
 function bumpOrder(delta: number) {
   const next = (form.orderIndex ?? 0) + delta
   form.orderIndex = Math.max(0, next)
+}
+
+function applyFormDraft(draft: CategoryFormDraft) {
+  Object.assign(form, draft.form)
+  slugTouched.value = draft.slugTouched
+}
+
+function snapshotFormDraft(): CategoryFormDraft {
+  return {
+    form: { ...form },
+    slugTouched: slugTouched.value,
+  }
 }
 
 function applyCategoryToForm(c: Awaited<ReturnType<typeof categoryApi.getById>>) {
@@ -263,6 +284,11 @@ watch(categoryId, () => {
 })
 
 onMounted(() => {
+  const draft = restoreDraft<CategoryFormDraft>()
+  if (draft) {
+    applyFormDraft(draft)
+    return
+  }
   if (isEdit.value) {
     loadCategory()
   }
@@ -287,6 +313,7 @@ function handlePreview() {
   }
 
   savePreviewData('category', form.slug, previewCategory)
+  saveDraft(snapshotFormDraft())
   router.push(`/san-pham/${form.slug}/preview`)
 }
 
@@ -313,6 +340,7 @@ async function save() {
     } else {
       await categoryApi.create(payload)
     }
+    clearDraft()
     router.push('/admin/products')
   } catch (e) {
     logger.error(e)

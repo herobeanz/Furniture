@@ -397,6 +397,7 @@ import { savePreviewData } from '@/utils/preview'
 import { getProductPath } from '@/utils/navigation'
 import ImageUploadField from '@/components/admin/ImageUploadField.vue'
 import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { useAdminFormDraft } from '@/composables/useAdminFormDraft'
 
 import { COLLECTION_DESCRIPTION_SEP as DESCRIPTION_SEP } from '@/utils/collectionDescription'
 const SHORT_DESC_MAX = 200
@@ -454,6 +455,14 @@ const form = reactive({
 
 const collectionProducts = ref<ProductRow[]>([])
 
+type CollectionFormDraft = {
+  form: typeof form
+  slugTouched: boolean
+  collectionProducts: ProductRow[]
+}
+
+const { saveDraft, restoreDraft, clearDraft } = useAdminFormDraft()
+
 const shortDescCount = computed(() => form.shortDescription.length)
 const detailDescCount = computed(() => form.detailedDescription.length)
 const seoTitleCount = computed(() => form.seoTitle.length)
@@ -503,6 +512,20 @@ function mapProductToRow(p: CollectionProduct): ProductRow {
     thumbnail: p.thumbnail,
     orderIndex: p.orderIndex ?? 0,
     breadcrumb: p.breadcrumb?.length ? p.breadcrumb : [],
+  }
+}
+
+function applyFormDraft(draft: CollectionFormDraft) {
+  Object.assign(form, draft.form)
+  slugTouched.value = draft.slugTouched
+  collectionProducts.value = draft.collectionProducts.map((p) => ({ ...p }))
+}
+
+function snapshotFormDraft(): CollectionFormDraft {
+  return {
+    form: { ...form },
+    slugTouched: slugTouched.value,
+    collectionProducts: collectionProducts.value.map((p) => ({ ...p })),
   }
 }
 
@@ -571,6 +594,11 @@ watch(collectionId, () => {
 })
 
 onMounted(() => {
+  const draft = restoreDraft<CollectionFormDraft>()
+  if (draft) {
+    applyFormDraft(draft)
+    return
+  }
   if (isEdit.value) {
     loadCollection()
   }
@@ -779,6 +807,7 @@ async function handlePreview() {
   }
 
   savePreviewData('collection', slug, previewCollection)
+  saveDraft(snapshotFormDraft())
   router.push(`/bo-suu-tap/${slug}/preview`)
 }
 
@@ -794,9 +823,11 @@ async function save() {
     const payload = buildPayload()
     if (isEdit.value && collectionId.value !== null) {
       await collectionApi.update(collectionId.value, payload)
+      clearDraft()
       router.push('/admin/collections')
     } else {
       const created = await collectionApi.create(payload)
+      clearDraft()
       router.push(`/admin/collections/${created.id}`)
     }
   } catch (e: unknown) {

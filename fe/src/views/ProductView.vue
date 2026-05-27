@@ -150,6 +150,7 @@ const {
   error,
   isNotFound,
   selectedIndex,
+  galleryImages,
   currentImage,
   breadcrumb,
   setSelectedImage,
@@ -160,16 +161,6 @@ const { phoneDisplay, phoneTel: telHref, facebookUrl, zaloUrl } = useContactInfo
 const hasRichDescription = computed(
   () => product.value != null && !isRichTextEmpty(product.value.description),
 );
-
-const galleryImages = computed(() => {
-  const p = product.value;
-  if (!p) return [] as string[];
-  const list = [...(p.images || [])];
-  if (p.thumbnail && !list.includes(p.thumbnail)) {
-    list.unshift(p.thumbnail);
-  }
-  return list;
-});
 
 function galleryPrev() {
   const n = galleryImages.value.length;

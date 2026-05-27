@@ -83,33 +83,6 @@
               </div>
             </div>
 
-            <div class="field-grid field-grid--2 thumb-row">
-              <div class="field">
-                <label class="field-label">
-                  Ảnh đại diện <span class="required">*</span>
-                </label>
-                <ImageUploadField
-                  v-model="form.thumbnail"
-                  :show-preview="false"
-                  hint="Định dạng: JPG, PNG, WEBP. Kích thước khuyến nghị: 1200x630px. Tối đa 5MB."
-                />
-              </div>
-              <div class="field">
-                <label class="preview-block-label">Xem trước</label>
-                <div class="preview-block preview-block--blog">
-                  <img
-                    v-if="form.thumbnail"
-                    :src="thumbnailPreview"
-                    alt="Xem trước ảnh đại diện"
-                    class="preview-block-img"
-                  />
-                  <div v-else class="preview-block-empty">
-                    <i class="fa-regular fa-image" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div class="field">
               <label class="field-label">
                 Nội dung bài viết <span class="required">*</span>
@@ -124,6 +97,42 @@
         </div>
 
         <div class="form-col form-col--side">
+          <section class="form-card">
+            <label class="field-label section-label">
+              Ảnh đại diện <span class="required">*</span>
+            </label>
+            <p class="field-hint thumb-intro">
+              Hiển thị trên thẻ bài viết (danh sách Blog), không chèn vào nội dung bài.
+            </p>
+            <div class="blog-card-image-wrap blog-card-image-wrap--form">
+              <img
+                v-if="form.thumbnail"
+                :src="thumbnailPreview"
+                alt="Ảnh đại diện bài viết"
+                class="blog-card-image"
+              />
+              <div v-else class="blog-card-image-placeholder">
+                <i class="fa-regular fa-image" />
+                <span>Chưa có ảnh</span>
+              </div>
+              <button
+                v-if="form.thumbnail"
+                type="button"
+                class="blog-thumb-remove"
+                title="Xóa ảnh"
+                @click="clearThumbnail"
+              >
+                <i class="fa-solid fa-xmark" />
+              </button>
+            </div>
+            <ImageUploadField
+              v-model="form.thumbnail"
+              :show-preview="false"
+              :show-inline-preview="false"
+              hint="JPG, PNG, WEBP. Khuyến nghị 1200×630px. Tối đa 5MB."
+            />
+          </section>
+
           <section class="form-card">
             <label class="field-label section-label">
               Danh mục <span class="required">*</span>
@@ -291,6 +300,7 @@ import { BLOG_FILTER_TABS } from '@/constants/blog'
 import ImageUploadField from '@/components/admin/ImageUploadField.vue'
 import RichTextEditor from '@/components/admin/RichTextEditor.vue'
 import { isRichTextEmpty } from '@/utils/richText'
+import { useAdminFormDraft } from '@/composables/useAdminFormDraft'
 
 const EXCERPT_MAX = 200
 const SEO_TITLE_MAX = 60
@@ -331,10 +341,21 @@ const loading = ref(false)
 const saving = ref(false)
 const error = ref('')
 
+type BlogFormDraft = {
+  form: typeof form
+  slugTouched: boolean
+}
+
+const { saveDraft, restoreDraft, clearDraft } = useAdminFormDraft()
+
 const excerptCount = computed(() => form.excerpt.length)
 const seoTitleCount = computed(() => form.seoTitle.length)
 const seoDescCount = computed(() => form.seoDescription.length)
 const thumbnailPreview = computed(() => resolveMediaUrl(form.thumbnail))
+
+function clearThumbnail() {
+  form.thumbnail = ''
+}
 
 function formatDateTimeLocal(date: Date): string {
   const year = date.getFullYear()
@@ -348,6 +369,18 @@ function formatDateTimeLocal(date: Date): string {
 function formatDateTime(dateString?: string): string {
   if (!dateString) return ''
   return formatDateTimeLocal(new Date(dateString))
+}
+
+function applyFormDraft(draft: BlogFormDraft) {
+  Object.assign(form, draft.form)
+  slugTouched.value = draft.slugTouched
+}
+
+function snapshotFormDraft(): BlogFormDraft {
+  return {
+    form: { ...form },
+    slugTouched: slugTouched.value,
+  }
 }
 
 function applyPostToForm(post: BlogPost) {
@@ -419,6 +452,11 @@ watch(postId, () => {
 })
 
 onMounted(() => {
+  const draft = restoreDraft<BlogFormDraft>()
+  if (draft) {
+    applyFormDraft(draft)
+    return
+  }
   if (isEdit.value) {
     loadPost()
   } else {
@@ -463,6 +501,11 @@ function handlePreview() {
   }
 
   const slug = slugify(form.slug.trim() || form.title)
+  if (!slug) {
+    alert('Slug không hợp lệ. Vui lòng nhập tiêu đề hoặc slug hợp lệ (chữ, số, gạch ngang).')
+    return
+  }
+
   const previewPost: BlogPost = {
     id: postId.value ?? 999999,
     title: form.title.trim(),
@@ -482,6 +525,7 @@ function handlePreview() {
   }
 
   savePreviewData('blog', slug, previewPost)
+  saveDraft(snapshotFormDraft())
   router.push(`/blog/${slug}/preview`)
 }
 
@@ -501,6 +545,7 @@ async function save() {
     } else {
       await blogApi.createPost(payload)
     }
+    clearDraft()
     router.push('/admin/blog')
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } }; message?: string }
@@ -664,8 +709,63 @@ async function save() {
   }
 }
 
-.thumb-row {
-  margin-top: 0.5rem;
+.thumb-intro {
+  margin-bottom: 0.75rem;
+}
+
+.blog-card-image-wrap--form {
+  position: relative;
+  height: 12rem;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-border-light);
+}
+
+.blog-card-image-wrap--form .blog-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.blog-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  color: #d1d5db;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.blog-card-image-placeholder i {
+  font-size: 1.5rem;
+}
+
+.blog-thumb-remove {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.blog-thumb-remove:hover {
+  background: rgba(0, 0, 0, 0.75);
 }
 
 .field {
@@ -772,43 +872,6 @@ async function save() {
   font-size: 0.5625rem;
   color: #9ca3af;
   pointer-events: none;
-}
-
-.preview-block-label {
-  display: block;
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: #9ca3af;
-  text-transform: uppercase;
-  margin-bottom: 0.375rem;
-}
-
-.preview-block {
-  border: 1px solid #e5e7eb;
-  border-radius: 0.25rem;
-  overflow: hidden;
-  background: #f9fafb;
-  box-shadow: var(--shadow-sm);
-}
-
-.preview-block--blog {
-  height: 10rem;
-}
-
-.preview-block-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.preview-block-empty {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #d1d5db;
-  font-size: 1.5rem;
 }
 
 .editor-shell {

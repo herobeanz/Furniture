@@ -23,12 +23,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import("../views/BlogView.vue"),
   },
   {
-    path: "/blog/:slug/preview",
+    path: "/blog/:slug([^/]+)/preview",
     name: "blog-post-preview",
     component: () => import("../layouts/PreviewLayout.vue"),
     children: [
       {
         path: "",
+        name: "blog-post-preview-content",
         component: () => import("../views/BlogPostView.vue"),
       },
     ],

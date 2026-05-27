@@ -21,23 +21,55 @@
       >
         <i class="fa-solid fa-chevron-right" aria-hidden="true" />
       </button>
+      <span v-if="images.length > 1" class="gallery-counter" aria-live="polite">
+        {{ selectedIndex + 1 }} / {{ images.length }}
+      </span>
     </div>
-    <div v-if="images.length > 1" class="gallery-thumbs">
+
+    <div v-if="images.length > 1" class="gallery-thumbs-row">
       <button
-        v-for="(img, i) in images"
-        :key="i"
+        v-if="canScrollThumbs"
         type="button"
-        class="thumb"
-        :class="{ active: selectedIndex === i }"
-        @click="$emit('selectImage', i)"
+        class="thumbs-nav thumbs-nav--prev"
+        :disabled="thumbOffset === 0"
+        aria-label="Xem ảnh nhỏ trước"
+        @click="scrollThumbsPrev"
       >
-        <img :src="img" :alt="`${productName} ${i + 1}`" />
+        <i class="fa-solid fa-chevron-left" aria-hidden="true" />
+      </button>
+
+      <div class="gallery-thumbs">
+        <button
+          v-for="item in visibleThumbs"
+          :key="item.index"
+          type="button"
+          class="thumb"
+          :class="{ active: selectedIndex === item.index }"
+          @click="$emit('selectImage', item.index)"
+        >
+          <img :src="item.src" :alt="`${productName} ${item.index + 1}`" />
+        </button>
+      </div>
+
+      <button
+        v-if="canScrollThumbs"
+        type="button"
+        class="thumbs-nav thumbs-nav--next"
+        :disabled="thumbOffset >= images.length - VISIBLE_THUMBS"
+        aria-label="Xem ảnh nhỏ sau"
+        @click="scrollThumbsNext"
+      >
+        <i class="fa-solid fa-chevron-right" aria-hidden="true" />
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+
+const VISIBLE_THUMBS = 4
+
 interface Props {
   images: string[]
   currentImage: string | undefined
@@ -45,13 +77,52 @@ interface Props {
   selectedIndex: number
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 defineEmits<{
   selectImage: [index: number]
   prev: []
   next: []
 }>()
+
+const thumbOffset = ref(0)
+
+const canScrollThumbs = computed(() => props.images.length > VISIBLE_THUMBS)
+
+const visibleThumbs = computed(() =>
+  props.images
+    .slice(thumbOffset.value, thumbOffset.value + VISIBLE_THUMBS)
+    .map((src, i) => ({
+      src,
+      index: thumbOffset.value + i,
+    })),
+)
+
+function syncThumbOffset() {
+  const total = props.images.length
+  if (total <= VISIBLE_THUMBS) {
+    thumbOffset.value = 0
+    return
+  }
+  const idx = props.selectedIndex
+  if (idx < thumbOffset.value) {
+    thumbOffset.value = idx
+  } else if (idx >= thumbOffset.value + VISIBLE_THUMBS) {
+    thumbOffset.value = idx - VISIBLE_THUMBS + 1
+  }
+}
+
+watch(() => props.selectedIndex, syncThumbOffset)
+watch(() => props.images.length, syncThumbOffset)
+
+function scrollThumbsPrev() {
+  thumbOffset.value = Math.max(0, thumbOffset.value - 1)
+}
+
+function scrollThumbsNext() {
+  const max = Math.max(0, props.images.length - VISIBLE_THUMBS)
+  thumbOffset.value = Math.min(max, thumbOffset.value + 1)
+}
 </script>
 
 <style scoped>
@@ -93,6 +164,19 @@ defineEmits<{
   background: var(--color-bg-alt);
 }
 
+.gallery-counter {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .gallery-nav {
   position: absolute;
   top: 50%;
@@ -127,10 +211,50 @@ defineEmits<{
   font-size: 0.6875rem;
 }
 
+.gallery-thumbs-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .gallery-thumbs {
+  flex: 1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.625rem;
+  min-width: 0;
+}
+
+.thumbs-nav {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-light);
+  border-radius: 0.25rem;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.thumbs-nav:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.thumbs-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.thumbs-nav i {
+  font-size: 0.625rem;
 }
 
 .thumb {

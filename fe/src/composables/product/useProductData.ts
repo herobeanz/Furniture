@@ -4,6 +4,8 @@ import { productApi, type Product } from '@/services/api/products'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 import { getCategoryPath, getProductPath } from '@/utils/navigation'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { buildProductGalleryList } from '@/utils/productGallery'
 
 /**
  * Composable for Product page data fetching and state management
@@ -21,11 +23,21 @@ export function useProductData() {
   const selectedIndex = ref(0)
   const quantity = ref(1)
 
-  const currentImage = computed(() => {
+  const galleryImageUrls = computed(() => {
     const p = product.value
-    if (!p?.images?.length) return p?.thumbnail || ''
-    const i = Math.min(selectedIndex.value, p.images.length - 1)
-    return p.images[i]
+    if (!p) return [] as string[]
+    return buildProductGalleryList(p.thumbnail, p.images)
+  })
+
+  const galleryImages = computed(() =>
+    galleryImageUrls.value.map((url) => resolveMediaUrl(url)).filter(Boolean),
+  )
+
+  const currentImage = computed(() => {
+    const list = galleryImageUrls.value
+    if (!list.length) return ''
+    const i = Math.min(selectedIndex.value, list.length - 1)
+    return resolveMediaUrl(list[i])
   })
 
   const breadcrumb = computed(() => {
@@ -50,7 +62,8 @@ export function useProductData() {
       const previewData = getPreviewData('product', productSlug.value)
       if (previewData) {
         product.value = previewData as Product
-        related.value = [] // No related products in preview
+        related.value = []
+        selectedIndex.value = 0
         loading.value = false
         return
       }
@@ -89,6 +102,15 @@ export function useProductData() {
     quantity.value = Math.max(1, Math.min(99, qty))
   }
 
+  watch(
+    () => galleryImageUrls.value.length,
+    (len) => {
+      if (selectedIndex.value >= len) {
+        selectedIndex.value = Math.max(0, len - 1)
+      }
+    },
+  )
+
   watch(productSlug, fetchProduct, { immediate: true })
 
   return {
@@ -101,6 +123,7 @@ export function useProductData() {
     selectedIndex,
     quantity,
     // Computed
+    galleryImages,
     currentImage,
     breadcrumb,
     productSlug,
