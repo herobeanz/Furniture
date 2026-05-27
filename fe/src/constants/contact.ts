@@ -10,7 +10,6 @@ export {
 export const CONTACT_IMAGES = {
   hero:
     'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80',
-  map: 'https://images.unsplash.com/photo-1524661135339-9140b00787e3?auto=format&fit=crop&w=800&q=80',
   showroom:
     'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80',
 } as const

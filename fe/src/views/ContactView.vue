@@ -122,12 +122,23 @@
 
         <div class="contact-side">
           <div class="contact-map">
-            <img
-              :src="CONTACT_IMAGES.map"
-              alt="Bản đồ chỉ đường"
-              class="contact-map-image"
+            <iframe
+              :src="mapEmbedUrl"
+              title="Bản đồ chỉ đường đến showroom"
+              class="contact-map-embed"
               loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
             />
+            <a
+              :href="mapsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact-map-open"
+            >
+              Mở Google Maps
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" />
+            </a>
             <div class="contact-map-pin">
               <i class="fa-solid fa-location-dot" aria-hidden="true" />
               <span>{{ BRAND_NAME }}</span>
@@ -229,11 +240,11 @@ import ContactForm from "@/components/contact/ContactForm.vue";
 import { useContactForm } from "@/composables/contact/useContactForm";
 import { useContactInfo } from "@/composables/common/useContactInfo";
 import { BRAND_NAME } from "@/constants/brand";
+import { CONTACT_HOURS_LINES, CONTACT_IMAGES } from "@/constants/contact";
 import {
-  CONTACT_HOURS_LINES,
-  CONTACT_IMAGES,
   CONTACT_MAP_QUERY,
-} from "@/constants/contact";
+  getContactMapEmbedUrl,
+} from "@/constants/site";
 
 const { form, sending, submitMessage, submitError, facebookUrl, submit } =
   useContactForm();
@@ -252,6 +263,8 @@ const mapsUrl = computed(
     siteMapUrl.value ||
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(CONTACT_MAP_QUERY)}`,
 );
+
+const mapEmbedUrl = computed(() => getContactMapEmbedUrl());
 
 async function handleSubmit() {
   await submit("contact");
@@ -518,18 +531,43 @@ async function handleSubmit() {
   box-shadow: var(--shadow-sm);
 }
 
-.contact-map-image {
+.contact-map-embed {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  filter: brightness(0.95) contrast(1.05);
+  border: 0;
+  display: block;
+}
+
+.contact-map-open {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.contact-map-open:hover {
+  background: #fff;
 }
 
 .contact-map-pin {
   position: absolute;
-  top: 50%;
+  top: 0.75rem;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
+  z-index: 2;
   background: #fff;
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;

@@ -4,344 +4,531 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+const AUTHOR = 'Đồ gỗ Hùng Cường';
+
+type SeedCategory = {
+  name: string;
+  slug: string;
+  description: string;
+  thumbnail: string;
+  order_index: number;
+  seo_title: string;
+  seo_description: string;
+};
+
+type SeedProduct = {
+  name: string;
+  slug: string;
+  sku: string;
+  shortDescription: string;
+  description: string;
+  price: number;
+  salePrice: number | null;
+  categorySlug: string;
+  thumbnail: string;
+  material: string;
+  dimensions: string;
+  color: string;
+  warranty: string;
+  images: string[];
+  seo_title?: string;
+  seo_description?: string;
+  is_featured?: boolean;
+};
+
+type SeedCollection = {
+  name: string;
+  slug: string;
+  description: string;
+  thumbnail: string;
+  seo_title: string;
+  seo_description: string;
+  order_index: number;
+  categorySlugs: string[];
+};
+
+type SeedBlogPost = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  thumbnail: string;
+  category: string;
+  seo_title: string;
+  seo_description: string;
+  is_featured: boolean;
+  published_at: Date;
+  sort_order: number;
+};
+
+const CATEGORIES: SeedCategory[] = [
+  {
+    name: 'Sofa',
+    slug: 'sofa',
+    description: 'Sofa phòng khách bọc vải, da và gỗ tự nhiên — thiết kế hiện đại, êm ái.',
+    thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
+    order_index: 0,
+    seo_title: 'Sofa phòng khách cao cấp',
+    seo_description: 'Sofa gỗ tự nhiên, bọc vải và da cho phòng khách hiện đại.',
+  },
+  {
+    name: 'Giường',
+    slug: 'giuong',
+    description: 'Giường ngủ gỗ sồi, óc chó và MDF chống ẩm — nhiều kích thước cho mọi phòng ngủ.',
+    thumbnail: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800',
+    order_index: 1,
+    seo_title: 'Giường ngủ gỗ cao cấp',
+    seo_description: 'Giường ngủ gỗ tự nhiên, thiết kế tối giản và bền chắc.',
+  },
+  {
+    name: 'Tủ quần áo',
+    slug: 'tu-quan-ao',
+    description: 'Tủ quần áo, tủ cánh lùa và tủ đứng — tối ưu lưu trữ phòng ngủ và không gian bếp.',
+    thumbnail: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800',
+    order_index: 2,
+    seo_title: 'Tủ quần áo gỗ thông minh',
+    seo_description: 'Tủ quần áo gỗ MDF chống ẩm, nhiều ngăn treo và kệ gấp.',
+  },
+];
+
+const PRODUCTS: SeedProduct[] = [
+  {
+    name: 'Sofa góc 2 chỗ bọc vải',
+    slug: 'sofa-goc-2-cho-boc-vai',
+    sku: 'SOFA-2C-001',
+    shortDescription:
+      'Sofa góc compact 2 chỗ, khung gỗ chắc, vải bọc chống bám bụi — lý tưởng căn hộ dưới 20m².',
+    description: `<p>Sofa góc 2 chỗ là lựa chọn cân bằng giữa tiện nghi và diện tích. Khung gỗ được xử lý chống mối, đệm mút đàn hồi cao giúp ngồi lâu không bị mỏi lưng.</p>
+<p>Thiết kế góc giúp tận dụng góc phòng, tạo luồng đi thông thoáng. Vải bọc có thể tháo rời để vệ sinh định kỳ.</p>
+<ul>
+<li>Kích thước phù hợp phòng khách nhỏ và studio</li>
+<li>Màu beige/dễ phối rèm, thảm trung tính</li>
+<li>Bảo hành khung gỗ 24 tháng</li>
+</ul>`,
+    price: 13500000,
+    salePrice: 11900000,
+    categorySlug: 'sofa',
+    thumbnail: 'https://images.unsplash.com/photo-1540574163026-643ea20ade68?w=800',
+    material: 'Vải polyester cao cấp, gỗ thông',
+    dimensions: '200x150x85 cm',
+    color: 'Beige',
+    warranty: '2 năm',
+    images: [
+      'https://images.unsplash.com/photo-1540574163026-643ea20ade68?w=800',
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
+    ],
+    seo_title: 'Sofa góc 2 chỗ bọc vải',
+    seo_description: 'Sofa góc nhỏ gọn cho phòng khách chung cư, khung gỗ bền.',
+    is_featured: true,
+  },
+  {
+    name: 'Sofa da 3 chỗ phòng khách',
+    slug: 'sofa-da-3-cho-phong-khach',
+    sku: 'SOFA-3C-002',
+    shortDescription:
+      'Sofa 3 chỗ bọc da công nghiệp, tựa lưng cao, phong cách sang trọng cho phòng khách rộng.',
+    description: `<p>Sofa 3 chỗ mang phong cách sang trọng với lớp da công nghiệp bề mặt mịn, dễ lau chùi. Khung gỗ sồi chịu lực tốt, phù hợp gia đình 4–5 người sử dụng hàng ngày.</p>
+<p>Đệm ghế chia 3 zone ngồi độc lập, giảm lún khi nhiều người cùng ngồi. Có thể kết hợp bàn trà thấp và đèn sàn để hoàn thiện không gian tiếp khách.</p>
+<p>Gợi ý bảo quản: tránh ánh nắng trực tiếp, lau khô bằng khăn mềm mỗi tuần.</p>`,
+    price: 22900000,
+    salePrice: 19900000,
+    categorySlug: 'sofa',
+    thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
+    material: 'Da công nghiệp, gỗ sồi',
+    dimensions: '220x95x88 cm',
+    color: 'Nâu cacao',
+    warranty: '2 năm',
+    images: [
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
+    ],
+    seo_title: 'Sofa da 3 chỗ phòng khách',
+    seo_description: 'Sofa da 3 chỗ khung gỗ sồi, thiết kế sang cho phòng khách.',
+    is_featured: true,
+  },
+  {
+    name: 'Giường ngủ gỗ sồi 1m8',
+    slug: 'giuong-ngu-go-soi-1m8',
+    sku: 'BED-180-001',
+    shortDescription:
+      'Giường đôi 1m8 khung gỗ sồi nguyên khối, đầu giường thấp tối giản, chân chắc chịu lực.',
+    description: `<p>Giường 1m8 x 2m là kích thước phổ biến cho cặp đôi. Khung gỗ sồi được phủ dầu chống ẩm, giữ vân gỗ tự nhiên, hạn chế cong vênh trong điều kiện nóng ẩm.</p>
+<p>Đầu giường thấp tạo cảm giác trần cao, dễ phối đèn đọc sách và tranh treo tường. Khoảng hở dưới gầm đủ để đặt hộc kéo lưu chăn mùa.</p>
+<ul>
+<li>Chịu tải tối đa khoảng 300kg (khung + nệm)</li>
+<li>Tương thích nệm foam, lò xo hoặc latex tiêu chuẩn VN</li>
+<li>Lắp đặt tại nhà miễn phí nội thành (theo chính sách cửa hàng)</li>
+</ul>`,
+    price: 16800000,
+    salePrice: 14200000,
+    categorySlug: 'giuong',
+    thumbnail: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800',
+    material: 'Gỗ sồi tự nhiên',
+    dimensions: '180x200x90 cm',
+    color: 'Vân gỗ sáng',
+    warranty: '2 năm',
+    images: ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800'],
+    seo_title: 'Giường ngủ gỗ sồi 1m8',
+    seo_description: 'Giường đôi 1m8 khung gỗ sồi, thiết kế hiện đại.',
+    is_featured: true,
+  },
+  {
+    name: 'Giường ngủ gỗ sồi 1m6 có hộc',
+    slug: 'giuong-ngu-go-soi-1m6-co-hoc',
+    sku: 'BED-160-001',
+    shortDescription:
+      'Giường 1m6 tiết kiệm diện tích, có hộc kéo dưới gầm, phù hợp phòng ngủ nhỏ.',
+    description: `<p>Giường 1m6 là giải pháp tối ưu cho phòng ngủ phụ hoặc căn hộ một phòng ngủ. Khung gỗ sồi bền, cạnh xử lý mịn tránh cấn tay.</p>
+<p>Hộc kéo rộng dưới gầm giúp cất chăn, gối theo mùa mà không chiếm diện tích tủ. Đầu giường có kệ hở để đặt điện thoại, sách hoặc đèn ngủ.</p>
+<p>Kết hợp nệm dày 20–25cm để đảm bảo thoáng khí và thoải mái khi nằm.</p>`,
+    price: 14900000,
+    salePrice: 12500000,
+    categorySlug: 'giuong',
+    thumbnail: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
+    material: 'Gỗ sồi, MDF phủ melamine',
+    dimensions: '160x200x95 cm',
+    color: 'Trắng vân gỗ',
+    warranty: '2 năm',
+    images: ['https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800'],
+    seo_title: 'Giường ngủ gỗ sồi 1m6 có hộc',
+    seo_description: 'Giường 1m6 gỗ sồi có hộc kéo, phù hợp phòng ngủ nhỏ.',
+  },
+  {
+    name: 'Tủ quần áo 4 cánh lùa 2m4',
+    slug: 'tu-quan-ao-4-canh-lua-2m4',
+    sku: 'WARD-240-001',
+    shortDescription:
+      'Tủ 4 cánh trượt rộng 2m4, chia ngăn treo và kệ gấp, MDF chống ẩm.',
+    description: `<p>Tủ quần áo 4 cánh lùa giúp mở rộng không gian sử dụng trong phòng ngủ hẹp. Ray trượt êm, bánh xe chịu tải, cánh không va chạm khi mở đồng thời.</p>
+<p>Bên trong gồm: khu treo áo dài, khu treo áo ngắn, kệ gấp và 2 ngăn kéo đựng phụ kiện. Mặt ngoài phủ melamine chống ẩm, dễ vệ sinh.</p>
+<p>Gợi ý lắp đặt: để cách tường sau ít nhất 5cm để cánh lùa vận hành trơn tru; kiểm tra mặt sàn bằng pháo trước khi bàn giao.</p>`,
+    price: 19500000,
+    salePrice: 16800000,
+    categorySlug: 'tu-quan-ao',
+    thumbnail: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800',
+    material: 'MDF chống ẩm, phủ melamine',
+    dimensions: '240x220x60 cm',
+    color: 'Trắng',
+    warranty: '2 năm',
+    images: [
+      'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800',
+      'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800',
+    ],
+    seo_title: 'Tủ quần áo 4 cánh lùa 2m4',
+    seo_description: 'Tủ quần áo cánh lùa rộng, nhiều ngăn treo và kệ gấp.',
+    is_featured: true,
+  },
+  {
+    name: 'Tủ đứng 3 cánh có gương',
+    slug: 'tu-dung-3-canh-co-guong',
+    sku: 'WARD-180-001',
+    shortDescription:
+      'Tủ quần áo 3 cánh, 1 cánh gương soi full, phù hợp phòng ngủ master vừa và nhỏ.',
+    description: `<p>Tủ 3 cánh là lựa chọn cân đối giữa dung tích và chi phí. Một cánh gương giúp phòng ngủ trông rộng hơn và tiện soi trang phục trước khi ra ngoài.</p>
+<p>Ngăn bên trong được chia theo chiều cao người dùng: áo treo trên, quần gấp giữa, phụ kiện dưới. Tay nắm âm tủ tạo mặt phẳng, dễ vệ sinh.</p>
+<p>Có thể đặt cạnh giường hoặc sát tường đối diện cửa sổ để tận dụng ánh sáng tự nhiên khi mở gương.</p>`,
+    price: 13500000,
+    salePrice: 11500000,
+    categorySlug: 'tu-quan-ao',
+    thumbnail: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800',
+    material: 'MDF phủ melamine, gương soi',
+    dimensions: '180x220x60 cm',
+    color: 'Vân gỗ sồi',
+    warranty: '2 năm',
+    images: ['https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800'],
+    seo_title: 'Tủ quần áo 3 cánh có gương',
+    seo_description: 'Tủ quần áo 3 cánh gương soi, thiết kế gọn cho phòng ngủ.',
+  },
+];
+
+const COLLECTIONS: SeedCollection[] = [
+  {
+    name: 'Phòng khách',
+    slug: 'phong-khach',
+    description:
+      'Sofa phòng khách gỗ tự nhiên — từ sofa góc gọn cho căn hộ đến sofa da 3 chỗ sang trọng. Chọn theo diện tích và phong cách nội thất của bạn.',
+    thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1000',
+    seo_title: 'Nội thất phòng khách gỗ — Đồ gỗ Hùng Cường',
+    seo_description: 'Sofa phòng khách bọc vải, da — khung gỗ bền, thiết kế hiện đại.',
+    order_index: 0,
+    categorySlugs: ['sofa'],
+  },
+  {
+    name: 'Phòng ngủ',
+    slug: 'phong-ngu',
+    description:
+      'Giường ngủ và tủ quần áo gỗ — giải pháp trọn gói cho phòng ngủ ấm cúng, gọn gàng và dễ bảo quản trong khí hậu nóng ẩm.',
+    thumbnail: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=1000',
+    seo_title: 'Nội thất phòng ngủ gỗ — Đồ gỗ Hùng Cường',
+    seo_description: 'Giường gỗ sồi, tủ quần áo cánh lùa — phòng ngủ hoàn thiện.',
+    order_index: 1,
+    categorySlugs: ['giuong', 'tu-quan-ao'],
+  },
+  {
+    name: 'Phòng bếp',
+    slug: 'phong-bep',
+    description:
+      'Tủ lưu trữ phòng bếp và bếp kết hợp — tủ đứng chống ẩm, nhiều ngăn đựng đồ khô, bát đĩa và dụng cụ nấu ăn gọn gàng.',
+    thumbnail: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1000',
+    seo_title: 'Tủ lưu trữ phòng bếp — Đồ gỗ Hùng Cường',
+    seo_description: 'Tủ đứng MDF chống ẩm cho phòng bếp, tối ưu không gian lưu trữ.',
+    order_index: 2,
+    categorySlugs: ['tu-quan-ao'],
+  },
+];
+
+const BLOG_POSTS: SeedBlogPost[] = [
+  {
+    slug: 'xu-huong-noi-that-ton-mau-trung-tinh-2025',
+    title: 'Xu hướng nội thất 2025: tông trung tính và gỗ tự nhiên vẫn lên ngôi',
+    excerpt:
+      'Beige, nâu ấm và vân gỗ sáng không chỉ là “an toàn” — chúng giúp nhà bạn rộng hơn, dễ thay đổi phụ kiện theo mùa và bền về thẩm mỹ.',
+    content: `<h2>Vì sao tông trung tính trở lại mạnh mẽ?</h2>
+<p>Sau giai đoạn thiên về màu tối và kim loại lạnh, năm 2025 ghi nhận sự quay về của palette ấm: kem, oatmeal, taupe và nâu gỗ nhạt. Các gia đình Việt ưu tiên không gian dễ “thở”, đặc biệt trong căn hộ 60–90m².</p>
+<p>Gỗ tự nhiên — sồi, cao su, óc chó — được dùng làm “xương sống” cho sofa, bàn và kệ. Điểm nhấn màu chỉ nên chiếm 10–15% diện tích (gối, tranh, chậu cây) để tránh rối mắt.</p>
+<h2>Cách phối trong phòng khách</h2>
+<ul>
+<li>Sofa màu beige + thảm len xám nhạt + rèm linen trắng ngà</li>
+<li>Chọn 1 bức tranh lớn hoặc gương trang trí thay vì nhiều vật dụng nhỏ</li>
+<li>Đèn sàn 2700–3000K tạo ánh sáng ấm buổi tối</li>
+</ul>
+<h2>Lưu ý khi mua đồ gỗ theo xu hướng</h2>
+<p>Ưu tiên bề mặt phủ dầu hoặc PU chống ẩm, đặc biệt với đồ đặt gần cửa ra vào hoặc ban công. Hỏi rõ chế độ bảo hành co ngót, nứt mép trong 12 tháng đầu.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=900',
+    category: 'Xu hướng nội thất',
+    seo_title: 'Xu hướng nội thất 2025: tông trung tính và gỗ',
+    seo_description: 'Phân tích xu hướng màu sắc và gỗ tự nhiên cho phòng khách, phòng ngủ năm 2025.',
+    is_featured: true,
+    published_at: new Date('2025-02-01T08:00:00Z'),
+    sort_order: 0,
+  },
+  {
+    slug: 'xu-huong-goc-xanh-trong-nha',
+    title: 'Góc xanh trong nhà: xu hướng sống lành mạnh kết hợp nội thất gỗ',
+    excerpt:
+      'Một góc cây nhỏ bên cửa sổ, kệ gỗ thấp và ghế đọc sách có thể biến góc thừa thành nơi thư giãn yêu thích của cả nhà.',
+    content: `<h2>Góc xanh không cần diện tích lớn</h2>
+<p>Chỉ cần 1–1,5m² sát cửa sổ hoặc ban công, bạn đã có thể tạo “góc xanh” với 2–3 chậu cây ánh sáng gián tiếp (trầu bà, lan ý, cây phát lộc).</p>
+<h2>Chọn nội thất gỗ phù hợp</h2>
+<p>Kệ gỗ thấp hoặc ghế đơn gỗ sồi giúp không gian tự nhiên, không lấn át cây. Tránh kệ quá cao che ánh sáng. Màu gỗ sáng phản chiếu tốt, giúp cây trông tươi hơn.</p>
+<h2>Chăm sóc đồ gỗ khi đặt gần cây</h2>
+<p>Tưới cây cẩn thận, tránh nước đọng lên mặt gỗ. Dùng lót chậu và khay hứng nước. Lau khô ngay nếu có cát/vụn đất rơi vãi.</p>
+<p>Góc xanh kết hợp sofa góc nhỏ tạo không gian đa năng: đọc sách, làm việc nhẹ hoặc trò chuyện buổi chiều.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=900',
+    category: 'Xu hướng nội thất',
+    seo_title: 'Góc xanh trong nhà và nội thất gỗ',
+    seo_description: 'Hướng dẫn bố trí góc cây trong nhà với kệ gỗ, ghế và ánh sáng tự nhiên.',
+    is_featured: false,
+    published_at: new Date('2025-02-08T08:00:00Z'),
+    sort_order: 1,
+  },
+  {
+    slug: 'kinh-nghiem-phan-biet-go-tu-nhien-va-go-cong-nghiep',
+    title: 'Phân biệt gỗ tự nhiên và gỗ công nghiệp khi mua nội thất',
+    excerpt:
+      'Cùng là “gỗ” nhưng MDF, MFC và gỗ tự nhiên khác nhau về độ bền, giá và cách sử dụng. Bài viết giúp bạn chọn đúng từng hạng mục trong nhà.',
+    content: `<h2>Gỗ tự nhiên là gì?</h2>
+<p>Gỗ tự nhiên (sồi, óc chó, gụ, cao su…) được xẻ từ thân cây, giữ vân gỗ thật. Ưu điểm: thẩm mỹ cao, bền, có thể đánh lại dầu. Nhược: giá cao hơn, dễ co ngót nếu không sấy đúng chuẩn.</p>
+<h2>Gỗ công nghiệp (MDF, MFC, HDF)</h2>
+<p>Là dăm gỗ ép keo dưới áp lực cao, bề mặt phủ melamine hoặc veneer. Ưu điểm: giá mềm, kích thước ổn định, phù hợp tủ, kệ số lượng lớn. Nhược: sợ nước đọng lâu ở cạnh hở, khó sửa khi trầy sâu.</p>
+<h2>Nên chọn loại nào cho từng khu vực?</h2>
+<ul>
+<li><strong>Sofa, giường khung gỗ:</strong> ưu tiên gỗ tự nhiên hoặc khung gỗ + bọc vải/da chất lượng</li>
+<li><strong>Tủ quần áo, tủ bếp:</strong> MDF/MFC chống ẩm phủ melamine là hợp lý</li>
+<li><strong>Đồ trưng bày ít dùng:</strong> có thể dùng MFC tiết kiệm</li>
+</ul>
+<h2>Câu hỏi nên hỏi khi mua</h2>
+<p>Hỏi loại gỗ cụ thể, lớp phủ bề mặt, độ dày ván, chính sách bảo hành co ngót/nứt. Yêu cầu xem mẫu thật hoặc ảnh cận cảnh mép và khớp nối.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=900',
+    category: 'Kinh nghiệm chọn đồ gỗ',
+    seo_title: 'Phân biệt gỗ tự nhiên và gỗ công nghiệp',
+    seo_description: 'So sánh gỗ tự nhiên, MDF, MFC — chọn đúng cho sofa, giường, tủ.',
+    is_featured: true,
+    published_at: new Date('2025-02-12T08:00:00Z'),
+    sort_order: 2,
+  },
+  {
+    slug: 'kinh-nghiem-do-am-khi-mua-noi-that-go',
+    title: 'Kiểm tra độ ẩm gỗ trước khi nhận nội thất — đặc biệt ở Việt Nam',
+    excerpt:
+      'Độ ẩm gỗ sai chuẩn là nguyên nhân phổ biến khiến tủ cong cánh, giường kêu cót két. Đây là checklist 5 bước trước khi ký biên bản nghiệm thu.',
+    content: `<h2>Độ ẩm gỗ chuẩn là bao nhiêu?</h2>
+<p>Với nội thất trong nhà ở Việt Nam, độ ẩm gỗ nên trong khoảng <strong>8–12%</strong>. Cao hơn dễ co ngót sau vài tháng; thấp quá có thể giòn ở khớp nối.</p>
+<h2>Checklist khi nhận hàng</h2>
+<ol>
+<li>Quan sát mép ván và khớp nối — không hở, không lệch</li>
+<li>Ngửi mùi: tránh mùi ẩm mốc hoặc keo quá nồng</li>
+<li>Gõ nhẹ: âm thanh đặc, không rỗng (với tủ MDF)</li>
+<li>Kiểm tra cánh lùa, ngăn kéo chạy êm, không kẹt</li>
+<li>Chụp ảnh hiện trạng làm căn cứ bảo hành</li>
+</ol>
+<h2>Cách bảo quản sau khi lắp đặt</h2>
+<p>Tránh đặt sát tường ngoài hứng nắng mưa. Không để máy lạnh thổi trực tiếp lên bề mặt gỗ. Lau bụi bằng khăn ẩm vắt khô, sau đó lau khô. Có thể dùng dầu lau gỗ 6–12 tháng/lần với đồ gỗ tự nhiên.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1581539250439-c96689d51628?w=900',
+    category: 'Kinh nghiệm chọn đồ gỗ',
+    seo_title: 'Kiểm tra độ ẩm gỗ nội thất',
+    seo_description: 'Hướng dẫn kiểm tra độ ẩm gỗ khi nhận tủ, giường, sofa tại nhà.',
+    is_featured: false,
+    published_at: new Date('2025-02-18T08:00:00Z'),
+    sort_order: 3,
+  },
+  {
+    slug: 'khong-gian-song-phong-khach-da-nang',
+    title: 'Thiết kế phòng khách đa năng cho căn hộ nhỏ: sofa góc và ánh sáng',
+    excerpt:
+      'Phòng khách vừa tiếp khách vừa sinh hoạt cần bố trí thông minh. Gợi ý chọn sofa, màu sắc và ánh sáng cụ thể cho diện tích dưới 20m².',
+    content: `<h2>Bắt đầu từ luồng đi</h2>
+<p>Đặt sofa dọc tường dài hoặc góc chữ L để giữ lối đi rộng tối thiểu 80cm. Tránh chặn cửa ra vào và đường đi tới bếp.</p>
+<h2>Chọn sofa phù hợp</h2>
+<p>Sofa góc 2 chỗ tiết kiệm diện tích hơn sofa thẳng 3 chỗ trong căn hộ nhỏ. Nếu gia đình thường tiếp 3–4 khách, cân nhắc sofa 3 chỗ da/vải có độ đàn hồi tốt.</p>
+<h2>Ánh sáng nhiều lớp</h2>
+<ul>
+<li><strong>Ánh sáng tổng thể:</strong> đèn trần sáng trung tính</li>
+<li><strong>Ánh sáng vùng:</strong> đèn sàn cạnh sofa</li>
+<li><strong>Ánh sáng điểm:</strong> đèn bàn hoặc kệ trang trí</li>
+</ul>
+<p>Màu tường sáng + sofa trung tính + 1 thảm lớn sẽ giúp phòng khách trông gọn và sang hơn nhiều đồ nhỏ rời rạc.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900',
+    category: 'Không gian sống',
+    seo_title: 'Phòng khách đa năng căn hộ nhỏ',
+    seo_description: 'Bố trí phòng khách nhỏ với sofa góc, ánh sáng và màu sắc hợp lý.',
+    is_featured: false,
+    published_at: new Date('2025-02-22T08:00:00Z'),
+    sort_order: 4,
+  },
+  {
+    slug: 'khong-gian-song-phong-ngu-nghi-ngoi-tot',
+    title: 'Phòng ngủ nghỉ ngơi tốt: chọn giường, tủ và ánh sáng đúng cách',
+    excerpt:
+      'Giấc ngủ chất lượng bắt đầu từ giường đúng kích thước, tủ gọn gàng và ánh sáng ấm trước khi ngủ. Hướng dẫn chi tiết từng bước.',
+    content: `<h2>Chọn kích thước giường</h2>
+<p>Phòng ngủ master thường dùng giường 1m8 x 2m. Phòng phụ 12–14m² có thể dùng 1m6. Để lối đi hai bên giường tối thiểu 60cm nếu có hai người cùng ngủ.</p>
+<h2>Tủ quần áo và lưu trữ</h2>
+<p>Tủ cánh lùa tiết kiệm không gian mở cửa hơn tủ cánh mở. Chia nội thất: 60% treo, 40% kệ gấp. Ngăn kéo đựng đồ lót và phụ kiện.</p>
+<h2>Ánh sáng và màu sắc</h2>
+<p>Đèn ngủ 2700–3000K, rèm che sáng kín. Màu tường sáng, gỗ ấm. Tránh TV đối diện giường nếu dễ mất ngủ.</p>
+<p>Combo gợi ý: giường gỗ sồi 1m8 + tủ 4 cánh lùa + 1 đèn đọc sách — đủ cho phòng ngủ hiện đại, dễ vệ sinh.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=900',
+    category: 'Không gian sống',
+    seo_title: 'Thiết kế phòng ngủ nghỉ ngơi',
+    seo_description: 'Chọn giường, tủ quần áo và ánh sáng cho phòng ngủ chất lượng.',
+    is_featured: true,
+    published_at: new Date('2025-03-01T08:00:00Z'),
+    sort_order: 5,
+  },
+  {
+    slug: 'phong-cach-scandinavian-go-nhien',
+    title: 'Phong cách Scandinavian: làm sao để nhà sáng, ấm mà không lạnh',
+    excerpt:
+      'Scandinavian không chỉ là “toàn màu trắng”. Bí quyết nằm ở gỗ sáng, textile ấm và giảm đồ dư thừa.',
+    content: `<h2>Nguyên tắc cốt lõi</h2>
+<p>Scandinavian tôn vẻ đẹp của ánh sáng tự nhiên, đường nét đơn giản và chất liệu thật (gỗ, len, cotton). Không cần nhiều đồ — mỗi món phải có lý do tồn tại.</p>
+<h2>Palette màu gợi ý</h2>
+<ul>
+<li>Nền: trắng ngà, xám nhạt</li>
+<li>Gỗ: sồi, ash, beech sáng màu</li>
+<li>Điểm nhấn: olive, terracotta nhạt, xanh ngọc pastel</li>
+</ul>
+<h2>Gợi ý nội thất gỗ</h2>
+<p>Sofa góc bọc vải sáng, giường gỗ chân thấp, tủ trắng vân gỗ. Thảm len dày và rèm mỏng để không che cửa sổ.</p>
+<p>Tránh quá nhiều đồ trang trí trên kệ — Scandinavian thích “không gian thở”.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=900',
+    category: 'Phong cách thiết kế',
+    seo_title: 'Phong cách Scandinavian với gỗ',
+    seo_description: 'Hướng dẫn phối nội thất gỗ phong cách Bắc Âu cho căn hộ.',
+    is_featured: false,
+    published_at: new Date('2025-03-05T08:00:00Z'),
+    sort_order: 6,
+  },
+  {
+    slug: 'phong-cach-indochine-go-mun-huong',
+    title: 'Indochine hiện đại: gỗ trầm, ánh sáng vàng ấm trong nhà Việt',
+    excerpt:
+      'Indochine không nhất thiết đồ cổ. Bạn có thể kết hợp gỗ mun, gỗ hương với tường trắng và đèn lồng tre đan cho không gian sang mà ấm.',
+    content: `<h2>Đặc trưng Indochine</h2>
+<p>Gỗ trầm (mun, hương, gụ), hoạ tiết gạch men hoặc xi măng giả gỗ, đèn vàng ấm, không gian thoáng có chiều sâu. Không nên nhồi quá nhiều đồ thờ hoặc đồ cổ nếu nhà theo phong cách hiện đại.</p>
+<h2>Cách phối với nội thất gỗ hiện đại</h2>
+<p>Sofa hoặc ghế gỗ bọc vải linen, bàn trà thấp gỗ mun, rèm linen màu kem. Tránh đặt quá nhiều đồ sẫm màu trong cùng một góc.</p>
+<h2>Mẹo cho căn hộ chung cư</h2>
+<p>Dùng gương lớn tạo chiều sâu. Chọn 1–2 món gỗ chất lượng làm điểm nhấn thay vì nhiều món rẻ. Kết hợp cây xanh lá lớn để cân bằng tông gỗ trầm.</p>`,
+    thumbnail: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900',
+    category: 'Phong cách thiết kế',
+    seo_title: 'Phong cách Indochine với gỗ trầm',
+    seo_description: 'Gợi ý phối Indochine hiện đại với gỗ mun, gỗ hương trong nhà Việt.',
+    is_featured: false,
+    published_at: new Date('2025-03-10T08:00:00Z'),
+    sort_order: 7,
+  },
+];
+
 async function main() {
   console.log('🌱 Seeding database...');
 
-  const HERO_IMAGES = {
-    phongKhach: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
-    phongNgu: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800',
-    phongBep: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
-    phongTho: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
-  };
+  const categorySlugs = CATEGORIES.map((c) => c.slug);
+  const categoryMap = new Map<string, number>();
 
-  // --- Categories (slug unique toàn site) ---
-  const sofaCouches = await prisma.category.upsert({
-    where: { slug: 'sofa-couches' },
-    update: {},
-    create: {
-      name: 'Sofa & Ghế bành',
-      slug: 'sofa-couches',
-      description: 'Sofa và ghế bành cao cấp',
-      order_index: 0,
-    },
-  });
-  const coffeeTables = await prisma.category.upsert({
-    where: { slug: 'coffee-tables' },
-    update: {},
-    create: {
-      name: 'Bàn trà',
-      slug: 'coffee-tables',
-      description: 'Bàn trà, bàn kệ phòng khách',
-      order_index: 1,
-    },
-  });
-
-  const diningTables = await prisma.category.upsert({
-    where: { slug: 'dining-tables' },
-    update: {},
-    create: {
-      name: 'Bàn ăn',
-      slug: 'dining-tables',
-      description: 'Bàn ăn, bàn làm việc',
-      order_index: 2,
-    },
-  });
-  const diningChairs = await prisma.category.upsert({
-    where: { slug: 'dining-chairs' },
-    update: {},
-    create: {
-      name: 'Ghế ăn',
-      slug: 'dining-chairs',
-      description: 'Ghế ăn, ghế văn phòng',
-      order_index: 3,
-    },
-  });
-
-  const giuong = await prisma.category.upsert({
-    where: { slug: 'giuong' },
-    update: {},
-    create: {
-      name: 'Giường',
-      slug: 'giuong',
-      description: 'Giường ngủ, giường tầng',
-      order_index: 4,
-    },
-  });
-  const tuQuanAo = await prisma.category.upsert({
-    where: { slug: 'tu-quan-ao' },
-    update: {},
-    create: {
-      name: 'Tủ quần áo',
-      slug: 'tu-quan-ao',
-      description: 'Tủ quần áo, tủ có gương',
-      order_index: 5,
-    },
-  });
-
-  const banTho = await prisma.category.upsert({
-    where: { slug: 'ban-tho' },
-    update: {},
-    create: {
-      name: 'Bàn thờ',
-      slug: 'ban-tho',
-      description: 'Bàn thờ, tủ thờ',
-      order_index: 6,
-    },
-  });
-  const keTho = await prisma.category.upsert({
-    where: { slug: 'ke-tho' },
-    update: {},
-    create: {
-      name: 'Kệ thờ',
-      slug: 'ke-tho',
-      description: 'Kệ thờ, kệ tam cấp',
-      order_index: 7,
-    },
-  });
-
+  for (const cat of CATEGORIES) {
+    const row = await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: {
+        name: cat.name,
+        description: cat.description,
+        thumbnail: cat.thumbnail,
+        order_index: cat.order_index,
+        seo_title: cat.seo_title,
+        seo_description: cat.seo_description,
+        is_active: true,
+      },
+      create: {
+        name: cat.name,
+        slug: cat.slug,
+        description: cat.description,
+        thumbnail: cat.thumbnail,
+        order_index: cat.order_index,
+        seo_title: cat.seo_title,
+        seo_description: cat.seo_description,
+        is_active: true,
+      },
+    });
+    categoryMap.set(cat.slug, row.id);
+  }
   console.log('  ✓ Categories');
 
-  // --- Products ---
-  const productData = [
-    {
-      name: 'Sofa da cao cấp 3 chỗ',
-      slug: 'sofa-da-cao-cap-3-cho',
-      sku: 'SOFA-3C-001',
-      shortDescription: 'Sofa da bò Ý, thiết kế hiện đại, êm ái',
-      description: 'Sofa 3 chỗ làm từ da bò Ý nhập khẩu. Khung gỗ sồi chắc chắn, đệm mút cao cấp. Phù hợp phòng khách 15–25m².',
-      price: 18900000,
-      salePrice: 22900000,
-      categoryId: sofaCouches.id,
-      thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
-      material: 'Da bò Ý, gỗ sồi',
-      dimensions: '220x95x88 cm',
-      color: 'Nâu đậm',
-      warranty: '2 năm',
-      images: [
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800',
-        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
-      ],
-    },
-    {
-      name: 'Sofa góc Sectional L-shaped',
-      slug: 'sofa-goc-sectional-l-shaped',
-      sku: 'SOFA-SEC-002',
-      shortDescription: 'Sofa góc chữ L, bọc vải nỉ, nhiều màu',
-      description: 'Sofa góc kiểu Sectional chữ L. Bọc vải nỉ chống bám bụi, dễ vệ sinh. Có thể tách module linh hoạt.',
-      price: 25900000,
-      salePrice: 29900000,
-      categoryId: sofaCouches.id,
-      thumbnail: 'https://images.unsplash.com/photo-1491926626787-62db157af940?w=800',
-      material: 'Vải nỉ, khung gỗ',
-      dimensions: '280x180x90 cm',
-      color: 'Xám',
-      warranty: '2 năm',
-      images: ['https://images.unsplash.com/photo-1491926626787-62db157af940?w=800'],
-    },
-    {
-      name: 'Bàn ăn gỗ sồi 6 chỗ',
-      slug: 'ban-an-go-soi-6-cho',
-      sku: 'TABLE-DIN-001',
-      shortDescription: 'Bàn ăn gỗ sồi tự nhiên, mặt bàn dày 3cm',
-      description: 'Bàn ăn gỗ sồi nguyên tấm. Mặt bàn dày 3cm, chân gỗ chắc chắn. Phù hợp gia đình 4–6 người.',
-      price: 12500000,
-      salePrice: 14900000,
-      categoryId: diningTables.id,
-      thumbnail: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800',
-      material: 'Gỗ sồi tự nhiên',
-      dimensions: '180x90x76 cm',
-      color: 'Vân gỗ tự nhiên',
-      warranty: '1 năm',
-      images: ['https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800'],
-    },
-    {
-      name: 'Bàn trà gỗ MDF phong cách Bắc Âu',
-      slug: 'ban-tra-go-mdf-phong-cach-bac-au',
-      sku: 'TABLE-COF-001',
-      shortDescription: 'Bàn trà nhỏ gọn, 2 ngăn kéo',
-      description: 'Bàn trà thiết kế Bắc Âu. Khung chân kim loại sơn tĩnh điện, mặt MDF phủ melamine chống trầy.',
-      price: 2900000,
-      salePrice: 3500000,
-      categoryId: coffeeTables.id,
-      thumbnail: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=800',
-      material: 'MDF, kim loại',
-      dimensions: '120x60x45 cm',
-      color: 'Trắng',
-      warranty: '6 tháng',
-      images: ['https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=800'],
-    },
-    {
-      name: 'Ghế ăn gỗ óc chó 1 chỗ',
-      slug: 'ghe-an-go-oc-cho-1-cho',
-      sku: 'CHAIR-DIN-001',
-      shortDescription: 'Ghế ăn gỗ óc chó, đệm ngồi bọc da',
-      description: 'Ghế ăn 1 chỗ. Khung gỗ óc chó, đệm ngồi bọc da công nghiệp. Đi kèm bộ 4 hoặc 6 chiếc.',
-      price: 1850000,
-      salePrice: 2200000,
-      categoryId: diningChairs.id,
-      thumbnail: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800',
-      material: 'Gỗ óc chó, da công nghiệp',
-      dimensions: '48x52x88 cm',
-      color: 'Nâu',
-      warranty: '6 tháng',
-      images: ['https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800'],
-    },
-    {
-      name: 'Giường ngủ gỗ sồi 1m6',
-      slug: 'giuong-ngu-go-soi-1m6',
-      sku: 'BED-001',
-      shortDescription: 'Giường một giường gỗ sồi, đầu giường có tủ',
-      description: 'Giường ngủ kích thước 1m6 x 2m. Khung gỗ sồi tự nhiên, đầu giường thiết kế có hộc tủ. Chân chắc chắn, dễ vệ sinh.',
-      price: 12500000,
-      salePrice: 14900000,
-      categoryId: giuong.id,
-      thumbnail: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800',
-      material: 'Gỗ sồi',
-      dimensions: '160x200x95 cm',
-      color: 'Vân gỗ',
-      warranty: '2 năm',
-      images: ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800'],
-    },
-    {
-      name: 'Tủ quần áo 3 cánh có gương',
-      slug: 'tu-quan-ao-3-canh-co-guong',
-      sku: 'WARD-001',
-      shortDescription: 'Tủ đứng 3 cánh, 1 cánh gương soi',
-      description: 'Tủ quần áo 3 cánh. Bên trong có ngăn treo, ngăn gấp và kéo. Một cánh gương soi full. Gỗ MDF phủ melamine.',
-      price: 11500000,
-      salePrice: 13500000,
-      categoryId: tuQuanAo.id,
-      thumbnail: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800',
-      material: 'MDF, melamine',
-      dimensions: '180x220x60 cm',
-      color: 'Trắng',
-      warranty: '2 năm',
-      images: ['https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800'],
-    },
-    {
-      name: 'Bàn thờ gỗ gụ 1m2',
-      slug: 'ban-tho-go-gu-1m2',
-      sku: 'ALTAR-001',
-      shortDescription: 'Bàn thờ gỗ gụ truyền thống, chạm khắc hoa văn',
-      description: 'Bàn thờ gỗ gụ cao cấp. Mặt bàn rộng 1m2, chân chạm hoa văn truyền thống. Phù hợp không gian thờ cúng trang nghiêm.',
-      price: 18500000,
-      salePrice: 22000000,
-      categoryId: banTho.id,
-      thumbnail: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
-      material: 'Gỗ gụ',
-      dimensions: '120x85x80 cm',
-      color: 'Nâu đỏ',
-      warranty: '3 năm',
-      images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'],
-    },
-    {
-      name: 'Kệ thờ tam cấp gỗ gụ',
-      slug: 'ke-tho-tam-cap-go-gu',
-      sku: 'SHRINE-001',
-      shortDescription: 'Kệ thờ 3 tầng tam cấp, chạm hoa văn',
-      description: 'Kệ thờ tam cấp gỗ gụ. Ba tầng giảm dần, dễ bày bát hương và đồ thờ. Chạm hoa văn mai, lan, cúc, trúc.',
-      price: 12000000,
-      salePrice: 14500000,
-      categoryId: keTho.id,
-      thumbnail: 'https://images.unsplash.com/photo-1615529328331-f8917597711f?w=800',
-      material: 'Gỗ gụ',
-      dimensions: '110x90x35 cm',
-      color: 'Nâu đỏ',
-      warranty: '3 năm',
-      images: ['https://images.unsplash.com/photo-1615529328331-f8917597711f?w=800'],
-    },
-    // --- Extra products to make listing richer across rooms ---
-    {
-      name: 'Sofa vải nỉ 2 chỗ tối giản',
-      slug: 'sofa-vai-ni-2-cho-toi-gian',
-      sku: 'SOFA-2C-002',
-      shortDescription: 'Sofa vải nỉ 2 chỗ, khung gỗ tự nhiên, phong cách tối giản.',
-      description:
-        'Sofa 2 chỗ bọc vải nỉ chống bám bụi, đệm mút đàn hồi tốt, phù hợp căn hộ chung cư nhỏ hoặc phòng khách tối giản.',
-      price: 8900000,
-      salePrice: 9900000,
-      categoryId: sofaCouches.id,
-      thumbnail: 'https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=800',
-      material: 'Vải nỉ, gỗ thông',
-      dimensions: '160x85x85 cm',
-      color: 'Xanh rêu',
-      warranty: '1 năm',
-      images: ['https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=800'],
-    },
-    {
-      name: 'Kệ tivi gỗ sồi 1m8',
-      slug: 'ke-tivi-go-soi-1m8',
-      sku: 'TVSTAND-001',
-      shortDescription: 'Kệ tivi gỗ sồi, 3 hộc kéo, phù hợp phòng khách hiện đại.',
-      description:
-        'Kệ tivi dài 1m8 làm từ gỗ sồi tự nhiên, 3 hộc kéo lưu trữ đồ gọn gàng. Bề mặt phủ dầu lau chống ẩm, giữ vân gỗ đẹp.',
-      price: 6500000,
-      salePrice: 7500000,
-      categoryId: coffeeTables.id,
-      thumbnail: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=800',
-      material: 'Gỗ sồi tự nhiên',
-      dimensions: '180x40x50 cm',
-      color: 'Vân gỗ sáng',
-      warranty: '1 năm',
-      images: ['https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=800'],
-    },
-    {
-      name: 'Giường tầng trẻ em có cầu thang',
-      slug: 'giuong-tang-tre-em-co-cau-thang',
-      sku: 'BED-BUNK-001',
-      shortDescription: 'Giường tầng gỗ thông cho 2 bé, có hộc kéo dưới gầm.',
-      description:
-        'Giường tầng thiết kế an toàn cho trẻ nhỏ, lan can cao, cầu thang chắc chắn, dưới gầm có 2 hộc kéo chứa đồ chơi hoặc chăn gối.',
-      price: 16500000,
-      salePrice: 18500000,
-      categoryId: giuong.id,
-      thumbnail: 'https://images.unsplash.com/photo-1617806245181-9c1a1d0d94d5?w=800',
-      material: 'Gỗ thông New Zealand',
-      dimensions: '200x100x170 cm',
-      color: 'Trắng – gỗ tự nhiên',
-      warranty: '2 năm',
-      images: ['https://images.unsplash.com/photo-1617806245181-9c1a1d0d94d5?w=800'],
-    },
-    {
-      name: 'Tủ quần áo cánh lùa 2m',
-      slug: 'tu-quan-ao-canh-lua-2m',
-      sku: 'WARD-002',
-      shortDescription: 'Tủ quần áo cánh lùa hiện đại, tiết kiệm diện tích.',
-      description:
-        'Tủ quần áo 2m với 2 cánh lùa, phân chia khu vực treo đồ và gấp đồ rõ ràng. Phù hợp phòng ngủ chung cư diện tích nhỏ.',
-      price: 13500000,
-      salePrice: 15500000,
-      categoryId: tuQuanAo.id,
-      thumbnail: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800',
-      material: 'MDF chống ẩm, phủ melamine vân gỗ',
-      dimensions: '200x220x60 cm',
-      color: 'Vân gỗ sồi',
-      warranty: '2 năm',
-      images: ['https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800'],
-    },
-    {
-      name: 'Bộ bàn ăn tròn 4 ghế',
-      slug: 'bo-ban-an-tron-4-ghe',
-      sku: 'DINSET-4P-001',
-      shortDescription: 'Bàn ăn tròn 1m, kèm 4 ghế bọc nệm, phù hợp căn hộ nhỏ.',
-      description:
-        'Bộ bàn ăn tròn đường kính 1m, mặt gỗ MDF phủ veneer, chân gỗ beech. Ghế bọc nệm êm ái, dễ phối với nhiều phong cách nội thất.',
-      price: 8900000,
-      salePrice: 9900000,
-      categoryId: diningTables.id,
-      thumbnail: 'https://images.unsplash.com/photo-1555041469-869513f4afb1?w=800',
-      material: 'MDF veneer, gỗ beech, nệm mút bọc vải',
-      dimensions: 'Bàn tròn D100 x H75 cm',
-      color: 'Trắng – gỗ sáng',
-      warranty: '1 năm',
-      images: ['https://images.unsplash.com/photo-1555041469-869513f4afb1?w=800'],
-    },
-  ];
+  const seededProductSlugs = PRODUCTS.map((p) => p.slug);
+  const removedProducts = await prisma.product.deleteMany({
+    where: { slug: { notIn: seededProductSlugs } },
+  });
+  if (removedProducts.count > 0) {
+    console.log(`  ✓ Removed ${removedProducts.count} legacy products`);
+  }
 
-  for (const p of productData) {
+  for (const p of PRODUCTS) {
+    const categoryId = categoryMap.get(p.categorySlug);
+    if (!categoryId) {
+      throw new Error(`Missing category for product: ${p.categorySlug}`);
+    }
+
     const product = await prisma.product.upsert({
       where: { slug: p.slug },
-      update: {},
+      update: {
+        name: p.name,
+        sku: p.sku,
+        short_description: p.shortDescription,
+        description: p.description,
+        price: p.price,
+        sale_price: p.salePrice,
+        category_id: categoryId,
+        thumbnail: p.thumbnail,
+        material: p.material,
+        dimensions: p.dimensions,
+        color: p.color,
+        warranty: p.warranty,
+        status: 'available',
+        is_active: true,
+        is_featured: p.is_featured ?? false,
+        seo_title: p.seo_title ?? null,
+        seo_description: p.seo_description ?? null,
+      },
       create: {
         name: p.name,
         slug: p.slug,
@@ -350,20 +537,20 @@ async function main() {
         description: p.description,
         price: p.price,
         sale_price: p.salePrice,
-        category_id: p.categoryId,
+        category_id: categoryId,
         thumbnail: p.thumbnail,
         material: p.material,
         dimensions: p.dimensions,
         color: p.color,
         warranty: p.warranty,
         status: 'available',
+        is_featured: p.is_featured ?? false,
+        seo_title: p.seo_title ?? null,
+        seo_description: p.seo_description ?? null,
       },
     });
 
-    // Create product images (delete existing first, then create new)
-    await prisma.productImage.deleteMany({
-      where: { product_id: product.id },
-    });
+    await prisma.productImage.deleteMany({ where: { product_id: product.id } });
     for (let i = 0; i < p.images.length; i++) {
       await prisma.productImage.create({
         data: {
@@ -378,90 +565,58 @@ async function main() {
   }
   console.log('  ✓ Products');
 
-  // --- Collections ---
-  const collectionProductSlugs = [
-    'sofa-da-cao-cap-3-cho',
-    'sofa-goc-sectional-l-shaped',
-    'ban-tra-go-mdf-phong-cach-bac-au',
-    'ke-tivi-go-soi-1m8',
-    'giuong-ngu-go-soi-1m6',
-    'giuong-tang-tre-em-co-cau-thang',
-    'tu-quan-ao-3-canh-co-guong',
-    'tu-quan-ao-canh-lua-2m',
-    'ban-an-go-soi-6-cho',
-    'bo-ban-an-tron-4-ghe',
-    'ghe-an-go-oc-cho-1-cho',
-    'ban-tho-go-gu-1m2',
-    'ke-tho-tam-cap-go-gu',
-  ];
-
-  const collectionProductsSource = await prisma.product.findMany({
-    where: { slug: { in: collectionProductSlugs } },
+  const removedCategories = await prisma.category.deleteMany({
+    where: { slug: { notIn: categorySlugs } },
   });
-  const productMap = new Map(collectionProductsSource.map((p) => [p.slug, p]));
+  if (removedCategories.count > 0) {
+    console.log(`  ✓ Removed ${removedCategories.count} legacy categories`);
+  }
 
-  const showcaseCollections = [
-    {
-      name: 'Phòng khách',
-      slug: 'phong-khach',
-      description:
-        'Khám phá các sản phẩm nội thất gỗ tự nhiên cho phòng khách – nơi thể hiện gu thẩm mỹ và đẳng cấp của gia chủ.',
-      thumbnail: HERO_IMAGES.phongKhach,
-      categoryIds: [sofaCouches.id, coffeeTables.id],
-      order_index: 0,
-    },
-    {
-      name: 'Phòng ngủ',
-      slug: 'phong-ngu',
-      description: 'Giường, tủ quần áo và nội thất phòng ngủ cao cấp.',
-      thumbnail: HERO_IMAGES.phongNgu,
-      categoryIds: [giuong.id, tuQuanAo.id],
-      order_index: 1,
-    },
-    {
-      name: 'Phòng bếp',
-      slug: 'phong-bep',
-      description: 'Bàn ăn, ghế ăn và nội thất phòng bếp.',
-      thumbnail: HERO_IMAGES.phongBep,
-      categoryIds: [diningTables.id, diningChairs.id],
-      order_index: 2,
-    },
-    {
-      name: 'Phòng thờ',
-      slug: 'phong-tho',
-      description: 'Bàn thờ, kệ thờ và nội thất phòng thờ trang nghiêm.',
-      thumbnail: HERO_IMAGES.phongTho,
-      categoryIds: [banTho.id, keTho.id],
-      order_index: 3,
-    },
-  ];
+  const collectionSlugs = COLLECTIONS.map((c) => c.slug);
+  const removedCollections = await prisma.collection.deleteMany({
+    where: { slug: { notIn: collectionSlugs } },
+  });
+  if (removedCollections.count > 0) {
+    console.log(`  ✓ Removed ${removedCollections.count} legacy collections`);
+  }
 
-  for (const sc of showcaseCollections) {
+  for (const col of COLLECTIONS) {
+    const categoryIds = col.categorySlugs
+      .map((slug) => categoryMap.get(slug))
+      .filter((id): id is number => id !== undefined);
+
     const collection = await prisma.collection.upsert({
-      where: { slug: sc.slug },
+      where: { slug: col.slug },
       update: {
-        name: sc.name,
-        description: sc.description,
-        thumbnail: sc.thumbnail,
-        order_index: sc.order_index,
+        name: col.name,
+        description: col.description,
+        thumbnail: col.thumbnail,
+        seo_title: col.seo_title,
+        seo_description: col.seo_description,
+        order_index: col.order_index,
         is_active: true,
       },
       create: {
-        name: sc.name,
-        slug: sc.slug,
-        description: sc.description,
-        thumbnail: sc.thumbnail,
-        order_index: sc.order_index,
+        name: col.name,
+        slug: col.slug,
+        description: col.description,
+        thumbnail: col.thumbnail,
+        seo_title: col.seo_title,
+        seo_description: col.seo_description,
+        order_index: col.order_index,
         is_active: true,
       },
     });
+
     await prisma.collectionProduct.deleteMany({
       where: { collection_id: collection.id },
     });
+
     const products = await prisma.product.findMany({
-      where: { category_id: { in: sc.categoryIds } },
-      orderBy: { created_at: 'asc' },
+      where: { category_id: { in: categoryIds } },
+      orderBy: { sort_order: 'asc' },
     });
+
     for (let i = 0; i < products.length; i++) {
       await prisma.collectionProduct.create({
         data: {
@@ -472,235 +627,52 @@ async function main() {
       });
     }
   }
-  console.log('  ✓ Showcase collections (phong-*)');
+  console.log('  ✓ Collections (phong-khach, phong-ngu, phong-bep)');
 
-  const collectionsData = [
-    {
-      name: 'Combo phòng khách hiện đại',
-      slug: 'combo-phong-khach-hien-dai',
-      description:
-        'Bộ sưu tập sofa, bàn trà và kệ tivi phù hợp cho phòng khách chung cư hiện đại, tông màu trung tính dễ phối.',
-      thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1000',
-      seo_title: 'Combo phòng khách hiện đại - Đồ gỗ Hùng Cường',
-      seo_description:
-        'Gợi ý combo sofa, bàn trà, kệ tivi cho phòng khách hiện đại, tối ưu chi phí và thẩm mỹ.',
-      productSlugs: [
-        'sofa-da-cao-cap-3-cho',
-        'sofa-goc-sectional-l-shaped',
-        'ban-tra-go-mdf-phong-cach-bac-au',
-        'ke-tivi-go-soi-1m8',
-      ],
-    },
-    {
-      name: 'Phòng ngủ ấm cúng cho gia đình trẻ',
-      slug: 'phong-ngu-am-cung-cho-gia-dinh-tre',
-      description:
-        'Set giường ngủ, tủ quần áo và giường tầng cho bé, phù hợp căn hộ 2 phòng ngủ cho gia đình trẻ.',
-      thumbnail: 'https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=1000',
-      seo_title: 'Phòng ngủ ấm cúng cho gia đình trẻ',
-      seo_description:
-        'Gợi ý nội thất phòng ngủ với giường, tủ và giường tầng cho gia đình trẻ, tối ưu không gian.',
-      productSlugs: [
-        'giuong-ngu-go-soi-1m6',
-        'giuong-tang-tre-em-co-cau-thang',
-        'tu-quan-ao-3-canh-co-guong',
-        'tu-quan-ao-canh-lua-2m',
-      ],
-    },
-    {
-      name: 'Góc ăn uống gia đình 4–6 người',
-      slug: 'goc-an-uong-gia-dinh-4-6-nguoi',
-      description:
-        'Bộ sưu tập bàn ăn và ghế ăn dành cho gia đình nhỏ, phong cách hiện đại, dễ vệ sinh và bền chắc.',
-      thumbnail: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1000',
-      seo_title: 'Góc ăn uống gia đình 4–6 người',
-      seo_description:
-        'Combo bàn ăn gỗ sồi, bộ bàn tròn và ghế ăn cho không gian bếp ấm cúng.',
-      productSlugs: [
-        'ban-an-go-soi-6-cho',
-        'bo-ban-an-tron-4-ghe',
-        'ghe-an-go-oc-cho-1-cho',
-      ],
-    },
-    {
-      name: 'Không gian thờ trang nghiêm',
-      slug: 'khong-gian-tho-trang-nghiem',
-      description:
-        'Set bàn thờ và kệ thờ gỗ gụ, giúp bạn dễ dàng hoàn thiện không gian thờ cúng trang nghiêm tại gia.',
-      thumbnail: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1000',
-      seo_title: 'Không gian thờ trang nghiêm',
-      seo_description:
-        'Bộ sưu tập bàn thờ, kệ thờ gỗ gụ cao cấp cho phòng thờ gia đình.',
-      productSlugs: ['ban-tho-go-gu-1m2', 'ke-tho-tam-cap-go-gu'],
-    },
-    {
-      name: 'Combo nội thất cơ bản cho căn hộ mới',
-      slug: 'combo-noi-that-co-ban-cho-can-ho-moi',
-      description:
-        'Combo lựa chọn nhanh gồm sofa, bàn trà, giường ngủ và tủ quần áo – đủ cho một căn hộ mới vào ở.',
-      thumbnail: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=1000',
-      seo_title: 'Combo nội thất cơ bản cho căn hộ mới',
-      seo_description:
-        'Gợi ý combo nội thất cơ bản cho căn hộ mới với sofa, bàn trà, giường và tủ quần áo.',
-      productSlugs: [
-        'sofa-vai-ni-2-cho-toi-gian',
-        'ban-tra-go-mdf-phong-cach-bac-au',
-        'giuong-ngu-go-soi-1m6',
-        'tu-quan-ao-canh-lua-2m',
-      ],
-    },
-  ];
-
-  for (let idx = 0; idx < collectionsData.length; idx++) {
-    const c = collectionsData[idx];
-    const orderIndex = idx + showcaseCollections.length;
-    const collection = await prisma.collection.upsert({
-      where: { slug: c.slug },
-      update: {
-        name: c.name,
-        description: c.description,
-        thumbnail: c.thumbnail,
-        seo_title: c.seo_title,
-        seo_description: c.seo_description,
-        order_index: orderIndex,
-        is_active: true,
-      },
-      create: {
-        name: c.name,
-        slug: c.slug,
-        description: c.description,
-        thumbnail: c.thumbnail,
-        seo_title: c.seo_title,
-        seo_description: c.seo_description,
-        order_index: orderIndex,
-        is_active: true,
-      },
-    });
-
-    // Reset products in this collection then add according to productSlugs
-    await prisma.collectionProduct.deleteMany({
-      where: { collection_id: collection.id },
-    });
-
-    for (let i = 0; i < c.productSlugs.length; i++) {
-      const slug = c.productSlugs[i];
-      const product = productMap.get(slug);
-      if (!product) {
-        console.warn(`⚠️  Product not found for collection seed: ${slug}`);
-        continue;
-      }
-      await prisma.collectionProduct.create({
-        data: {
-          collection_id: collection.id,
-          product_id: product.id,
-          order_index: i,
-        },
-      });
-    }
+  const seededBlogSlugs = BLOG_POSTS.map((p) => p.slug);
+  const removedBlogs = await prisma.blogPost.deleteMany({
+    where: { slug: { notIn: seededBlogSlugs } },
+  });
+  if (removedBlogs.count > 0) {
+    console.log(`  ✓ Removed ${removedBlogs.count} legacy blog posts`);
   }
-  console.log('  ✓ Collections');
 
-  // --- Blog Posts ---
-  const blogPosts = [
-    {
-      slug: 'bi-quyet-bo-tri-phong-khach-go-am-cung',
-      title: 'Bí quyết bố trí phòng khách gỗ ấm cúng',
-      excerpt:
-        'Một vài gợi ý đơn giản để phòng khách với nội thất gỗ trở nên ấm cúng, hiện đại mà vẫn thoáng đãng.',
-      content:
-        '<p>Phòng khách là không gian trung tâm của ngôi nhà. Khi sử dụng nội thất gỗ, bạn nên chú ý tới màu sắc, ánh sáng và cách bố trí để tránh cảm giác nặng nề.</p><p>Kết hợp sofa nỉ màu sáng với bàn trà gỗ, thêm thảm và đèn sàn sẽ giúp không gian cân bằng hơn.</p>',
-      thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900',
-      category: 'phong-khach',
-      author: 'Đồ gỗ Hùng Cường',
-      seo_title: 'Bí quyết bố trí phòng khách gỗ ấm cúng',
-      seo_description: 'Gợi ý bố trí nội thất gỗ cho phòng khách ấm cúng, hiện đại.',
-      is_featured: true,
-      published_at: new Date('2024-01-10T08:00:00Z'),
-    },
-    {
-      slug: 'chon-giuong-ngu-go-phu-hop-cho-can-ho-chung-cu',
-      title: 'Chọn giường ngủ gỗ phù hợp cho căn hộ chung cư',
-      excerpt:
-        'Giường ngủ là trung tâm của phòng ngủ. Chọn đúng kích thước và chất liệu giúp bạn ngủ ngon hơn mỗi đêm.',
-      content:
-        '<p>Khi chọn giường ngủ cho căn hộ, hãy ưu tiên kích thước phù hợp diện tích phòng, khung gỗ chắc chắn và thiết kế đơn giản.</p><p>Giường có hộc kéo hoặc ngăn chứa đồ cũng là lựa chọn tối ưu cho không gian nhỏ.</p>',
-      thumbnail: 'https://images.unsplash.com/photo-1505691723518-36a5ac3be353?w=900',
-      category: 'phong-ngu',
-      author: 'Đồ gỗ Hùng Cường',
-      seo_title: 'Chọn giường ngủ gỗ cho căn hộ chung cư',
-      seo_description: 'Kinh nghiệm chọn giường ngủ gỗ bền đẹp cho phòng ngủ chung cư.',
-      is_featured: true,
-      published_at: new Date('2024-01-15T08:00:00Z'),
-    },
-    {
-      slug: 'go-go-nao-phu-hop-lam-ban-an-gia-dinh',
-      title: 'Gỗ gì phù hợp làm bàn ăn gia đình?',
-      excerpt: 'So sánh nhanh một số loại gỗ phổ biến khi làm bàn ăn: sồi, óc chó, cao su, xoan đào...',
-      content:
-        '<p>Mỗi loại gỗ có ưu/nhược điểm riêng. Gỗ sồi vân đẹp, giá vừa phải; gỗ óc chó cao cấp, màu trầm sang trọng; gỗ cao su kinh tế.</p><p>Tùy ngân sách và phong cách nội thất, bạn có thể chọn loại phù hợp cho gia đình.</p>',
-      thumbnail: 'https://images.unsplash.com/photo-1616628187878-8a6c0d5c1765?w=900',
-      category: 'phong-bep',
-      author: 'Đồ gỗ Hùng Cường',
-      seo_title: 'Gỗ nào phù hợp làm bàn ăn gia đình?',
-      seo_description: 'Tư vấn chọn chất liệu gỗ cho bàn ăn bền đẹp, phù hợp ngân sách.',
-      is_featured: false,
-      published_at: new Date('2024-01-20T08:00:00Z'),
-    },
-    {
-      slug: 'nhung-luu-y-khi-thiet-ke-phong-tho-gia-dinh',
-      title: 'Những lưu ý khi thiết kế phòng thờ gia đình',
-      excerpt:
-        'Phòng thờ cần trang nghiêm nhưng vẫn hài hòa với tổng thể nội thất. Một vài nguyên tắc cơ bản bạn nên biết.',
-      content:
-        '<p>Khi bố trí bàn thờ, nên tránh đặt đối diện nhà vệ sinh hoặc dưới xà ngang. Chiều cao bàn thờ và khoảng cách tới trần cũng cần hợp lý.</p><p>Chọn chất liệu gỗ tốt, màu trầm ấm sẽ giúp không gian thờ cúng thêm trang trọng.</p>',
-      thumbnail: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900',
-      category: 'phong-tho',
-      author: 'Đồ gỗ Hùng Cường',
-      seo_title: 'Lưu ý khi thiết kế phòng thờ gia đình',
-      seo_description: 'Các nguyên tắc cơ bản khi thiết kế phòng thờ với nội thất gỗ.',
-      is_featured: false,
-      published_at: new Date('2024-01-25T08:00:00Z'),
-    },
-    {
-      slug: 'meo-giu-do-go-ben-dep-lau-nam',
-      title: 'Mẹo giữ đồ gỗ bền đẹp lâu năm',
-      excerpt:
-        'Một vài thói quen nhỏ khi sử dụng và vệ sinh sẽ giúp nội thất gỗ luôn như mới sau nhiều năm.',
-      content:
-        '<p>Hạn chế đặt đồ nóng trực tiếp lên bề mặt gỗ, lau ngay khi bị đổ nước, dùng khăn mềm để vệ sinh.</p><p>Có thể sử dụng dầu lau chuyên dụng 6–12 tháng một lần để nuôi dưỡng bề mặt gỗ.</p>',
-      thumbnail: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=900',
-      category: 'kinh-nghiem',
-      author: 'Đồ gỗ Hùng Cường',
-      seo_title: 'Mẹo giữ đồ gỗ bền đẹp lâu năm',
-      seo_description: 'Chia sẻ cách bảo quản đồ gỗ trong gia đình luôn bền đẹp.',
-      is_featured: false,
-      published_at: new Date('2024-02-01T08:00:00Z'),
-    },
-  ];
-
-  for (const post of blogPosts) {
+  for (const post of BLOG_POSTS) {
     await prisma.blogPost.upsert({
       where: { slug: post.slug },
-      update: {},
+      update: {
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        thumbnail: post.thumbnail,
+        category: post.category,
+        author: AUTHOR,
+        seo_title: post.seo_title,
+        seo_description: post.seo_description,
+        is_active: true,
+        is_featured: post.is_featured,
+        published_at: post.published_at,
+        sort_order: post.sort_order,
+      },
       create: {
         title: post.title,
         slug: post.slug,
-        excerpt: post.excerpt ?? null,
+        excerpt: post.excerpt,
         content: post.content,
-        thumbnail: post.thumbnail ?? null,
-        category: post.category ?? null,
-        author: post.author ?? null,
-        seo_title: post.seo_title ?? null,
-        seo_description: post.seo_description ?? null,
+        thumbnail: post.thumbnail,
+        category: post.category,
+        author: AUTHOR,
+        seo_title: post.seo_title,
+        seo_description: post.seo_description,
         is_active: true,
-        is_featured: post.is_featured ?? false,
-        published_at: post.published_at ?? null,
+        is_featured: post.is_featured,
+        published_at: post.published_at,
+        sort_order: post.sort_order,
       },
     });
   }
   console.log('  ✓ Blog posts');
 
-  // --- Admin (password: admin123) ---
   const hashedPassword = await bcrypt.hash('admin123', 10);
   await prisma.admin.upsert({
     where: { username: 'admin' },
@@ -715,9 +687,11 @@ async function main() {
   });
   console.log('  ✓ Admin (username: admin, password: admin123)');
 
-  // --- Sample Inquiries ---
-  const products = await prisma.product.findMany({ take: 2 });
-  if (products.length >= 1) {
+  const sampleProducts = await prisma.product.findMany({
+    where: { category: { slug: 'sofa' } },
+    take: 1,
+  });
+  if (sampleProducts.length > 0) {
     const count = await prisma.inquiry.count();
     if (count === 0) {
       await prisma.inquiry.create({
@@ -725,8 +699,9 @@ async function main() {
           name: 'Nguyễn Văn A',
           phone: '0901234567',
           email: 'nguyenvana@example.com',
-          message: 'Tôi muốn đặt mua sofa 3 chỗ và bàn trà. Có giao hàng nội thành không?',
-          product_id: products[0].id,
+          message:
+            'Tôi quan tâm sofa góc 2 chỗ bọc vải. Cho xin báo giá và thời gian giao hàng nội thành.',
+          product_id: sampleProducts[0].id,
           status: 'new',
           source: 'contact',
         },

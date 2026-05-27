@@ -8,6 +8,13 @@ function env(key: string, fallback: string): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+function envNumber(key: string, fallback: number): number {
+  const raw = import.meta.env[key];
+  if (typeof raw !== "string" || !raw.trim()) return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 const DEFAULTS = {
   brand: {
     name: "Đồ gỗ Hùng Cường",
@@ -24,6 +31,9 @@ const DEFAULTS = {
     addressLine1: "Làng Nghề Châu Phong, Liên Hà,",
     addressLine2: "Đông Anh, Hà Nội",
     mapUrl: "https://maps.app.goo.gl/FTVZq3HGJzbsoC9V8",
+    /** Tọa độ showroom (từ Google Maps share link). */
+    mapLat: 21.140003,
+    mapLng: 105.898248,
     hoursShort: "08:00 - 17:30 (T2 - CN)",
     hoursLine1: "08:00 - 17:30",
     hoursLine2: "Thứ 2 - Thứ 7",
@@ -57,6 +67,8 @@ export const SITE = {
       DEFAULTS.contact.addressLine2,
     ),
     mapUrl: env("VITE_CONTACT_MAP_URL", DEFAULTS.contact.mapUrl),
+    mapLat: envNumber("VITE_CONTACT_MAP_LAT", DEFAULTS.contact.mapLat),
+    mapLng: envNumber("VITE_CONTACT_MAP_LNG", DEFAULTS.contact.mapLng),
     hoursShort: env("VITE_CONTACT_HOURS_SHORT", DEFAULTS.contact.hoursShort),
     hoursLine1: env("VITE_CONTACT_HOURS_LINE1", DEFAULTS.contact.hoursLine1),
     hoursLine2: env("VITE_CONTACT_HOURS_LINE2", DEFAULTS.contact.hoursLine2),
@@ -81,6 +93,27 @@ export const CONTACT_ADDRESS_FULL =
   `${SITE.contact.addressLine1} ${SITE.contact.addressLine2}`.trim();
 
 export const CONTACT_MAP_QUERY = CONTACT_ADDRESS_FULL;
+
+/** Tọa độ bản đồ (đồng bộ với VITE_CONTACT_MAP_URL / Google Maps). */
+export const CONTACT_MAP_COORDS = {
+  lat: SITE.contact.mapLat,
+  lng: SITE.contact.mapLng,
+} as const;
+
+/** Bản đồ nhúng OpenStreetMap quanh showroom (không cần API key). */
+export function getContactMapEmbedUrl(
+  lat: number = CONTACT_MAP_COORDS.lat,
+  lng: number = CONTACT_MAP_COORDS.lng,
+): string {
+  const pad = 0.009;
+  const bbox = [
+    lng - pad,
+    lat - pad,
+    lng + pad,
+    lat + pad,
+  ].join(",");
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+}
 
 export const CONTACT_HOURS_SHORT = SITE.contact.hoursShort;
 
