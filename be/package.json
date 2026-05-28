@@ -21,7 +21,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "uploads:orphans": "ts-node -r dotenv/config scripts/cleanup-upload-orphans.ts",
+    "uploads:orphans:delete": "ts-node -r dotenv/config scripts/cleanup-upload-orphans.ts -- --delete"
   },
   "prisma": {
     "seed": "ts-node -r dotenv/config prisma/seed.ts"

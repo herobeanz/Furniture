@@ -71,3 +71,6 @@ temp/
 out/
 .vercel
 .turbo
+
+# ADF local settings
+.claude/settings.local.json
