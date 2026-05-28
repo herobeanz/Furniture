@@ -26,8 +26,13 @@ async function bootstrap() {
     }),
   );
 
+  const frontendOrigins = (config.get<string>('FRONTEND_URL') || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: config.get<string>('FRONTEND_URL') || 'http://localhost:5173',
+    origin: frontendOrigins,
     credentials: true,
   });
 
