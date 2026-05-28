@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: backend-furniture-rvyn
+    name: backend-furniture
     runtime: node
     rootDir: be
     buildCommand: npm ci && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
