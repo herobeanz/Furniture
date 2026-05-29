@@ -25,7 +25,7 @@ Repo cần có các file sau trên branch deploy:
 Backend build command trên Render:
 
 ```bash
-npm ci && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
+npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
 ```
 
 Start command:
@@ -64,7 +64,9 @@ Không commit giá trị thật vào Git.
 
 ## 2. Deploy backend lên Render
 
-### 2.1 Tạo Render Blueprint
+### 2.1 Cách A - Tạo Render Blueprint
+
+Dùng cách này nếu muốn Render đọc `render.yaml` tự động.
 
 1. Mở Render Dashboard.
 2. Chọn **New +**.
@@ -74,12 +76,60 @@ Không commit giá trị thật vào Git.
 5. Chọn branch deploy, thường là `main`.
 6. Render sẽ tự đọc `render.yaml`.
 7. Xác nhận service backend:
-   - Name: `furniture-backend`
+   - Name: `backend-furniture`
    - Type: `web`
    - Runtime: `node`
    - Root directory: `be`
 
-### 2.2 Thêm Environment Variables trên Render
+### 2.2 Cách B - Sửa Web Service thủ công
+
+Dùng cách này nếu service đã được tạo thủ công và log còn chạy `yarn install` hoặc `yarn start`.
+
+Vào Render service `backend-furniture` → **Settings** và set đúng các field sau:
+
+```text
+Root Directory
+be
+```
+
+```text
+Build Command
+npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
+```
+
+```text
+Start Command
+npm run start:prod
+```
+
+```text
+Health Check Path
+/health
+```
+
+Sau đó bấm:
+
+```text
+Save Changes
+Manual Deploy → Deploy latest commit
+```
+
+Log đúng phải thấy:
+
+```text
+Running build command 'npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build'
+Running 'npm run start:prod'
+```
+
+Nếu log vẫn thấy các dòng dưới đây thì service settings chưa đúng hoặc deploy nhầm service:
+
+```text
+Running build command 'yarn install'
+Running 'yarn start'
+Couldn't find a package.json file in "/opt/render/project/src"
+```
+
+### 2.3 Thêm Environment Variables trên Render
 
 Trong Render service, vào **Environment** và set các biến sau.
 
@@ -111,11 +161,12 @@ CLOUDINARY_FOLDER=furniture
 
 Render tự cung cấp `PORT`, không cần set thủ công.
 
-### 2.3 Deploy
+### 2.4 Deploy
 
 1. Bấm **Apply** hoặc **Deploy latest commit**.
 2. Theo dõi log build.
-3. Đảm bảo các bước sau chạy thành công:
+3. Đảm bảo deploy checkout commit mới nhất trên `main`.
+4. Đảm bảo các bước sau chạy thành công:
    - `npm ci`
    - `npm run prisma:generate`
    - `npm run prisma:migrate:deploy`
@@ -225,6 +276,25 @@ Cách xử lý:
 3. Redeploy frontend.
 4. Mở DevTools Network xem URL API thực tế.
 
+### Render chạy `yarn install` hoặc `yarn start`
+
+Nguyên nhân:
+
+- Service được tạo thủ công và chưa set `Root Directory`.
+- Build/start command đang dùng default của Render.
+- Manual Deploy đang deploy nhầm service.
+
+Cách sửa trong Render service **Settings**:
+
+```text
+Root Directory: be
+Build Command: npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
+Start Command: npm run start:prod
+Health Check Path: /health
+```
+
+Save lại rồi chạy **Manual Deploy → Deploy latest commit**.
+
 ### Render build fail ở Prisma migrate
 
 Kiểm tra:
@@ -253,7 +323,12 @@ FRONTEND_URL=https://dogohungcuong.vercel.app,http://localhost:5173
 Backend Render:
 
 - [ ] GitHub repo đã có `render.yaml`
-- [ ] Render Blueprint đã connect repo
+- [ ] Service name là `backend-furniture`
+- [ ] Service URL là `https://backend-furniture-rvyn.onrender.com`
+- [ ] Nếu dùng Blueprint: Render Blueprint đã connect repo
+- [ ] Nếu dùng Web Service thủ công: `Root Directory` là `be`
+- [ ] Nếu dùng Web Service thủ công: build command là `npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build`
+- [ ] Nếu dùng Web Service thủ công: start command là `npm run start:prod`
 - [ ] `DATABASE_URL` đã set
 - [ ] `DIRECT_URL` đã set
 - [ ] JWT/Supabase secrets đã set
