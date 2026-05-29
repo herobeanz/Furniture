@@ -5,11 +5,17 @@
 Dự án deploy theo mô hình tách riêng:
 
 - Frontend: Vercel
-- Backend: Render
+- Backend: Render (Web Service, cấu hình thủ công trên Dashboard)
 - Database: Supabase PostgreSQL
 - Upload assets: Cloudinary, nếu dùng tính năng upload
 
-Backend đã có `render.yaml` ở repo root. Render Blueprint sẽ đọc file này để build và chạy service NestJS trong thư mục `be`.
+Backend là NestJS trong thư mục `be`. Không dùng Render Blueprint hay `render.yaml` — toàn bộ build/start command và biến môi trường khai báo trực tiếp trên service Render.
+
+URL production backend (tham chiếu trong doc):
+
+```text
+https://backend-furniture-rvyn.onrender.com
+```
 
 ## 1. Chuẩn bị trước khi deploy
 
@@ -17,28 +23,18 @@ Backend đã có `render.yaml` ở repo root. Render Blueprint sẽ đọc file 
 
 Repo cần có các file sau trên branch deploy:
 
-- `render.yaml`
 - `be/package.json`
 - `be/prisma/schema.prisma`
 - `be/.env.example`
 
-Backend build command trên Render:
+Cấu hình sẽ nhập trên Render Dashboard:
 
-```bash
-npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
-```
-
-Start command:
-
-```bash
-npm run start:prod
-```
-
-Health check path:
-
-```text
-/health
-```
+| Field | Giá trị |
+|-------|---------|
+| Root Directory | `be` |
+| Build Command | `npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build` |
+| Start Command | `npm run start:prod` (chạy `node dist/src/main.js`) |
+| Health Check Path | `/health` |
 
 ### 1.2 Chuẩn bị Supabase connection strings
 
@@ -54,92 +50,51 @@ postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/p
 
 #### `DIRECT_URL`
 
-Dùng direct/non-pooling connection cho Prisma migrations:
+Dùng **session pooler** (port `5432` trên host `*.pooler.supabase.com`) cho Prisma migrations trên Render. Không dùng `db.<project-ref>.supabase.co` — Render thường không reach được (lỗi P1001).
 
 ```text
-postgres://postgres.<project-ref>:<password>@db.<project-ref>.supabase.co:5432/postgres?sslmode=require
+postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:5432/postgres?sslmode=require
 ```
+
+Tham chiếu mẫu: `be/.env.render.example`.
 
 Không commit giá trị thật vào Git.
 
 ## 2. Deploy backend lên Render
 
-### 2.1 Cách A - Tạo Render Blueprint
+### 2.1 Tạo Web Service
 
-Dùng cách này nếu muốn Render đọc `render.yaml` tự động.
+1. Mở [Render Dashboard](https://dashboard.render.com).
+2. Chọn **New +** → **Web Service** (không chọn Blueprint).
+3. Connect GitHub repository (ví dụ `herobeanz/Furniture`).
+4. Chọn branch deploy, thường là `main`.
+5. Điền cấu hình:
+   - **Name:** `backend-furniture`
+   - **Region:** theo nhu cầu (Free tier có sleep sau idle)
+   - **Root Directory:** `be`
+   - **Runtime:** Node
+   - **Build Command:**
+     ```bash
+     npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
+     ```
+   - **Start Command:**
+     ```bash
+     npm run start:prod
+     ```
+   - **Health Check Path:** `/health`
+6. Chọn plan (Free hoặc paid) rồi **Create Web Service**.
 
-1. Mở Render Dashboard.
-2. Chọn **New +**.
-3. Chọn **Blueprint**.
-4. Connect GitHub repository:
-   - `herobeanz/Furniture`
-5. Chọn branch deploy, thường là `main`.
-6. Render sẽ tự đọc `render.yaml`.
-7. Xác nhận service backend:
-   - Name: `backend-furniture`
-   - Type: `web`
-   - Runtime: `node`
-   - Root directory: `be`
+### 2.2 Thêm Environment Variables
 
-### 2.2 Cách B - Sửa Web Service thủ công
-
-Dùng cách này nếu service đã được tạo thủ công và log còn chạy `yarn install` hoặc `yarn start`.
-
-Vào Render service `backend-furniture` → **Settings** và set đúng các field sau:
-
-```text
-Root Directory
-be
-```
-
-```text
-Build Command
-npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
-```
-
-```text
-Start Command
-npm run start:prod
-```
-
-```text
-Health Check Path
-/health
-```
-
-Sau đó bấm:
-
-```text
-Save Changes
-Manual Deploy → Deploy latest commit
-```
-
-Log đúng phải thấy:
-
-```text
-Running build command 'npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build'
-Running 'npm run start:prod'
-```
-
-Nếu log vẫn thấy các dòng dưới đây thì service settings chưa đúng hoặc deploy nhầm service:
-
-```text
-Running build command 'yarn install'
-Running 'yarn start'
-Couldn't find a package.json file in "/opt/render/project/src"
-```
-
-### 2.3 Thêm Environment Variables trên Render
-
-Trong Render service, vào **Environment** và set các biến sau.
+Trong Render service → **Environment**, set các biến sau.
 
 Bắt buộc:
 
 ```text
 NODE_ENV=production
 FRONTEND_URL=https://dogohungcuong.vercel.app
-DATABASE_URL=<supabase-pooled-url-port-6543>
-DIRECT_URL=<supabase-direct-url-port-5432>
+DATABASE_URL=<supabase-transaction-pooler-port-6543-pgbouncer=true>
+DIRECT_URL=<supabase-session-pooler-port-5432-on-pooler-host>
 JWT_SECRET=<strong-random-secret>
 JWT_EXPIRES_IN=7d
 SUPABASE_URL=<supabase-project-url>
@@ -161,30 +116,55 @@ CLOUDINARY_FOLDER=furniture
 
 Render tự cung cấp `PORT`, không cần set thủ công.
 
-### 2.4 Deploy
+### 2.3 Deploy và cập nhật
 
-1. Bấm **Apply** hoặc **Deploy latest commit**.
-2. Theo dõi log build.
-3. Đảm bảo deploy checkout commit mới nhất trên `main`.
-4. Đảm bảo các bước sau chạy thành công:
-   - `npm ci`
+1. Bấm **Save** (nếu vừa thêm env) rồi **Manual Deploy → Deploy latest commit**.
+2. Theo dõi log build trên commit mới nhất của branch deploy.
+3. Log thành công phải có các bước:
+   - `npm install`
    - `npm run prisma:generate`
    - `npm run prisma:migrate:deploy`
    - `npm run build`
    - `npm run start:prod`
 
-## 3. Kiểm tra backend sau deploy
+### 2.4 Sửa service đã tạo nhầm cấu hình
 
-Giả sử Render URL là:
+Dùng mục này nếu log còn chạy `yarn install` / `yarn start` hoặc không tìm thấy `package.json`.
+
+Vào service `backend-furniture` → **Settings**:
 
 ```text
-https://furniture-backend.onrender.com
+Root Directory: be
+Build Command: npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
+Start Command: npm run start:prod
+Health Check Path: /health
 ```
 
-Mở health check:
+**Save Changes** → **Manual Deploy → Deploy latest commit**.
+
+Log đúng:
 
 ```text
-https://furniture-backend.onrender.com/health
+Running build command 'npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build'
+Running 'npm run start:prod'
+```
+
+Nếu start fail với `Cannot find module .../dist/main`, đổi Start Command thành `node dist/src/main.js` hoặc pull commit mới (`start:prod` đã trỏ đúng path).
+
+Log sai (settings chưa đúng hoặc deploy nhầm service):
+
+```text
+Running build command 'yarn install'
+Running 'yarn start'
+Couldn't find a package.json file in "/opt/render/project/src"
+```
+
+## 3. Kiểm tra backend sau deploy
+
+Health check:
+
+```text
+https://backend-furniture-rvyn.onrender.com/health
 ```
 
 Kết quả mong muốn:
@@ -201,7 +181,7 @@ Nếu Redis không được cấu hình, health có thể là `degraded` nhưng 
 API base URL cho frontend:
 
 ```text
-https://furniture-backend.onrender.com/api/v1
+https://backend-furniture-rvyn.onrender.com/api/v1
 ```
 
 ## 4. Cấu hình frontend trên Vercel
@@ -209,7 +189,7 @@ https://furniture-backend.onrender.com/api/v1
 Frontend Vite cần biến môi trường production:
 
 ```text
-VITE_API_BASE_URL=https://furniture-backend.onrender.com/api/v1
+VITE_API_BASE_URL=https://backend-furniture-rvyn.onrender.com/api/v1
 ```
 
 Các bước:
@@ -219,7 +199,7 @@ Các bước:
 3. Vào **Settings** → **Environment Variables**.
 4. Thêm hoặc sửa:
    - Key: `VITE_API_BASE_URL`
-   - Value: `https://furniture-backend.onrender.com/api/v1`
+   - Value: `https://backend-furniture-rvyn.onrender.com/api/v1`
    - Environment: Production
 5. Bấm **Save**.
 6. Redeploy frontend production.
@@ -232,6 +212,8 @@ VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
 VITE_SUPABASE_PUBLISHABLE_KEY=<supabase-publishable-key>
 VITE_APP_URL=https://dogohungcuong.vercel.app
 ```
+
+Ghi chú Vercel: repo có `vercel.json` ở root (build trỏ vào `fe/`). Nếu project Vercel đặt Root Directory là `fe`, dùng `fe/vercel.json` thay vì file root.
 
 ## 5. Kiểm tra kết nối frontend-backend
 
@@ -248,7 +230,7 @@ https://dogohungcuong.vercel.app
 4. Kiểm tra request API phải gọi tới:
 
 ```text
-https://furniture-backend.onrender.com/api/v1/...
+https://backend-furniture-rvyn.onrender.com/api/v1/...
 ```
 
 Không được còn gọi:
@@ -276,24 +258,31 @@ Cách xử lý:
 3. Redeploy frontend.
 4. Mở DevTools Network xem URL API thực tế.
 
+### `Cannot find module .../dist/main` khi start
+
+Nguyên nhân:
+
+- Start command cũ là `node dist/main` nhưng Nest build ra `dist/src/main.js`.
+- Hoặc **Root Directory** chưa là `be` (log hiện path `.../be/dist/main` từ repo root).
+
+Cách sửa:
+
+```text
+Root Directory: be
+Start Command: npm run start:prod
+```
+
+Hoặc trực tiếp: `node dist/src/main.js` (khi cwd là thư mục `be`).
+
 ### Render chạy `yarn install` hoặc `yarn start`
 
 Nguyên nhân:
 
-- Service được tạo thủ công và chưa set `Root Directory`.
+- Chưa set **Root Directory** là `be`.
 - Build/start command đang dùng default của Render.
 - Manual Deploy đang deploy nhầm service.
 
-Cách sửa trong Render service **Settings**:
-
-```text
-Root Directory: be
-Build Command: npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build
-Start Command: npm run start:prod
-Health Check Path: /health
-```
-
-Save lại rồi chạy **Manual Deploy → Deploy latest commit**.
+Cách sửa: xem mục [2.4](#24-sửa-service-đã-tạo-nhầm-cấu-hình).
 
 ### Render build fail ở Prisma migrate
 
@@ -322,22 +311,21 @@ FRONTEND_URL=https://dogohungcuong.vercel.app,http://localhost:5173
 
 Backend Render:
 
-- [ ] GitHub repo đã có `render.yaml`
+- [ ] Web Service đã connect GitHub (không dùng Blueprint)
 - [ ] Service name là `backend-furniture`
+- [ ] `Root Directory` là `be`
+- [ ] Build command đúng (npm + prisma + build)
+- [ ] Start command là `npm run start:prod`
+- [ ] Health check path là `/health`
 - [ ] Service URL là `https://backend-furniture-rvyn.onrender.com`
-- [ ] Nếu dùng Blueprint: Render Blueprint đã connect repo
-- [ ] Nếu dùng Web Service thủ công: `Root Directory` là `be`
-- [ ] Nếu dùng Web Service thủ công: build command là `npm install && npm run prisma:generate && npm run prisma:migrate:deploy && npm run build`
-- [ ] Nếu dùng Web Service thủ công: start command là `npm run start:prod`
-- [ ] `DATABASE_URL` đã set
-- [ ] `DIRECT_URL` đã set
+- [ ] `DATABASE_URL` và `DIRECT_URL` đã set
 - [ ] JWT/Supabase secrets đã set
 - [ ] Cloudinary env đã set nếu dùng upload
 - [ ] `/health` trả database `up`
 
 Frontend Vercel:
 
-- [ ] `VITE_API_BASE_URL` trỏ tới Render `/api/v1`
+- [ ] `VITE_API_BASE_URL` trỏ tới `https://backend-furniture-rvyn.onrender.com/api/v1`
 - [ ] `VITE_APP_URL=https://dogohungcuong.vercel.app`
 - [ ] Redeploy production sau khi đổi env
 - [ ] Network tab không còn gọi localhost
