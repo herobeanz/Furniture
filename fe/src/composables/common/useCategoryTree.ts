@@ -1,36 +1,25 @@
-import { ref, onMounted } from 'vue'
-import { categoryApi, type CategoryTreeNode } from '@/services/api/categories'
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
+import type { CategoryTreeNode } from '@/services/api/categories'
+import { useCategoryTreeStore } from '@/stores/categoryTree'
 
 /**
- * Composable for fetching and managing category tree
- * Used by Header and Footer components
+ * Danh mục dùng chung — một nguồn Pinia, tránh gọi /categories/tree trùng lặp.
  */
 export function useCategoryTree() {
-  const categoryTree = ref<CategoryTreeNode[]>([])
-  const loading = ref(false)
-  const error = ref('')
-
-  async function loadCategoryTree() {
-    loading.value = true
-    error.value = ''
-    try {
-      categoryTree.value = await categoryApi.getCategoryTree()
-    } catch (e: any) {
-      error.value = e?.message || 'Không thể tải danh mục.'
-      categoryTree.value = []
-    } finally {
-      loading.value = false
-    }
-  }
+  const store = useCategoryTreeStore()
+  const { categoryTree, loading, error } = storeToRefs(store)
 
   onMounted(() => {
-    loadCategoryTree()
+    store.ensureCategoryTree()
   })
 
   return {
     categoryTree,
     loading,
     error,
-    loadCategoryTree,
+    loadCategoryTree: store.loadCategoryTree,
   }
 }
+
+export type { CategoryTreeNode }

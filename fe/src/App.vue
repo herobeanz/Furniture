@@ -3,7 +3,9 @@
     <MainLayout v-if="!isAdminRoute && !isPreviewRoute">
       <router-view v-slot="{ Component, route }">
         <Transition :name="getTransitionName(route)" mode="out-in">
-          <component :is="Component" :key="route.path" />
+          <KeepAlive :max="8" :include="publicKeepAliveViews">
+            <component :is="Component" />
+          </KeepAlive>
         </Transition>
       </router-view>
     </MainLayout>
@@ -18,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, KeepAlive } from 'vue'
 import { useRoute } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { UiToaster } from '@/components/ui'
@@ -27,6 +29,17 @@ import RouterLoadingSpinner from '@/components/common/RouterLoadingSpinner.vue'
 const route = useRoute()
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 const isPreviewRoute = computed(() => route.path.endsWith('/preview'))
+
+/** Tên component (defineOptions) được giữ state khi điều hướng */
+const publicKeepAliveViews = [
+  'HomeView',
+  'ProductsListView',
+  'CategoryView',
+  'ProductView',
+  'CollectionView',
+  'CollectionsListView',
+  'SearchView',
+]
 
 function getTransitionName(route: any): string {
   // No transition for admin routes

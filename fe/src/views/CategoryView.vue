@@ -119,6 +119,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'CategoryView' })
+
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import ProductGrid from '@/components/ProductGrid.vue'

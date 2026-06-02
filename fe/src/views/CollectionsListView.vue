@@ -125,6 +125,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'CollectionsListView' })
+
 import { computed, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import CollectionCard from "@/components/collection/CollectionCard.vue";

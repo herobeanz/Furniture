@@ -1,20 +1,22 @@
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onActivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { productApi, type Product } from '@/services/api/products'
+import type { Product } from '@/services/api/products'
+import type { ProductQueryParams } from '@/services/api/products'
 import { useCategoryTree } from '@/composables/common/useCategoryTree'
 import {
   PRODUCTS_PAGE_SIZE,
   productsSortToApi,
   type ProductsPageSortKey,
 } from '@/constants/products-page'
+import { useProductsCacheStore } from '@/stores/productsCache'
 import { logger } from '@/utils/logger'
 
 export function useProductsListPage() {
   const route = useRoute()
   const router = useRouter()
+  const productsCache = useProductsCacheStore()
   const { categoryTree } = useCategoryTree()
 
-  /** null = tất cả sản phẩm; đồng bộ với ?category= trên /san-pham */
   const selectedCategorySlug = computed(() => {
     const q = route.query.category
     return typeof q === 'string' && q.length > 0 ? q : null
@@ -24,8 +26,8 @@ export function useProductsListPage() {
     [...categoryTree.value].sort(
       (a, b) =>
         (a.orderIndex ?? 0) - (b.orderIndex ?? 0) ||
-        a.name.localeCompare(b.name, 'vi')
-    )
+        a.name.localeCompare(b.name, 'vi'),
+    ),
   )
 
   const products = ref<Product[]>([])
@@ -36,7 +38,7 @@ export function useProductsListPage() {
   const error = ref<string | null>(null)
 
   const totalPages = computed(() =>
-    Math.max(1, Math.ceil(total.value / PRODUCTS_PAGE_SIZE))
+    Math.max(1, Math.ceil(total.value / PRODUCTS_PAGE_SIZE)),
   )
 
   const resultRange = computed(() => {
@@ -46,29 +48,62 @@ export function useProductsListPage() {
     return `${start}–${end} của ${total.value} sản phẩm`
   })
 
-  async function fetchProducts() {
+  function buildListParams(): ProductQueryParams {
+    const { sort, order } = productsSortToApi(sortKey.value)
+    return {
+      page: page.value,
+      limit: PRODUCTS_PAGE_SIZE,
+      sort,
+      order,
+      ...(selectedCategorySlug.value
+        ? { category: selectedCategorySlug.value }
+        : {}),
+    }
+  }
+
+  function applyListResponse(res: { data?: Product[]; total?: number }) {
+    products.value = res.data ?? []
+    total.value = res.total ?? 0
+  }
+
+  async function fetchProducts(options?: { force?: boolean }) {
+    const params = buildListParams()
+    const cached = productsCache.peekList(params)
+
+    if (cached && !options?.force) {
+      applyListResponse(cached)
+      error.value = null
+      loading.value = false
+      if (!productsCache.isListFresh(params)) {
+        void revalidateList(params)
+      }
+      return
+    }
+
     loading.value = true
     error.value = null
     try {
-      const { sort, order } = productsSortToApi(sortKey.value)
-      const res = await productApi.getProducts({
-        page: page.value,
-        limit: PRODUCTS_PAGE_SIZE,
-        sort,
-        order,
-        ...(selectedCategorySlug.value
-          ? { category: selectedCategorySlug.value }
-          : {}),
-      })
-      products.value = res.data ?? []
-      total.value = res.total ?? 0
+      const res = await productsCache.fetchList(params, options)
+      applyListResponse(res)
     } catch (e) {
       logger.error('Failed to load products list:', e)
-      products.value = []
-      total.value = 0
+      if (!cached) {
+        products.value = []
+        total.value = 0
+      }
       error.value = 'Không thể tải danh sách sản phẩm.'
     } finally {
       loading.value = false
+    }
+  }
+
+  async function revalidateList(params: ProductQueryParams) {
+    try {
+      const res = await productsCache.fetchList(params, { force: true })
+      applyListResponse(res)
+      error.value = null
+    } catch (e) {
+      logger.error('Failed to refresh products list:', e)
     }
   }
 
@@ -102,6 +137,10 @@ export function useProductsListPage() {
   })
 
   onMounted(() => {
+    void fetchProducts()
+  })
+
+  onActivated(() => {
     void fetchProducts()
   })
 

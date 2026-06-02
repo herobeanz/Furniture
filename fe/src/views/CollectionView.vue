@@ -44,6 +44,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'CollectionView' })
+
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'

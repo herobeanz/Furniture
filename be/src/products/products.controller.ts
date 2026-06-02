@@ -16,6 +16,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ReorderProductsDto } from './dto/reorder-products.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PublicCacheHeaders } from '../shared/decorators/public-cache.decorator';
 
 @ApiTags('products')
 @Controller('products')
@@ -32,6 +33,7 @@ export class ProductsController {
   }
 
   @Get()
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get products (public, paginated)' })
   @ApiResponse({ status: 200, description: 'Products retrieved' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -59,6 +61,7 @@ export class ProductsController {
   }
 
   @Get(':slug/related')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get related products by slug' })
   @ApiResponse({ status: 200, description: 'Related products retrieved' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -77,6 +80,7 @@ export class ProductsController {
   }
 
   @Get(':slug')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get product by slug' })
   @ApiResponse({ status: 200, description: 'Product retrieved' })
   @ApiResponse({ status: 404, description: 'Product not found' })

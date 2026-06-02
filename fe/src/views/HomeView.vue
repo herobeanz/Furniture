@@ -21,7 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+defineOptions({ name: 'HomeView' })
+
+import { onMounted, onActivated } from 'vue'
 import HeroSection from '../components/home/HeroSection.vue'
 import FeaturedCollectionsSection from '../components/home/FeaturedCollectionsSection.vue'
 import TopProductsSection from '../components/home/TopProductsSection.vue'
@@ -35,6 +37,7 @@ const {
   featuredCollections,
   showcaseCollections,
   collectionsLoading,
+  loading,
   loadingBlogs,
   tabProducts,
   tabProductsLoading,
@@ -78,7 +81,13 @@ const mockReviews: Review[] = [
 ]
 
 onMounted(() => {
-  loadInitialData()
+  void loadInitialData()
+})
+
+onActivated(() => {
+  if (!loading.value && products.value.length === 0) {
+    void loadInitialData()
+  }
 })
 </script>
 

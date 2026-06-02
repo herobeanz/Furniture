@@ -128,6 +128,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'ProductView' })
+
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import RelatedProductsCarousel from "@/components/product/RelatedProductsCarousel.vue";

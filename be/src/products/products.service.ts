@@ -6,6 +6,7 @@ import type { CreateProductDto } from './dto/create-product.dto';
 import type { UpdateProductDto } from './dto/update-product.dto';
 import type { ProductImageItemDto } from './dto/product-image-item.dto';
 import { slugify } from '../shared/utils/slugify';
+import { serializeProductListItem } from '../shared/utils/product-serialize';
 
 const MAX_PRODUCT_GALLERY_IMAGES = 10;
 
@@ -119,7 +120,9 @@ export class ProductsService {
     ]);
 
     const data = products.map((p: any) => {
-      const result = serializeProduct(p) as ReturnType<typeof serializeProduct> & {
+      const result = serializeProductListItem(p) as ReturnType<
+        typeof serializeProductListItem
+      > & {
         breadcrumb?: { name: string; slug: string }[];
       };
       const category = p.category;
@@ -207,7 +210,9 @@ export class ProductsService {
 
     // Map related products with breadcrumb so frontend can build proper URL
     return list.map((p: any) => {
-      const result = serializeProduct(p) as ReturnType<typeof serializeProduct> & {
+      const result = serializeProductListItem(p) as ReturnType<
+        typeof serializeProductListItem
+      > & {
         breadcrumb?: { name: string; slug: string }[];
       };
       const category = p.category;

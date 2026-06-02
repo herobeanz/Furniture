@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import type { CreateCategoryDto } from './dto/create-category.dto';
 import type { UpdateCategoryDto } from './dto/update-category.dto';
+import { serializeProductListItem } from '../shared/utils/product-serialize';
 
 export interface CategoryTreeNode {
   id: number;
@@ -37,35 +38,6 @@ function serializeCategory(c: any, productCount?: number) {
     seoTitle: c.seo_title ?? c.seoTitle ?? undefined,
     seoDescription: c.seo_description ?? c.seoDescription ?? undefined,
     productCount: productCount ?? c._count?.products ?? 0,
-  };
-}
-
-function serializeProduct(p: any) {
-  // Convert images array to array of image URLs (strings)
-  const imageUrls = p.images?.map((img: any) => img.image_url ?? img.imageUrl).filter(Boolean) ?? [];
-  
-  return {
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    description: p.description ?? '',
-    shortDescription: p.short_description ?? p.shortDescription ?? undefined,
-    price: toNumber(p.price) ?? 0,
-    salePrice: toNumber(p.sale_price ?? p.salePrice),
-    sku: p.sku,
-    categoryId: p.category_id ?? p.categoryId,
-    thumbnail: p.thumbnail ?? undefined,
-    status: p.status,
-    material: p.material ?? undefined,
-    dimensions: p.dimensions ?? undefined,
-    color: p.color ?? undefined,
-    warranty: p.warranty ?? undefined,
-    isActive: p.is_active ?? p.isActive,
-    isFeatured: p.is_featured ?? p.isFeatured,
-    isHot: p.is_hot ?? p.isHot,
-    seoTitle: p.seo_title ?? p.seoTitle ?? undefined,
-    seoDescription: p.seo_description ?? p.seoDescription ?? undefined,
-    images: imageUrls, // Array of image URL strings
   };
 }
 
@@ -168,7 +140,9 @@ export class CategoriesService {
 
     // Map products with breadcrumb
     const data = products.map((p: any) => {
-      const result = serializeProduct(p) as ReturnType<typeof serializeProduct> & {
+      const result = serializeProductListItem(p) as ReturnType<
+        typeof serializeProductListItem
+      > & {
         breadcrumb?: { name: string; slug: string }[];
       };
       result.breadcrumb = [

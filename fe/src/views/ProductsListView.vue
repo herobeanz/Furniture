@@ -93,7 +93,11 @@
     <section class="products-grid-section container">
       <div v-if="error" class="products-error">
         <ErrorState :message="error" />
-        <button type="button" class="products-retry-btn" @click="fetchProducts">
+        <button
+          type="button"
+          class="products-retry-btn"
+          @click="() => fetchProducts({ force: true })"
+        >
           Thử lại
         </button>
       </div>
@@ -143,6 +147,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'ProductsListView' })
+
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import ProductGrid from "@/components/ProductGrid.vue";

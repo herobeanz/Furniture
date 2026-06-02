@@ -16,6 +16,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ReorderCategoriesDto } from './dto/reorder-categories.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PublicCacheHeaders } from '../shared/decorators/public-cache.decorator';
 
 @ApiTags('categories')
 @Controller('categories')
@@ -23,6 +24,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get()
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get all active categories' })
   @ApiResponse({ status: 200, description: 'Categories retrieved' })
   getCategories() {
@@ -30,6 +32,7 @@ export class CategoriesController {
   }
 
   @Get('tree')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get flat category list for navigation' })
   @ApiResponse({ status: 200, description: 'Category tree retrieved' })
   getTree() {
@@ -56,6 +59,7 @@ export class CategoriesController {
   }
 
   @Get(':slug/products')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get products by category slug' })
   @ApiResponse({ status: 200, description: 'Products retrieved' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -79,6 +83,7 @@ export class CategoriesController {
   }
 
   @Get(':slug')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get category by slug' })
   @ApiResponse({ status: 200, description: 'Category retrieved' })
   @ApiResponse({ status: 404, description: 'Category not found' })

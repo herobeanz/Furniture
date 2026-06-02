@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onActivated } from 'vue'
 import { useRoute } from 'vue-router'
 import { categoryApi, type Category } from '@/services/api/categories'
 import type { Product } from '@/services/api/products'
@@ -10,12 +10,15 @@ import {
   productsSortToApi,
   type ProductsPageSortKey,
 } from '@/constants/category-page'
+import { useProductsCacheStore } from '@/stores/productsCache'
+import { logger } from '@/utils/logger'
 
 /**
  * Composable for Category page (/san-pham/:categorySlug)
  */
 export function useCategoryData() {
   const route = useRoute()
+  const productsCache = useProductsCacheStore()
   const categorySlug = computed(
     () => (route.params.categorySlug as string) ?? '',
   )
@@ -48,6 +51,62 @@ export function useCategoryData() {
     Math.max(1, Math.ceil(totalProducts.value / CATEGORY_PAGE_SIZE)),
   )
 
+  function buildProductParams(): Record<string, unknown> {
+    const { sort, order } = productsSortToApi(sortKey.value)
+    return {
+      page: page.value,
+      limit: CATEGORY_PAGE_SIZE,
+      sort,
+      order,
+    }
+  }
+
+  async function fetchProducts(options?: { force?: boolean }) {
+    if (!category.value || error.value) return
+    const slug = category.value.slug
+    const params = buildProductParams()
+    const cached = productsCache.peekCategoryList(slug, params)
+
+    if (cached && !options?.force) {
+      products.value = cached.data
+      totalProducts.value = cached.total
+      loadingProducts.value = false
+      if (!productsCache.isCategoryListFresh(slug, params)) {
+        void revalidateProducts(slug, params)
+      }
+      return
+    }
+
+    loadingProducts.value = true
+    try {
+      const res = await productsCache.fetchCategoryList(slug, params, options)
+      products.value = res.data
+      totalProducts.value = res.total
+    } catch {
+      if (!cached) {
+        products.value = []
+        totalProducts.value = 0
+      }
+    } finally {
+      loadingProducts.value = false
+    }
+  }
+
+  async function revalidateProducts(
+    slug: string,
+    params: Record<string, unknown>,
+  ) {
+    try {
+      const res = await productsCache.fetchCategoryList(slug, params, {
+        force: true,
+      })
+      products.value = res.data
+      totalProducts.value = res.total
+    } catch (e) {
+      logger.error('Failed to refresh category products:', e)
+    }
+  }
+
   async function fetchCategory() {
     if (!categorySlug.value) return
     loading.value = true
@@ -79,27 +138,6 @@ export function useCategoryData() {
     }
   }
 
-  async function fetchProducts() {
-    if (!category.value || error.value) return
-    loadingProducts.value = true
-    try {
-      const { sort, order } = productsSortToApi(sortKey.value)
-      const res = await categoryApi.getCategoryProducts(category.value.slug, {
-        page: page.value,
-        limit: CATEGORY_PAGE_SIZE,
-        sort,
-        order,
-      })
-      products.value = (res.data ?? []) as Product[]
-      totalProducts.value = res.total ?? 0
-    } catch {
-      products.value = []
-      totalProducts.value = 0
-    } finally {
-      loadingProducts.value = false
-    }
-  }
-
   function goPage(p: number) {
     const next = Math.min(Math.max(1, p), totalPages.value)
     if (next === page.value) return
@@ -121,7 +159,7 @@ export function useCategoryData() {
     () => {
       reset()
       if (categorySlug.value) {
-        fetchCategory()
+        void fetchCategory()
       }
     },
     { immediate: true },
@@ -133,7 +171,13 @@ export function useCategoryData() {
 
   watch([page, sortKey], () => {
     if (category.value) {
-      fetchProducts()
+      void fetchProducts()
+    }
+  })
+
+  onActivated(() => {
+    if (category.value) {
+      void fetchProducts()
     }
   })
 

@@ -1,14 +1,18 @@
 import { ref, computed, watch } from 'vue'
 import { categoryApi, type Category } from '../../services/api/categories'
-import { productApi, type Product } from '../../services/api/products'
+import type { Product } from '../../services/api/products'
+import type { ProductQueryParams } from '../../services/api/products'
 import { blogApi, type BlogPost } from '../../services/api/blog'
 import { collectionApi, type Collection } from '../../services/api/collections'
+import { useProductsCacheStore } from '@/stores/productsCache'
 import { logger } from '../../utils/logger'
 
 /**
  * Composable for home page data fetching and management
  */
 export function useHomeData() {
+  const productsCache = useProductsCacheStore()
+
   const categories = ref<Category[]>([])
   const products = ref<Product[]>([])
   const blogPosts = ref<BlogPost[]>([])
@@ -24,7 +28,7 @@ export function useHomeData() {
     [...featuredCollections.value]
       .filter((c) => c.isActive !== false)
       .sort((a, b) => a.orderIndex - b.orderIndex || a.id - b.id)
-      .slice(0, 4)
+      .slice(0, 4),
   )
 
   const heroTiles = computed(() => showcaseCollections.value)
@@ -44,12 +48,28 @@ export function useHomeData() {
 
   async function loadTabProducts() {
     if (!activeTab.value) return
+    const params: ProductQueryParams = {
+      category: activeTab.value,
+      limit: 8,
+    }
+    const cached = productsCache.peekList(params)
+    if (cached) {
+      tabProducts.value = cached.data || []
+      tabProductsLoading.value = false
+      if (!productsCache.isListFresh(params)) {
+        try {
+          const fresh = await productsCache.fetchList(params, { force: true })
+          tabProducts.value = fresh.data || []
+        } catch {
+          /* giữ cache */
+        }
+      }
+      return
+    }
+
     tabProductsLoading.value = true
     try {
-      const res = await productApi.getProducts({
-        category: activeTab.value,
-        limit: 8,
-      })
+      const res = await productsCache.fetchList(params)
       tabProducts.value = res.data || []
     } catch {
       tabProducts.value = []
@@ -81,8 +101,15 @@ export function useHomeData() {
 
   async function loadInitialData() {
     try {
+      const heroParams: ProductQueryParams = { limit: 12 }
+      const cachedHero = productsCache.peekList(heroParams)
+
+      const heroPromise = cachedHero
+        ? Promise.resolve(cachedHero)
+        : productsCache.fetchList(heroParams)
+
       const [res] = await Promise.all([
-        productApi.getProducts({ limit: 12 }),
+        heroPromise,
         loadCategories(),
         loadBlogPosts(),
         loadFeaturedCollections(),
@@ -100,7 +127,7 @@ export function useHomeData() {
   }
 
   watch(activeTab, () => {
-    loadTabProducts()
+    void loadTabProducts()
   })
 
   watch(
@@ -109,7 +136,7 @@ export function useHomeData() {
       if (len && !activeTab.value) {
         activeTab.value = categories.value[0]?.slug ?? ''
       }
-    }
+    },
   )
 
   return {

@@ -33,19 +33,22 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'SearchView' })
+
 import { logger } from '@/utils/logger'
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onActivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ProductGrid from '@/components/ProductGrid.vue'
 import Breadcrumb from '@/components/common/Breadcrumb.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import { productApi } from '@/services/api/products'
-import type { Product } from '@/services/api/products'
+import type { Product, ProductQueryParams } from '@/services/api/products'
+import { useProductsCacheStore } from '@/stores/productsCache'
 
 const route = useRoute()
 const router = useRouter()
+const productsCache = useProductsCacheStore()
 
 const searchQuery = ref('')
 const products = ref<Product[]>([])
@@ -70,14 +73,32 @@ async function performSearch() {
   }
 
   searchQuery.value = query.trim()
-  loading.value = true
+  const params: ProductQueryParams = {
+    search: searchQuery.value,
+    page: page.value,
+    limit,
+  }
+  const cached = productsCache.peekList(params)
 
+  if (cached) {
+    products.value = cached.data || []
+    totalResults.value = cached.total || 0
+    loading.value = false
+    if (!productsCache.isListFresh(params)) {
+      try {
+        const fresh = await productsCache.fetchList(params, { force: true })
+        products.value = fresh.data || []
+        totalResults.value = fresh.total || 0
+      } catch (error) {
+        logger.error('Search refresh error:', error)
+      }
+    }
+    return
+  }
+
+  loading.value = true
   try {
-    const result = await productApi.getProducts({
-      search: searchQuery.value,
-      page: page.value,
-      limit,
-    })
+    const result = await productsCache.fetchList(params)
     products.value = result.data || []
     totalResults.value = result.total || 0
   } catch (error) {
@@ -117,8 +138,8 @@ watch(
   { immediate: true }
 )
 
-onMounted(() => {
-  performSearch()
+onActivated(() => {
+  void performSearch()
 })
 </script>
 

@@ -1,17 +1,22 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onActivated } from 'vue'
 import { useRoute } from 'vue-router'
-import { productApi, type Product } from '@/services/api/products'
+import type { Product } from '@/services/api/products'
 import { extractErrorMessage, isNotFoundError } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 import { getCategoryPath, getProductPath } from '@/utils/navigation'
 import { resolveMediaUrl } from '@/utils/mediaUrl'
 import { buildProductGalleryList } from '@/utils/productGallery'
+import {
+  useProductsCacheStore,
+  RELATED_PRODUCTS_LIMIT,
+} from '@/stores/productsCache'
 
 /**
  * Composable for Product page data fetching and state management
  */
 export function useProductData() {
   const route = useRoute()
+  const productsCache = useProductsCacheStore()
   const productSlug = computed(() => (route.params.productSlug as string) ?? '')
   const isPreview = computed(() => route.path.endsWith('/preview'))
 
@@ -54,12 +59,52 @@ export function useProductData() {
     })
   })
 
+  function applyCached(slug: string) {
+    const cachedProduct = productsCache.peekProduct(slug)
+    const cachedRelated = productsCache.peekRelated(slug, RELATED_PRODUCTS_LIMIT)
+    if (cachedProduct) {
+      product.value = cachedProduct
+    }
+    if (cachedRelated) {
+      related.value = cachedRelated
+    }
+    return !!cachedProduct
+  }
+
+  async function loadRelated(slug: string, options?: { force?: boolean }) {
+    const cached = productsCache.peekRelated(slug, RELATED_PRODUCTS_LIMIT)
+    if (cached && !options?.force) {
+      related.value = cached
+      if (!productsCache.isRelatedFresh(slug, RELATED_PRODUCTS_LIMIT)) {
+        try {
+          const fresh = await productsCache.fetchRelated(slug, RELATED_PRODUCTS_LIMIT, {
+            force: true,
+          })
+          related.value = fresh
+        } catch {
+          /* giữ bản cache */
+        }
+      }
+      return
+    }
+    try {
+      related.value = await productsCache.fetchRelated(
+        slug,
+        RELATED_PRODUCTS_LIMIT,
+        options,
+      )
+    } catch {
+      if (!cached) related.value = []
+    }
+  }
+
   async function fetchProduct() {
     if (!productSlug.value) return
-    
-    // Check for preview data first
+
+    const slug = productSlug.value
+
     if (isPreview.value) {
-      const previewData = getPreviewData('product', productSlug.value)
+      const previewData = getPreviewData('product', slug)
       if (previewData) {
         product.value = previewData as Product
         related.value = []
@@ -68,29 +113,54 @@ export function useProductData() {
         return
       }
     }
-    
-    loading.value = true
+
     error.value = ''
     isNotFound.value = false
-    product.value = null
-    related.value = []
-    selectedIndex.value = 0
-    quantity.value = 1
+    const hasCache = applyCached(slug)
+
+    if (hasCache) {
+      loading.value = false
+      selectedIndex.value = 0
+      quantity.value = 1
+      if (!productsCache.isProductFresh(slug)) {
+        void revalidateProduct(slug)
+      } else {
+        void loadRelated(slug)
+      }
+      return
+    }
+
+    if (!product.value || product.value.slug !== slug) {
+      loading.value = true
+    }
+
     try {
-      const [p, rel] = await Promise.all([
-        productApi.getProduct(productSlug.value),
-        productApi.getRelatedProducts(productSlug.value, 12),
-      ])
+      const p = await productsCache.fetchProduct(slug)
       product.value = p
-      related.value = Array.isArray(rel) ? rel : []
-    } catch (e: any) {
+      selectedIndex.value = 0
+      quantity.value = 1
+      await loadRelated(slug)
+    } catch (e: unknown) {
       if (isNotFoundError(e, ['product not found'])) {
         isNotFound.value = true
+        product.value = null
       } else {
         error.value = extractErrorMessage(e, 'Không tìm thấy sản phẩm.')
       }
     } finally {
       loading.value = false
+    }
+  }
+
+  async function revalidateProduct(slug: string) {
+    try {
+      const p = await productsCache.fetchProduct(slug, { force: true })
+      if (productSlug.value === slug) {
+        product.value = p
+      }
+      await loadRelated(slug, { force: true })
+    } catch {
+      /* giữ cache hiện tại */
     }
   }
 
@@ -113,8 +183,11 @@ export function useProductData() {
 
   watch(productSlug, fetchProduct, { immediate: true })
 
+  onActivated(() => {
+    void fetchProduct()
+  })
+
   return {
-    // State
     product,
     related,
     loading,
@@ -122,12 +195,10 @@ export function useProductData() {
     isNotFound,
     selectedIndex,
     quantity,
-    // Computed
     galleryImages,
     currentImage,
     breadcrumb,
     productSlug,
-    // Methods
     setSelectedImage,
     setQuantity,
   }
