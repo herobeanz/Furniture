@@ -1,16 +1,5 @@
 <template>
   <div class="collections-page">
-    <nav class="container collections-breadcrumb" aria-label="Breadcrumb">
-      <RouterLink to="/" class="collections-breadcrumb-link"
-        >Trang chủ</RouterLink
-      >
-      <i
-        class="fa-solid fa-chevron-right collections-breadcrumb-sep"
-        aria-hidden="true"
-      />
-      <span class="collections-breadcrumb-current">Bộ sưu tập</span>
-    </nav>
-
     <section class="collections-hero">
       <div class="container collections-hero-inner">
         <div class="collections-hero-copy">
@@ -126,7 +115,6 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { RouterLink } from "vue-router";
 import CollectionCard from "@/components/collection/CollectionCard.vue";
 import CollectionCardSkeleton from "@/components/skeleton/CollectionCardSkeleton.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
@@ -211,33 +199,6 @@ watch(totalPages, (total) => {
 .collections-page {
   background: #faf9f6;
   padding-bottom: 2.5rem;
-}
-
-.collections-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-top: 1.5rem;
-  font-size: 0.6875rem;
-  color: var(--color-text-light);
-}
-
-.collections-breadcrumb-link {
-  color: inherit;
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.collections-breadcrumb-link:hover {
-  color: var(--color-primary);
-}
-
-.collections-breadcrumb-sep {
-  font-size: 0.5rem;
-}
-
-.collections-breadcrumb-current {
-  color: var(--color-text-muted);
 }
 
 .collections-hero {

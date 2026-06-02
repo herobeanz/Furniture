@@ -9,22 +9,16 @@
         required
         autocomplete="name"
       />
-      <input
+      <PhoneInput
         v-model="form.phone"
-        type="tel"
-        class="contact-field"
         placeholder="Số điện thoại *"
-        required
-        autocomplete="tel"
+        :required="true"
       />
     </div>
 
-    <input
+    <EmailInput
       v-model="form.email"
-      type="email"
-      class="contact-field"
       placeholder="Email"
-      autocomplete="email"
     />
 
     <div class="contact-field-group">
@@ -65,6 +59,7 @@
 
 <script setup lang="ts">
 import { CONTACT_TOPICS } from '@/constants/contact'
+import { PhoneInput, EmailInput } from '@/components/ui/inputs'
 
 interface Props {
   form: {

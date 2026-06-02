@@ -5,22 +5,6 @@
     <ErrorState v-else-if="error" :message="error" />
 
     <template v-else-if="category">
-      <nav class="category-breadcrumb container" aria-label="Breadcrumb">
-        <RouterLink to="/" class="category-breadcrumb-link">Trang chủ</RouterLink>
-        <i
-          class="fa-solid fa-chevron-right category-breadcrumb-sep"
-          aria-hidden="true"
-        />
-        <RouterLink to="/san-pham" class="category-breadcrumb-link">
-          Sản phẩm
-        </RouterLink>
-        <i
-          class="fa-solid fa-chevron-right category-breadcrumb-sep"
-          aria-hidden="true"
-        />
-        <span class="category-breadcrumb-current">{{ category.name }}</span>
-      </nav>
-
       <section class="category-hero">
         <div class="container category-hero-inner">
           <div class="category-hero-copy">
@@ -120,7 +104,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
 import ProductGrid from '@/components/ProductGrid.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import CategoryProductToolbar from '@/components/category/CategoryProductToolbar.vue'
@@ -193,33 +176,6 @@ const paginationItems = computed((): PaginationItem[] => {
 .category-page {
   padding-bottom: 0;
   background: #faf9f6;
-}
-
-.category-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1.5rem 0 0;
-  font-size: 0.6875rem;
-  color: #9ca3af;
-}
-
-.category-breadcrumb-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.category-breadcrumb-link:hover {
-  color: var(--color-primary);
-}
-
-.category-breadcrumb-sep {
-  font-size: 0.4375rem;
-}
-
-.category-breadcrumb-current {
-  color: #4b5563;
 }
 
 .category-hero {

@@ -1,0 +1,8 @@
+export { default as PhoneInput } from './PhoneInput.vue'
+export { default as EmailInput } from './EmailInput.vue'
+export { default as CurrencyInput } from './CurrencyInput.vue'
+export { default as QuantityInput } from './QuantityInput.vue'
+export { default as DecimalInput } from './DecimalInput.vue'
+export { default as DateInput } from './DateInput.vue'
+export { default as DateRangeInput } from './DateRangeInput.vue'
+export { default as YearInput } from './YearInput.vue'

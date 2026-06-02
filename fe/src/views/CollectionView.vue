@@ -1,15 +1,5 @@
 <template>
   <div class="collection-page">
-    <nav class="collection-breadcrumb container" aria-label="Breadcrumb">
-      <RouterLink to="/" class="collection-breadcrumb-link">Trang chủ</RouterLink>
-      <i class="fa-solid fa-chevron-right collection-breadcrumb-sep" aria-hidden="true" />
-      <RouterLink to="/bo-suu-tap" class="collection-breadcrumb-link">Bộ sưu tập</RouterLink>
-      <template v-if="collection">
-        <i class="fa-solid fa-chevron-right collection-breadcrumb-sep" aria-hidden="true" />
-        <span class="collection-breadcrumb-current">{{ collection.name }}</span>
-      </template>
-    </nav>
-
     <ProductGridSkeleton v-if="loading" :columns="4" :count="8" />
     <NotFoundView v-else-if="isNotFound" />
     <ErrorState v-else-if="error" :message="error" />
@@ -45,7 +35,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
 import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import ErrorState from '@/components/common/ErrorState.vue'
@@ -64,34 +53,6 @@ const heroDescription = computed(() =>
 <style scoped>
 .collection-page {
   padding-bottom: 3rem;
-}
-
-.collection-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 0 0.5rem;
-  font-size: 0.8125rem;
-}
-
-.collection-breadcrumb-link {
-  color: var(--color-text-muted);
-  text-decoration: none;
-}
-
-.collection-breadcrumb-link:hover {
-  color: var(--color-primary);
-}
-
-.collection-breadcrumb-sep {
-  font-size: 0.5rem;
-  color: var(--color-text-light);
-}
-
-.collection-breadcrumb-current {
-  color: var(--color-heading);
-  font-weight: 500;
 }
 
 .collection-hero {

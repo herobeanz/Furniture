@@ -1,14 +1,5 @@
 <template>
   <div class="products-page">
-    <nav class="products-breadcrumb container" aria-label="Breadcrumb">
-      <RouterLink to="/" class="products-breadcrumb-link">Trang chủ</RouterLink>
-      <i
-        class="fa-solid fa-chevron-right products-breadcrumb-sep"
-        aria-hidden="true"
-      />
-      <span class="products-breadcrumb-current">Sản phẩm</span>
-    </nav>
-
     <section class="products-hero">
       <div class="container products-hero-inner">
         <div class="products-hero-copy">
@@ -158,7 +149,6 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { RouterLink } from "vue-router";
 import ProductGrid from "@/components/ProductGrid.vue";
 import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
@@ -225,33 +215,6 @@ function onSortChange(e: Event) {
 .products-page {
   padding-bottom: 3rem;
   background: #faf9f6;
-}
-
-.products-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1.25rem 0 0.5rem;
-  font-size: 0.6875rem;
-  color: var(--color-text-light);
-}
-
-.products-breadcrumb-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.products-breadcrumb-link:hover {
-  color: var(--color-primary);
-}
-
-.products-breadcrumb-sep {
-  font-size: 0.5rem;
-}
-
-.products-breadcrumb-current {
-  color: var(--color-text-muted);
 }
 
 .products-hero {
