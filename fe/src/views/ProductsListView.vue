@@ -20,8 +20,8 @@
         </div>
         <div class="products-hero-visual">
           <img
-            :src="PRODUCTS_HERO_IMAGE"
-            alt="Tổng hợp nội thất gỗ"
+            :src="heroImage"
+            :alt="heroAlt"
             class="products-hero-image"
             loading="eager"
           />
@@ -97,12 +97,26 @@
           Thử lại
         </button>
       </div>
-      <ProductGridSkeleton v-else-if="loading" :count="12" :columns="4" />
-      <EmptyState
-        v-else-if="products.length === 0"
-        message="Chưa có sản phẩm nào."
-      />
-      <ProductGrid v-else :products="products" :columns="4" variant="compact" />
+      <div v-else class="products-grid-wrap">
+        <ProductGridSkeleton
+          v-if="loading && products.length === 0"
+          :count="12"
+          :columns="4"
+        />
+        <EmptyState
+          v-else-if="products.length === 0"
+          message="Chưa có sản phẩm nào."
+        />
+        <ProductGrid v-else :products="products" :columns="4" variant="compact" />
+
+        <div
+          v-if="loading && products.length > 0"
+          class="products-loading-overlay"
+          aria-live="polite"
+        >
+          <i class="fa-solid fa-spinner fa-spin products-loading-spinner" aria-hidden="true" />
+        </div>
+      </div>
 
       <nav
         v-if="!loading && !error && totalPages > 1"
@@ -156,6 +170,7 @@ import {
   type ProductsPageSortKey,
 } from "@/constants/products-page";
 import { categoryStripIcon } from "@/constants/products-page";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 const {
   categories,
@@ -167,11 +182,28 @@ const {
   totalPages,
   resultRange,
   selectedCategorySlug,
+  selectedCategoryThumbnail,
   setCategorySlug,
   setSort,
   goToPage,
   fetchProducts,
 } = useProductsListPage();
+
+const selectedCategory = computed(() =>
+  categories.value.find((cat) => cat.slug === selectedCategorySlug.value)
+);
+
+const heroImage = computed(() => {
+  const thumb = selectedCategoryThumbnail.value?.trim();
+  if (thumb) return resolveMediaUrl(thumb);
+  return PRODUCTS_HERO_IMAGE;
+});
+
+const heroAlt = computed(() =>
+  selectedCategory.value
+    ? `Sản phẩm danh mục ${selectedCategory.value.name}`
+    : "Tổng hợp nội thất gỗ"
+);
 
 const pageNumbers = computed(() => {
   const total = totalPages.value;
@@ -382,6 +414,27 @@ function onSortChange(e: Event) {
 
 .products-grid-section {
   padding: 1.5rem 0 0;
+}
+
+.products-grid-wrap {
+  position: relative;
+}
+
+.products-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(1px);
+  border-radius: 0.375rem;
+  pointer-events: none;
+}
+
+.products-loading-spinner {
+  font-size: 1.25rem;
+  color: var(--color-primary);
 }
 
 .products-pagination {

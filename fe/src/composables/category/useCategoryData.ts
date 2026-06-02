@@ -10,11 +10,13 @@ import {
   productsSortToApi,
   type ProductsPageSortKey,
 } from '@/constants/category-page'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 
 /**
  * Composable for Category page (/san-pham/:categorySlug)
  */
 export function useCategoryData() {
+  const routerLoading = useRouterLoadingStore()
   const route = useRoute()
   const categorySlug = computed(
     () => (route.params.categorySlug as string) ?? '',
@@ -53,6 +55,7 @@ export function useCategoryData() {
     loading.value = true
     error.value = ''
     isNotFound.value = false
+    routerLoading.start('Đang tải danh mục...')
 
     if (isPreviewMode.value) {
       const preview = getPreviewData('category', categorySlug.value)
@@ -76,12 +79,14 @@ export function useCategoryData() {
       category.value = null
     } finally {
       loading.value = false
+      routerLoading.stop()
     }
   }
 
   async function fetchProducts() {
     if (!category.value || error.value) return
     loadingProducts.value = true
+    routerLoading.start('Đang tải sản phẩm...')
     try {
       const { sort, order } = productsSortToApi(sortKey.value)
       const res = await categoryApi.getCategoryProducts(category.value.slug, {
@@ -97,6 +102,7 @@ export function useCategoryData() {
       totalProducts.value = 0
     } finally {
       loadingProducts.value = false
+      routerLoading.stop()
     }
   }
 

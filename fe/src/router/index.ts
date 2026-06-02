@@ -379,8 +379,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const routerLoading = useRouterLoadingStore();
 
-  // Start loading indicator (except for same route or admin routes)
-  if (to.path !== from.path && !to.path.startsWith("/admin")) {
+  // Start loading indicator for any meaningful navigation (path/query/hash).
+  if (to.fullPath !== from.fullPath) {
     routerLoading.start();
   }
 

@@ -1,6 +1,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productApi, type Product } from '@/services/api/products'
+import { categoryApi } from '@/services/api/categories'
 import { useCategoryTree } from '@/composables/common/useCategoryTree'
 import {
   PRODUCTS_PAGE_SIZE,
@@ -8,8 +9,10 @@ import {
   type ProductsPageSortKey,
 } from '@/constants/products-page'
 import { logger } from '@/utils/logger'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 
 export function useProductsListPage() {
+  const routerLoading = useRouterLoadingStore()
   const route = useRoute()
   const router = useRouter()
   const { categoryTree } = useCategoryTree()
@@ -34,6 +37,7 @@ export function useProductsListPage() {
   const sortKey = ref<ProductsPageSortKey>('newest')
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const selectedCategoryThumbnail = ref<string | null>(null)
 
   const totalPages = computed(() =>
     Math.max(1, Math.ceil(total.value / PRODUCTS_PAGE_SIZE))
@@ -49,6 +53,7 @@ export function useProductsListPage() {
   async function fetchProducts() {
     loading.value = true
     error.value = null
+    routerLoading.start('Đang tải sản phẩm...')
     try {
       const { sort, order } = productsSortToApi(sortKey.value)
       const res = await productApi.getProducts({
@@ -69,6 +74,7 @@ export function useProductsListPage() {
       error.value = 'Không thể tải danh sách sản phẩm.'
     } finally {
       loading.value = false
+      routerLoading.stop()
     }
   }
 
@@ -97,9 +103,30 @@ export function useProductsListPage() {
     router.replace({ path: '/san-pham', query })
   }
 
+  async function fetchSelectedCategoryThumbnail(slug: string | null) {
+    if (!slug) {
+      selectedCategoryThumbnail.value = null
+      return
+    }
+    try {
+      const category = await categoryApi.getCategory(slug)
+      selectedCategoryThumbnail.value = category.thumbnail?.trim() || null
+    } catch {
+      selectedCategoryThumbnail.value = null
+    }
+  }
+
   watch([page, sortKey, selectedCategorySlug], () => {
     void fetchProducts()
   })
+
+  watch(
+    selectedCategorySlug,
+    (slug) => {
+      void fetchSelectedCategoryThumbnail(slug)
+    },
+    { immediate: true }
+  )
 
   onMounted(() => {
     void fetchProducts()
@@ -116,6 +143,7 @@ export function useProductsListPage() {
     totalPages,
     resultRange,
     selectedCategorySlug,
+    selectedCategoryThumbnail,
     setCategorySlug,
     setSort,
     goToPage,

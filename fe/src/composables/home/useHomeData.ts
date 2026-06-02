@@ -4,11 +4,13 @@ import { productApi, type Product } from '../../services/api/products'
 import { blogApi, type BlogPost } from '../../services/api/blog'
 import { collectionApi, type Collection } from '../../services/api/collections'
 import { logger } from '../../utils/logger'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 
 /**
  * Composable for home page data fetching and management
  */
 export function useHomeData() {
+  const routerLoading = useRouterLoadingStore()
   const categories = ref<Category[]>([])
   const products = ref<Product[]>([])
   const blogPosts = ref<BlogPost[]>([])
@@ -45,6 +47,7 @@ export function useHomeData() {
   async function loadTabProducts() {
     if (!activeTab.value) return
     tabProductsLoading.value = true
+    routerLoading.start('Đang tải sản phẩm...')
     try {
       const res = await productApi.getProducts({
         category: activeTab.value,
@@ -55,6 +58,7 @@ export function useHomeData() {
       tabProducts.value = []
     } finally {
       tabProductsLoading.value = false
+      routerLoading.stop()
     }
   }
 

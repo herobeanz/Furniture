@@ -2,8 +2,10 @@ import { ref, onMounted } from 'vue'
 import { collectionApi, type Collection } from '@/services/api/collections'
 import { extractErrorMessage } from '@/utils/error'
 import { logger } from '@/utils/logger'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 
 export function useCollectionsListPage() {
+  const routerLoading = useRouterLoadingStore()
   const collections = ref<Collection[]>([])
   const loading = ref(true)
   const error = ref('')
@@ -11,6 +13,7 @@ export function useCollectionsListPage() {
   async function fetchCollections() {
     loading.value = true
     error.value = ''
+    routerLoading.start('Đang tải bộ sưu tập...')
     try {
       collections.value = await collectionApi.getCollections()
     } catch (e: unknown) {
@@ -18,6 +21,7 @@ export function useCollectionsListPage() {
       logger.error('Failed to fetch collections:', e)
     } finally {
       loading.value = false
+      routerLoading.stop()
     }
   }
 

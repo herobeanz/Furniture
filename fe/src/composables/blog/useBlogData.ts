@@ -5,11 +5,13 @@ import { extractErrorMessage } from '@/utils/error'
 import { getPreviewData } from '@/utils/preview'
 import { slugify } from '@/utils/slugify'
 import { logger } from '@/utils/logger'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 
 /**
  * Composable for Blog listing page data fetching
  */
 export function useBlogListData() {
+  const routerLoading = useRouterLoadingStore()
   const posts = ref<BlogPost[]>([])
   const loading = ref(true)
   const error = ref('')
@@ -17,6 +19,7 @@ export function useBlogListData() {
   async function fetchPosts() {
     loading.value = true
     error.value = ''
+    routerLoading.start('Đang tải bài viết...')
     try {
       posts.value = await blogApi.getPosts()
     } catch (e: any) {
@@ -24,6 +27,7 @@ export function useBlogListData() {
       logger.error('Failed to fetch blog posts:', e)
     } finally {
       loading.value = false
+      routerLoading.stop()
     }
   }
 
@@ -60,6 +64,7 @@ function loadBlogPreview(slugParam: string): BlogPost | null {
 }
 
 export function useBlogPostData() {
+  const routerLoading = useRouterLoadingStore()
   const route = useRoute()
   const slug = computed(() => resolveRouteSlug(route.params.slug))
   const isPreview = computed(
@@ -97,6 +102,7 @@ export function useBlogPostData() {
 
     loading.value = true
     error.value = ''
+    routerLoading.start('Đang tải bài viết...')
     try {
       post.value = await blogApi.getPost(slug.value)
     } catch (e: unknown) {
@@ -104,6 +110,7 @@ export function useBlogPostData() {
       logger.error('Failed to fetch blog post:', e)
     } finally {
       loading.value = false
+      routerLoading.stop()
     }
   }
 

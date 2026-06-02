@@ -22,18 +22,24 @@
         </button>
       </div>
 
-      <ProductGridSkeleton v-if="loading" :columns="4" :count="4" />
-      <div v-else-if="products.length === 0" class="empty">
-        Chưa có sản phẩm.
-      </div>
-      <div v-else class="product-grid four-cols">
-        <ProductCard
-          v-for="product in products"
-          :key="product.id"
-          :product="product"
-          :show-hot-tag="product.isHot"
-          variant="compact"
-        />
+      <div class="products-wrap">
+        <ProductGridSkeleton v-if="loading && products.length === 0" :columns="4" :count="4" />
+        <div v-else-if="products.length === 0" class="empty">
+          Chưa có sản phẩm.
+        </div>
+        <div v-else class="product-grid four-cols">
+          <ProductCard
+            v-for="product in products"
+            :key="product.id"
+            :product="product"
+            :show-hot-tag="product.isHot"
+            variant="compact"
+          />
+        </div>
+
+        <div v-if="loading && products.length > 0" class="products-overlay" aria-live="polite">
+          <i class="fa-solid fa-spinner fa-spin products-overlay-spinner" aria-hidden="true" />
+        </div>
       </div>
     </div>
   </section>
@@ -103,6 +109,10 @@ const viewAllHref = computed(() =>
   gap: 1.5rem;
 }
 
+.products-wrap {
+  position: relative;
+}
+
 .four-cols {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -117,6 +127,23 @@ const viewAllHref = computed(() =>
   padding: 2rem;
   text-align: center;
   color: var(--color-text-muted);
+}
+
+.products-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(1px);
+  border-radius: 0.375rem;
+  pointer-events: none;
+}
+
+.products-overlay-spinner {
+  font-size: 1.25rem;
+  color: var(--color-primary);
 }
 
 @media (max-width: 768px) {
