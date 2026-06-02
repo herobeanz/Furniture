@@ -6,8 +6,12 @@
     <RouterLink :to="getProductPath(product)" class="product-card-image">
       <img
         v-if="cardImage"
-        :src="resolveMediaUrl(cardImage)"
+        :src="cardImageSrc"
+        :srcset="cardImageSrcSet"
+        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         :alt="product.name"
+        loading="lazy"
+        decoding="async"
       />
       <div v-else class="no-image">Ảnh</div>
       <!-- <span v-if="showSaleTag && hasDiscount" class="tag sale">SALE CỰC SỐC</span> -->
@@ -73,6 +77,7 @@ import { computed } from "vue";
 import type { Product } from "@/services/api/products";
 import { formatPrice } from "@/utils/format";
 import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { optimizeImageUrl } from "@/utils/imageUrl";
 import { getProductDisplayImage } from "@/utils/productGallery";
 import { getProductPath } from "@/utils/navigation";
 
@@ -89,6 +94,21 @@ const props = withDefaults(
 const cardImage = computed(() =>
   getProductDisplayImage(props.product.thumbnail, props.product.images),
 );
+
+const cardImageBase = computed(() => resolveMediaUrl(cardImage.value));
+const cardImageSrc = computed(() =>
+  optimizeImageUrl(cardImageBase.value, { width: 480, quality: "auto" }),
+);
+const cardImageSrcSet = computed(() => {
+  const base = cardImageBase.value;
+  if (!base) return "";
+  return [320, 480, 640]
+    .map(
+      (width) =>
+        `${optimizeImageUrl(base, { width, quality: "auto" })} ${width}w`,
+    )
+    .join(", ");
+});
 
 const hasDiscount = computed(() => {
   return (

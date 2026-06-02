@@ -1,7 +1,15 @@
 <template>
   <div class="product-gallery">
     <div class="gallery-main">
-      <img v-if="currentImage" :src="currentImage" :alt="productName" />
+      <img
+        v-if="currentImage"
+        :src="mainImageSrc"
+        :srcset="mainImageSrcSet"
+        sizes="(max-width: 1024px) 100vw, 50vw"
+        :alt="productName"
+        fetchpriority="high"
+        decoding="async"
+      />
       <div v-else class="gallery-placeholder">Ảnh sản phẩm</div>
       <button
         v-if="images.length > 1"
@@ -47,7 +55,14 @@
           :class="{ active: selectedIndex === item.index }"
           @click="$emit('selectImage', item.index)"
         >
-          <img :src="item.src" :alt="`${productName} ${item.index + 1}`" />
+          <img
+            :src="thumbSrc(item.src)"
+            :srcset="thumbSrcSet(item.src)"
+            sizes="96px"
+            :alt="`${productName} ${item.index + 1}`"
+            loading="lazy"
+            decoding="async"
+          />
         </button>
       </div>
 
@@ -67,6 +82,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { optimizeImageUrl } from '@/utils/imageUrl'
 
 const VISIBLE_THUMBS = 4
 
@@ -97,6 +113,27 @@ const visibleThumbs = computed(() =>
       index: thumbOffset.value + i,
     })),
 )
+
+const mainImageSrc = computed(() =>
+  optimizeImageUrl(props.currentImage, { width: 1200, quality: 'auto' }),
+)
+
+const mainImageSrcSet = computed(() => {
+  if (!props.currentImage) return ''
+  return [640, 960, 1200, 1600]
+    .map((width) => `${optimizeImageUrl(props.currentImage, { width, quality: 'auto' })} ${width}w`)
+    .join(', ')
+})
+
+function thumbSrc(src: string): string {
+  return optimizeImageUrl(src, { width: 160, quality: 'auto' })
+}
+
+function thumbSrcSet(src: string): string {
+  return [120, 160, 240]
+    .map((width) => `${optimizeImageUrl(src, { width, quality: 'auto' })} ${width}w`)
+    .join(', ')
+}
 
 function syncThumbOffset() {
   const total = props.images.length

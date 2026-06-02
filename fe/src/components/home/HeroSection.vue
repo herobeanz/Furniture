@@ -22,9 +22,14 @@
       <div class="hero-visual">
         <img
           v-if="heroImage"
-          :src="heroImage"
+          :src="heroImageSrc"
+          :srcset="heroImageSrcSet"
+          sizes="(max-width: 1024px) 100vw, 58vw"
           alt="Nội thất gỗ cao cấp"
           class="hero-image"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
         />
         <div v-else class="hero-image hero-image--placeholder" />
       </div>
@@ -55,6 +60,7 @@ import type { Product } from "@/services/api/products";
 import type { Collection } from "@/services/api/collections";
 import { VALUE_PROPS } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { optimizeImageUrl } from "@/utils/imageUrl";
 
 interface Props {
   products?: Product[];
@@ -72,6 +78,20 @@ const heroImage = computed(() => {
   const collection =
     props.collections?.find((c) => c.thumbnail) ?? props.collections?.[0];
   return resolveMediaUrl(collection?.thumbnail);
+});
+
+const heroImageSrc = computed(() =>
+  optimizeImageUrl(heroImage.value, { width: 1280, quality: "auto" }),
+);
+
+const heroImageSrcSet = computed(() => {
+  if (!heroImage.value) return "";
+  return [640, 960, 1280, 1600]
+    .map(
+      (width) =>
+        `${optimizeImageUrl(heroImage.value, { width, quality: "auto" })} ${width}w`,
+    )
+    .join(", ");
 });
 
 function valueIconClass(icon: string): string {
