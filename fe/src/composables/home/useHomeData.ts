@@ -2,9 +2,11 @@ import { ref, computed, watch } from 'vue'
 import { categoryApi, type Category } from '../../services/api/categories'
 import type { Product } from '../../services/api/products'
 import type { ProductQueryParams } from '../../services/api/products'
-import { blogApi, type BlogPost } from '../../services/api/blog'
-import { collectionApi, type Collection } from '../../services/api/collections'
+import type { BlogPost } from '../../services/api/blog'
+import type { Collection } from '../../services/api/collections'
 import { useProductsCacheStore } from '@/stores/productsCache'
+import { useBlogCacheStore } from '@/stores/blogCache'
+import { useCollectionsCacheStore } from '@/stores/collectionsCache'
 import { logger } from '../../utils/logger'
 
 /**
@@ -12,6 +14,8 @@ import { logger } from '../../utils/logger'
  */
 export function useHomeData() {
   const productsCache = useProductsCacheStore()
+  const blogCache = useBlogCacheStore()
+  const collectionsCache = useCollectionsCacheStore()
 
   const categories = ref<Category[]>([])
   const products = ref<Product[]>([])
@@ -35,9 +39,25 @@ export function useHomeData() {
   const rootCategories = computed(() => categories.value)
 
   async function loadFeaturedCollections() {
+    const cached = collectionsCache.peekList()
+    if (cached) {
+      featuredCollections.value = cached
+      collectionsLoading.value = false
+      if (!collectionsCache.isListFresh()) {
+        try {
+          featuredCollections.value = await collectionsCache.fetchList({
+            force: true,
+          })
+        } catch {
+          /* giữ cache */
+        }
+      }
+      return
+    }
+
     collectionsLoading.value = true
     try {
-      featuredCollections.value = await collectionApi.getCollections()
+      featuredCollections.value = await collectionsCache.fetchList()
     } catch (e) {
       logger.error('Failed to load collections:', e)
       featuredCollections.value = []
@@ -88,9 +108,23 @@ export function useHomeData() {
   }
 
   async function loadBlogPosts() {
+    const cached = blogCache.peekPosts(true)
+    if (cached) {
+      blogPosts.value = cached
+      loadingBlogs.value = false
+      if (!blogCache.isPostsFresh(true)) {
+        try {
+          blogPosts.value = await blogCache.fetchPosts(true, { force: true })
+        } catch {
+          /* giữ cache */
+        }
+      }
+      return
+    }
+
     loadingBlogs.value = true
     try {
-      blogPosts.value = await blogApi.getPosts(true)
+      blogPosts.value = await blogCache.fetchPosts(true)
     } catch (e) {
       logger.error('Failed to load blog posts:', e)
       blogPosts.value = []

@@ -163,13 +163,14 @@ import {
   ABOUT_STATS,
   ABOUT_STORY_PILLARS,
 } from "@/constants/about";
-import { collectionApi } from "@/services/api/collections";
+import { useCollectionsCacheStore } from "@/stores/collectionsCache";
 
+const collectionsCache = useCollectionsCacheStore();
 const primaryCollectionSlug = ref<string | null>(null);
 
 onMounted(async () => {
   try {
-    const list = await collectionApi.getCollections();
+    const list = await collectionsCache.fetchList();
     const match =
       list.find((c) => c.isActive) ??
       list[0];

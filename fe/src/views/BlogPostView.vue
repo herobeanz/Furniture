@@ -9,6 +9,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'BlogPostView' })
+
 import BlogPostContent from '@/components/blog/BlogPostContent.vue'
 import LoadingState from '@/components/common/LoadingState.vue'
 import ErrorState from '@/components/common/ErrorState.vue'

@@ -39,6 +39,8 @@ const publicKeepAliveViews = [
   'CollectionView',
   'CollectionsListView',
   'SearchView',
+  'BlogView',
+  'BlogPostView',
 ]
 
 function getTransitionName(route: any): string {

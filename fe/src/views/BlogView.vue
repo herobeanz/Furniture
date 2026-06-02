@@ -118,6 +118,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'BlogView' })
+
 import { computed, ref, watch } from "vue";
 import BlogCard from "@/components/blog/BlogCard.vue";
 import BlogSkeleton from "@/components/skeleton/BlogSkeleton.vue";

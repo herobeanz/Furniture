@@ -17,6 +17,7 @@ import { AddProductDto } from './dto/add-product.dto';
 import { UpdateProductOrderDto } from './dto/update-product-order.dto';
 import { ReorderCollectionsDto } from './dto/reorder-collections.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PublicCacheHeaders } from '../shared/decorators/public-cache.decorator';
 
 @ApiTags('collections')
 @Controller('collections')
@@ -24,6 +25,7 @@ export class CollectionsController {
   constructor(private readonly collectionsService: CollectionsService) {}
 
   @Get()
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get all active collections (public)' })
   @ApiResponse({ status: 200, description: 'Collections retrieved' })
   getCollections() {
@@ -50,6 +52,7 @@ export class CollectionsController {
   }
 
   @Get(':slug')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get collection by slug with products (public)' })
   @ApiResponse({ status: 200, description: 'Collection retrieved' })
   @ApiResponse({ status: 404, description: 'Collection not found' })

@@ -16,6 +16,7 @@ import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
 import { ReorderBlogPostsDto } from './dto/reorder-blog-posts.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PublicCacheHeaders } from '../shared/decorators/public-cache.decorator';
 
 @ApiTags('blog')
 @Controller('blog')
@@ -23,6 +24,7 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get blog posts (public)' })
   @ApiResponse({ status: 200, description: 'Blog posts retrieved' })
   @ApiQuery({ name: 'featured', required: false, type: Boolean })
@@ -62,6 +64,7 @@ export class BlogController {
   }
 
   @Get(':slug')
+  @PublicCacheHeaders()
   @ApiOperation({ summary: 'Get blog post by slug (public)' })
   @ApiResponse({ status: 200, description: 'Blog post retrieved' })
   @ApiResponse({ status: 404, description: 'Blog post not found' })

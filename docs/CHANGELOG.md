@@ -6,6 +6,28 @@ Ghi lại các thay đổi đáng chú ý theo **ngày** (ISO 8601). Mục mới
 
 ## 2026-06-02
 
+### Tối ưu blog & bộ sưu tập (performance)
+
+**Mục tiêu:** Mở rộng cùng mô hình cache + KeepAlive cho blog và collections (trước chỉ có products/categories).
+
+#### Frontend
+
+- Thêm Pinia `blogCache` — cache danh sách (all / featured) và chi tiết theo slug (TTL 5 phút).
+- Thêm Pinia `collectionsCache` — cache danh sách và chi tiết theo slug; dedupe request list.
+- Cập nhật `useBlogData`, `useCollectionsListPage`, `useCollectionData` (stale-while-revalidate + `onActivated`).
+- Cập nhật `useHomeData`, `useHeader`, `AboutView` dùng cache collections/blog thay vì gọi API trực tiếp.
+- `App.vue`: thêm `BlogView`, `BlogPostView` vào `KeepAlive`.
+- `defineOptions({ name })` trên `BlogView`, `BlogPostView`.
+
+#### Backend
+
+- `@PublicCacheHeaders()` trên `GET /blog`, `GET /blog/:slug`, `GET /collections`, `GET /collections/:slug`.
+
+**File chính:**  
+`fe/src/stores/blogCache.ts`, `fe/src/stores/collectionsCache.ts`, `fe/src/composables/blog/useBlogData.ts`, `be/src/blog/blog.controller.ts`, `be/src/collections/collections.controller.ts`
+
+---
+
 ### Tối ưu tải sản phẩm (performance)
 
 **Mục tiêu:** Giảm thời gian chờ khi click điều hướng; tránh tải lại API không cần thiết.
