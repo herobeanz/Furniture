@@ -58,7 +58,25 @@
                   <i class="fa-solid fa-bars" />
                 </span>
               </td>
-              <td class="col-name">{{ item.name }}</td>
+              <td class="col-name">
+                <div class="category-cell">
+                  <div class="category-thumb">
+                    <img
+                      v-if="item.thumbnail"
+                      :src="resolveMediaUrl(item.thumbnail)"
+                      :alt="item.name"
+                      class="thumb-img"
+                    />
+                    <i v-else class="fa-regular fa-images thumb-placeholder" />
+                  </div>
+                  <div class="category-text">
+                    <div class="category-name">{{ item.name }}</div>
+                    <div v-if="item.description" class="category-sub">
+                      {{ truncateDescription(item.description) }}
+                    </div>
+                  </div>
+                </div>
+              </td>
               <td class="col-slug">
                 <code class="slug-text">{{ item.slug }}</code>
               </td>
@@ -106,6 +124,7 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { categoryApi, type Category } from '@/services/api/categories'
 import { logger } from '@/utils/logger'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
 const items = ref<Category[]>([])
 const loading = ref(true)
@@ -119,6 +138,11 @@ function sortByOrder(list: Category[]): Category[] {
   return [...list].sort(
     (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || a.id - b.id,
   )
+}
+
+function truncateDescription(text: string, max = 72): string {
+  if (text.length <= max) return text
+  return `${text.slice(0, max - 3)}...`
 }
 
 function onDragStart(index: number, e: DragEvent) {
@@ -368,8 +392,50 @@ onMounted(fetchList)
 }
 
 .col-name {
+  min-width: 14rem;
+}
+
+.category-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.category-thumb {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-placeholder {
+  font-size: 0.75rem;
+  color: #d1d5db;
+}
+
+.category-name {
   font-weight: 700;
   color: #111827;
+  line-height: 1.3;
+}
+
+.category-sub {
+  font-size: 0.625rem;
+  font-weight: 400;
+  color: #9ca3af;
+  margin-top: 0.125rem;
+  line-height: 1.3;
 }
 
 .col-slug {
