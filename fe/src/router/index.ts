@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
-import { useTrackingStore } from "@/stores/tracking";
 import { useRouterLoadingStore } from "@/stores/routerLoading";
 import { getAdminToken } from "@/services/api/client";
 import { logger } from "@/utils/logger";
@@ -402,10 +401,7 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to, from) => {
-  const tracking = useTrackingStore();
   const routerLoading = useRouterLoadingStore();
-
-  tracking.trackPageView(to.path, to.name as string);
 
   // Store route depth for transition animations
   const depth = to.path.split("/").filter(Boolean).length;

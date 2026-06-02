@@ -22,9 +22,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "prisma db seed",
-    "uploads:orphans": "ts-node -r dotenv/config scripts/cleanup-upload-orphans.ts",
-    "uploads:orphans:delete": "ts-node -r dotenv/config scripts/cleanup-upload-orphans.ts -- --delete"
+    "prisma:seed": "prisma db seed"
   },
   "prisma": {
     "seed": "ts-node -r dotenv/config prisma/seed.ts"
@@ -38,21 +36,17 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.3.0",
-    "@nestjs/typeorm": "^11.0.0",
     "@prisma/client": "6.9.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cloudinary": "^2.10.0",
     "dotenv": "^16.4.5",
-    "ioredis": "^5.4.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "pg": "^8.18.0",
     "prisma": "6.9.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "typeorm": "^0.3.28"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

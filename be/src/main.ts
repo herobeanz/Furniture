@@ -1,21 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
   const config = app.get(ConfigService);
 
-  const uploadDir = config.get<string>('UPLOAD_DIR') || './uploads';
-  const uploadPath = join(process.cwd(), uploadDir.replace(/^\.\//, ''));
-  app.useStaticAssets(uploadPath, { prefix: '/uploads/' });
-
-  app.setGlobalPrefix('api/v1', { exclude: ['health', 'uploads'] });
+  app.setGlobalPrefix('api/v1', { exclude: ['health'] });
 
   app.useGlobalPipes(
     new ValidationPipe({

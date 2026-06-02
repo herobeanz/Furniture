@@ -1,5 +1,3 @@
-import { getApiOrigin, resolveMediaUrl } from '@/utils/mediaUrl'
-
 /** Plain text from HTML (validation, word count). */
 export function stripHtml(html: string): string {
   return html
@@ -21,30 +19,17 @@ export function countRichTextWords(html: string): number {
   return text.split(/\s+/).filter(Boolean).length
 }
 
-/** Resolve /uploads/ paths for TinyMCE preview in admin. */
+/** TinyMCE preview in admin — images are stored as absolute Cloudinary URLs. */
 export function toEditorHtml(html: string): string {
-  if (!html) return ''
-  return html.replace(
-    /src=(["'])(\/uploads\/[^"']+)\1/gi,
-    (_match, quote: string, path: string) => `src=${quote}${resolveMediaUrl(path)}${quote}`,
-  )
+  return html ?? ''
 }
 
-/** Prefer relative /uploads/ paths when saving to DB. */
+/** Persist editor HTML as-is (Cloudinary URLs). */
 export function fromEditorHtml(html: string): string {
-  if (!html) return ''
-  const origin = getApiOrigin().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return html.replace(
-    new RegExp(`src=(["'])${origin}(/uploads/[^"']+)\\1`, 'gi'),
-    (_match, quote: string, path: string) => `src=${quote}${path}${quote}`,
-  )
+  return html ?? ''
 }
 
-/** Public pages: ensure images in stored HTML render correctly. */
+/** Public pages: stored HTML already contains absolute image URLs. */
 export function resolveRichContentHtml(html: string): string {
-  if (!html) return ''
-  return html.replace(
-    /src=(["'])(\/uploads\/[^"']+)\1/gi,
-    (_match, quote: string, path: string) => `src=${quote}${resolveMediaUrl(path)}${quote}`,
-  )
+  return html ?? ''
 }

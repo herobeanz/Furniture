@@ -97,12 +97,6 @@ DATABASE_URL=<supabase-transaction-pooler-port-6543-pgbouncer=true>
 DIRECT_URL=<supabase-session-pooler-port-5432-on-pooler-host>
 JWT_SECRET=<strong-random-secret>
 JWT_EXPIRES_IN=7d
-SUPABASE_URL=<supabase-project-url>
-SUPABASE_ANON_KEY=<supabase-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<supabase-service-role-key>
-SUPABASE_JWT_SECRET=<supabase-jwt-secret>
-SUPABASE_PUBLISHABLE_KEY=<supabase-publishable-key>
-SUPABASE_SECRET_KEY=<supabase-secret-key>
 ```
 
 Nếu dùng upload Cloudinary:
@@ -176,8 +170,6 @@ Kết quả mong muốn:
 }
 ```
 
-Nếu Redis không được cấu hình, health có thể là `degraded` nhưng database vẫn phải là `up`.
-
 API base URL cho frontend:
 
 ```text
@@ -204,16 +196,7 @@ Các bước:
 5. Bấm **Save**.
 6. Redeploy frontend production.
 
-Nếu dùng Supabase public client ở frontend, set thêm:
-
-```text
-VITE_SUPABASE_URL=<supabase-project-url>
-VITE_SUPABASE_ANON_KEY=<supabase-anon-key>
-VITE_SUPABASE_PUBLISHABLE_KEY=<supabase-publishable-key>
-VITE_APP_URL=https://dogohungcuong.vercel.app
-```
-
-Ghi chú Vercel: repo có `vercel.json` ở root (build trỏ vào `fe/`). Nếu project Vercel đặt Root Directory là `fe`, dùng `fe/vercel.json` thay vì file root.
+Ghi chú Vercel: đặt **Root Directory** = `fe` và dùng `fe/vercel.json` (SPA rewrites).
 
 ## 5. Kiểm tra kết nối frontend-backend
 
@@ -319,7 +302,7 @@ Backend Render:
 - [ ] Health check path là `/health`
 - [ ] Service URL là `https://backend-furniture-rvyn.onrender.com`
 - [ ] `DATABASE_URL` và `DIRECT_URL` đã set
-- [ ] JWT/Supabase secrets đã set
+- [ ] JWT secret đã set
 - [ ] Cloudinary env đã set nếu dùng upload
 - [ ] `/health` trả database `up`
 
@@ -334,5 +317,4 @@ Frontend Vercel:
 
 - Không commit `.env` thật.
 - Không paste secrets vào commit hoặc issue public.
-- Nếu secrets từng bị lộ trong chat/log, rotate trong Supabase/Cloudinary trước production.
-- `SUPABASE_SERVICE_ROLE_KEY` chỉ dùng backend, không set ở frontend.
+- Nếu secrets từng bị lộ trong chat/log, rotate trong Supabase (DB password) / Cloudinary trước production.

@@ -119,11 +119,6 @@ frontend/
 * toggleWishlist()
 * persist localStorage
 
-### useTrackingStore
-
-* anonymousId
-* pageView / click tracking
-
 ---
 
 ## A4. Frontend Data Flow
@@ -255,10 +250,6 @@ Database
   * category
   * inquiry (lead)
   * cms
-* Redis:
-
-  * cache
-  * rate limit
 
 ---
 

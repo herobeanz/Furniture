@@ -2,14 +2,7 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCollectionDto } from './dto/create-collection.dto';
 import type { UpdateCollectionDto } from './dto/update-collection.dto';
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '');
-}
+import { slugify } from '../shared/utils/slugify';
 
 function serializeCollection(c: any) {
   return {
