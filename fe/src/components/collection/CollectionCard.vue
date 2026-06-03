@@ -96,7 +96,7 @@ const productCountLabel = computed(() => {
 }
 
 .collection-card-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0;
@@ -104,7 +104,7 @@ const productCountLabel = computed(() => {
 }
 
 .collection-card-count {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0.125rem 0 0;
 }
@@ -134,7 +134,7 @@ const productCountLabel = computed(() => {
 }
 
 .collection-card-arrow i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   line-height: 1;
 }
 </style>

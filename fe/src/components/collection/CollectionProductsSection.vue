@@ -128,7 +128,7 @@ function onSortChange(e: Event) {
 
 .result-count {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -139,7 +139,7 @@ function onSortChange(e: Event) {
 }
 
 .sort-label {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -147,7 +147,7 @@ function onSortChange(e: Event) {
   padding: 0.375rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   background: #fff;
 }
 
@@ -165,7 +165,7 @@ function onSortChange(e: Event) {
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   background: #fff;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   cursor: pointer;
 }
 

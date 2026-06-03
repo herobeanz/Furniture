@@ -109,7 +109,7 @@ const excerptText = computed(() => {
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--color-text-light);
   margin-bottom: 0.5rem;
@@ -128,7 +128,7 @@ const excerptText = computed(() => {
 
 .blog-card-title {
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   line-height: 1.4;
@@ -141,7 +141,7 @@ const excerptText = computed(() => {
 }
 
 .blog-card-excerpt {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.55;
   margin: 0 0 1rem;
@@ -154,7 +154,7 @@ const excerptText = computed(() => {
 }
 
 .blog-card-read {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   display: inline-flex;
@@ -169,7 +169,7 @@ const excerptText = computed(() => {
 }
 
 .blog-card-read i {
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   line-height: 1;
 }
 </style>

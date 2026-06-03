@@ -36,7 +36,7 @@ const inputId = computed(() => props.inputId || 'input-' + Math.random().toStrin
 .ui-input {
   width: 100%;
   padding: 0.625rem 0.75rem;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   border: 1px solid #d1d5db;
   border-radius: 6px;
   background: #fff;

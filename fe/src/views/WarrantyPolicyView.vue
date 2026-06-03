@@ -31,7 +31,11 @@
             class="warranty-feature"
             :class="{ 'warranty-feature--bordered': index > 0 }"
           >
-            <i :class="feature.icon" class="warranty-feature-icon" aria-hidden="true" />
+            <i
+              :class="feature.icon"
+              class="warranty-feature-icon"
+              aria-hidden="true"
+            />
             <div>
               <h4 class="warranty-feature-title">{{ feature.title }}</h4>
               <p class="warranty-feature-desc">{{ feature.description }}</p>
@@ -64,7 +68,9 @@
               <h3 class="warranty-card-title">{{ card.title }}</h3>
             </div>
 
-            <p v-if="card.intro" class="warranty-card-intro">{{ card.intro }}</p>
+            <p v-if="card.intro" class="warranty-card-intro">
+              {{ card.intro }}
+            </p>
 
             <ul v-if="card.items?.length" class="warranty-card-list">
               <li v-for="(item, i) in card.items" :key="i">
@@ -81,7 +87,11 @@
                 :key="step.title"
                 class="warranty-step"
               >
-                <i :class="step.icon" class="warranty-step-icon" aria-hidden="true" />
+                <i
+                  :class="step.icon"
+                  class="warranty-step-icon"
+                  aria-hidden="true"
+                />
                 <p>
                   <strong>{{ step.title }}</strong> {{ step.text }}
                 </p>
@@ -151,32 +161,26 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { BRAND_NAME } from '@/constants/brand'
+import { RouterLink } from "vue-router";
+import { BRAND_NAME } from "@/constants/brand";
 import {
   WARRANTY_HERO_FEATURES,
   WARRANTY_HERO_IMAGE,
   WARRANTY_TERM_CARDS,
-} from '@/constants/warranty-policy'
-import { useContactInfo } from '@/composables/common/useContactInfo'
+} from "@/constants/warranty-policy";
+import { useContactInfo } from "@/composables/common/useContactInfo";
 
-const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useContactInfo()
+const {
+  phoneDisplay,
+  phoneTel,
+  email,
+  hoursShort: CONTACT_HOURS_SHORT,
+} = useContactInfo();
 </script>
 
 <style scoped>
 .warranty-page {
   background: #faf9f6;
-}
-
-.eyebrow {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-  font-family: var(--font-sans);
 }
 
 /* Hero */
@@ -208,18 +212,17 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 .warranty-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
-  line-height: 1.15;
+  font-size: var(--fs-page-title);
+  line-height: var(--lh-h1);
   color: var(--color-heading);
   margin-bottom: 1rem;
   font-weight: 600;
 }
 
 .warranty-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-lg);
   color: var(--color-text-muted);
-  line-height: 1.7;
-  max-width: 20rem;
+  line-height: var(--lh-body);
   margin: 0;
 }
 
@@ -288,28 +291,28 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 .warranty-feature-icon {
   color: var(--color-primary);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin-top: 0.125rem;
   flex-shrink: 0;
 }
 
 .warranty-feature-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.25rem;
 }
 
 .warranty-feature-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
-  line-height: 1.5;
+  line-height: var(--lh-body);
   margin: 0;
 }
 
 /* Terms */
 .warranty-terms {
-  padding-top: 0;
+  padding-top: 2rem;
 }
 
 .warranty-terms-head {
@@ -319,14 +322,16 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 .warranty-terms-title {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
+  line-height: var(--lh-h2);
   color: var(--color-heading);
   margin: 0 0 0.5rem;
   font-weight: 600;
 }
 
 .warranty-terms-sub {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
   color: var(--color-text-muted);
   margin: 0;
 }
@@ -345,7 +350,7 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 @media (min-width: 1024px) {
   .warranty-cards {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -373,7 +378,7 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 .warranty-card-num {
   background: #f5f2eb;
   color: var(--color-primary-dark);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.25rem 0.5rem;
   border-radius: 2px;
@@ -381,23 +386,24 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 }
 
 .warranty-card-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-card-title);
+  line-height: var(--lh-h3);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0;
 }
 
 .warranty-card-intro {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text-muted);
-  line-height: 1.65;
+  line-height: var(--lh-body);
   margin: 0 0 0.75rem;
 }
 
 .warranty-card-list {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text);
-  line-height: 1.55;
+  line-height: var(--lh-body);
   margin: 0 0 1rem;
   padding-left: 1rem;
   list-style: disc;
@@ -422,9 +428,9 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
   display: flex;
   align-items: flex-start;
   gap: 0.625rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text);
-  line-height: 1.55;
+  line-height: var(--lh-body);
 }
 
 .warranty-step-icon {
@@ -439,9 +445,9 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 }
 
 .warranty-contact-lines {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text);
-  line-height: 1.6;
+  line-height: var(--lh-body);
   margin-bottom: 1rem;
 }
 
@@ -480,11 +486,11 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 .warranty-card-note {
   background: #fcfbfa;
   border: 1px solid var(--color-border-light);
-  padding: 0.625rem;
+  padding: 0.75rem;
   border-radius: 2px;
-  font-size: 0.625rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
-  line-height: 1.55;
+  line-height: var(--lh-body);
   margin-top: auto;
 }
 
@@ -495,7 +501,7 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 /* CTA */
 .warranty-cta {
-  padding-top: 0;
+  padding-top: 2.5rem;
   padding-bottom: 4rem;
 }
 
@@ -535,20 +541,21 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 
 .warranty-cta-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-card-title);
+  line-height: var(--lh-h3);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.25rem;
 }
 
 .warranty-cta-text {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
-  line-height: 1.55;
+  line-height: var(--lh-body);
   margin: 0;
   max-width: 36rem;
 }
@@ -560,7 +567,7 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
   gap: 0.5rem;
   background: var(--color-primary-dark);
   color: #fff;
-  font-size: 0.75rem;
+  font-size: var(--fs-button);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -578,6 +585,6 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 }
 
 .warranty-cta-btn i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 </style>

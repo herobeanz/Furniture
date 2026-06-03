@@ -93,7 +93,7 @@ function valueIconClass(icon: string): string {
 
 .hero-eyebrow {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -103,7 +103,7 @@ function valueIconClass(icon: string): string {
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: var(--fs-hero-title);
   line-height: 1.15;
   color: #111827;
   margin-bottom: 1rem;
@@ -112,10 +112,9 @@ function valueIconClass(icon: string): string {
 }
 
 .hero-text {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin-bottom: 2rem;
 }
 
@@ -130,7 +129,7 @@ function valueIconClass(icon: string): string {
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -230,14 +229,14 @@ function valueIconClass(icon: string): string {
 }
 
 .value-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   margin: 0 0 0.125rem;
 }
 
 .value-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin: 0;
 }

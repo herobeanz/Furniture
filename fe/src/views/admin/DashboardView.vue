@@ -263,14 +263,14 @@ function formatProductDate(iso: string): string {
 .page-intro h1 {
   margin: 0;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
 }
 
 .page-intro p {
   margin: 0.125rem 0 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 
@@ -278,7 +278,7 @@ function formatProductDate(iso: string): string {
   margin-top: 1.5rem;
   padding: 2rem;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
   background: #fff;
   border: 1px solid #f3f4f6;
@@ -321,13 +321,13 @@ function formatProductDate(iso: string): string {
 }
 
 .stat-label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #9ca3af;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   font-weight: 700;
   color: #111827;
   line-height: 1.2;
@@ -342,7 +342,7 @@ function formatProductDate(iso: string): string {
 }
 
 .trend-badge {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
@@ -364,7 +364,7 @@ function formatProductDate(iso: string): string {
 }
 
 .trend-compare {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -443,7 +443,7 @@ function formatProductDate(iso: string): string {
 .panel-head h3,
 .panel-title-only {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -455,7 +455,7 @@ function formatProductDate(iso: string): string {
 }
 
 .panel-link {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #92400e;
   border: 1px solid #e5e7eb;
@@ -470,7 +470,7 @@ function formatProductDate(iso: string): string {
 
 .chart-select-wrap {
   position: relative;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .chart-select {
@@ -491,7 +491,7 @@ function formatProductDate(iso: string): string {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -509,7 +509,7 @@ function formatProductDate(iso: string): string {
   gap: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid #f9fafb;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .inquiry-item:first-child {
@@ -519,14 +519,14 @@ function formatProductDate(iso: string): string {
 
 .inquiry-item h4 {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
 }
 
 .inquiry-item p {
   margin: 0.125rem 0 0;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -544,7 +544,7 @@ function formatProductDate(iso: string): string {
 }
 
 .status-pill {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
@@ -572,7 +572,7 @@ function formatProductDate(iso: string): string {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .data-table th {
@@ -609,7 +609,7 @@ function formatProductDate(iso: string): string {
   justify-content: center;
   flex-shrink: 0;
   color: #9ca3af;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .product-thumb img {
@@ -625,11 +625,11 @@ function formatProductDate(iso: string): string {
 
 .date-cell {
   color: #9ca3af;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .status-tag {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
 }
@@ -647,6 +647,6 @@ function formatProductDate(iso: string): string {
 .empty-inline,
 .empty-cell {
   color: #9ca3af;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 </style>

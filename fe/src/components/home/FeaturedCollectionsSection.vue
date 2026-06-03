@@ -128,7 +128,7 @@ const tiles = computed<FeaturedTile[]>(() => {
 }
 
 .section-head .section-desc {
-  max-width: 28rem;
+  max-width: none;
   margin-left: auto;
   margin-right: auto;
 }
@@ -199,19 +199,19 @@ const tiles = computed<FeaturedTile[]>(() => {
 }
 
 .bento-label {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 0.25rem;
 }
 
 .bento-heading {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
 .bento-heading--sm {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin-bottom: 0.5rem;
 }
 
@@ -221,7 +221,7 @@ const tiles = computed<FeaturedTile[]>(() => {
   gap: 0.5rem;
   background: #fff;
   color: var(--color-text);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 9999px;

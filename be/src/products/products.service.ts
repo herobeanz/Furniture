@@ -80,13 +80,17 @@ export class ProductsService {
     search?: string;
     sort?: string;
     order?: 'asc' | 'desc';
+    featured?: boolean;
   }) {
     const page = params.page ?? 1;
     const limit = Math.min(params.limit ?? 20, 100);
-    const orderBy = (params.sort ?? 'createdAt') as string;
-    const sortOrder = params.order ?? 'desc';
+    const orderBy = (params.sort ?? (params.featured ? 'sort_order' : 'createdAt')) as string;
+    const sortOrder = params.order ?? (params.featured ? 'asc' : 'desc');
 
     const where: Record<string, unknown> = { status: 'available', is_active: true };
+    if (params.featured) {
+      where.is_featured = true;
+    }
     if (params.category) {
       // category có thể là category slug
       const category = await this.prisma.category.findFirst({

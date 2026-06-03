@@ -3,7 +3,13 @@
     <aside class="admin-sidebar">
       <div>
         <div class="sidebar-brand">
-          <span class="brand-mark">{{ SITE.brand.logoMark }}</span>
+          <img
+            :src="SITE.brand.logoMarkSrc"
+            :alt="SITE.brand.name"
+            class="brand-mark"
+            width="32"
+            height="32"
+          />
           <div class="brand-text">
             <span class="brand-line-sm">{{ SITE.brand.logoLineSm }}</span>
             <span class="brand-line-lg">{{ SITE.brand.logoLineLg }}</span>
@@ -169,13 +175,11 @@ onUnmounted(() => {
 }
 
 .brand-mark {
-  background: #92400e;
-  color: #fff;
-  font-weight: 700;
-  padding: 0.375rem;
-  font-size: 1.125rem;
-  border-radius: 0.125rem;
-  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .brand-text {
@@ -185,7 +189,7 @@ onUnmounted(() => {
 .brand-line-sm {
   display: block;
   font-weight: 700;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   letter-spacing: 0.12em;
   color: #78350f;
 }
@@ -193,7 +197,7 @@ onUnmounted(() => {
 .brand-line-lg {
   display: block;
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #92400e;
 }
 
@@ -211,14 +215,14 @@ onUnmounted(() => {
   padding: 0.75rem 1rem;
   border-radius: 0.375rem;
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #4b5563;
   transition: background 0.2s, color 0.2s;
 }
 
 .nav-item i {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   width: 1rem;
   text-align: center;
 }
@@ -237,7 +241,7 @@ onUnmounted(() => {
   padding: 1rem;
   border-top: 1px solid #f9fafb;
   text-align: center;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -281,7 +285,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
@@ -292,19 +296,19 @@ onUnmounted(() => {
 
 .user-title {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
 }
 
 .user-role {
   margin: 0;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
 .user-role i {
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
   margin-left: 0.125rem;
 }
 
@@ -319,7 +323,7 @@ onUnmounted(() => {
   border-radius: 0.25rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #4b5563;
   z-index: 40;

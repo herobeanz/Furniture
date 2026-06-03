@@ -25,7 +25,7 @@ defineProps<Props>()
 
 <style scoped>
 .breadcrumb {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin-bottom: 1rem;
 }
@@ -38,7 +38,7 @@ defineProps<Props>()
 
 @media (max-width: 768px) {
   .breadcrumb {
-    font-size: 0.8rem;
+    font-size: var(--fs-body-sm);
     margin-bottom: 0.875rem;
   }
 
@@ -49,7 +49,7 @@ defineProps<Props>()
 
 @media (max-width: 480px) {
   .breadcrumb {
-    font-size: 0.75rem;
+    font-size: var(--fs-body-sm);
     margin-bottom: 0.75rem;
     overflow-x: auto;
     white-space: nowrap;

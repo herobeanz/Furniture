@@ -160,7 +160,7 @@ function scrollThumbsNext() {
   align-items: center;
   justify-content: center;
   color: var(--color-text-light);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   background: var(--color-bg-alt);
 }
 
@@ -172,7 +172,7 @@ function scrollThumbsNext() {
   border-radius: 0.25rem;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -208,7 +208,7 @@ function scrollThumbsNext() {
 }
 
 .gallery-nav i {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .gallery-thumbs-row {
@@ -254,7 +254,7 @@ function scrollThumbsNext() {
 }
 
 .thumbs-nav i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .thumb {

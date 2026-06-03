@@ -106,8 +106,8 @@
             <span class="product-consult-hint">Chat ngay</span>
           </a>
           <a
-            v-if="facebookUrl"
-            :href="facebookUrl"
+            v-if="messengerUrl"
+            :href="messengerUrl"
             target="_blank"
             rel="noopener noreferrer"
             class="product-consult-link"
@@ -156,7 +156,7 @@ const {
   setSelectedImage,
 } = useProductData();
 
-const { phoneDisplay, phoneTel: telHref, facebookUrl, zaloUrl } = useContactInfo();
+const { phoneDisplay, phoneTel: telHref, messengerUrl, zaloUrl } = useContactInfo();
 
 const hasRichDescription = computed(
   () => product.value != null && !isRichTextEmpty(product.value.description),
@@ -188,7 +188,7 @@ function galleryNext() {
   align-items: center;
   gap: 0.5rem;
   padding: 1.5rem 0 0.5rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
 }
 
@@ -203,7 +203,7 @@ function galleryNext() {
 }
 
 .product-breadcrumb-sep {
-  font-size: 0.4375rem;
+  font-size: var(--fs-caption);
   opacity: 0.7;
 }
 
@@ -240,7 +240,7 @@ function galleryNext() {
 
 .product-description-title {
   font-family: var(--font-serif);
-  font-size: 1.375rem;
+  font-size: var(--fs-card-title);
   font-weight: 600;
   color: #111827;
   margin: 0 0 1.25rem;
@@ -287,20 +287,20 @@ function galleryNext() {
 }
 
 .product-trust-icon {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .product-trust-title {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   margin: 0 0 0.125rem;
 }
 
 .product-trust-desc {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   margin: 0;
 }
@@ -340,20 +340,20 @@ function galleryNext() {
 }
 
 .product-consult-icon {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .product-consult-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   margin: 0 0 0.25rem;
 }
 
 .product-consult-text {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0;
   max-width: 22rem;
@@ -377,7 +377,7 @@ function galleryNext() {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #374151;
   text-decoration: none;
@@ -391,12 +391,12 @@ function galleryNext() {
 .product-consult-hint {
   font-weight: 400;
   color: var(--color-text-light);
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .product-consult-phone {
   font-weight: 700;
   color: #111827;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 </style>

@@ -64,7 +64,7 @@ const hasDetails = computed(
   grid-template-columns: minmax(7rem, 1fr) 3fr;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .product-spec-label {
@@ -76,7 +76,7 @@ const hasDetails = computed(
 }
 
 .product-spec-label i {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-primary);
   width: 0.875rem;
   text-align: center;

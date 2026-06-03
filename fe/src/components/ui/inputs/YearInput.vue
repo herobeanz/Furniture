@@ -53,10 +53,10 @@ function onBlur() {
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-heading);
 }
 .field-input:focus { outline: none; border-color: var(--color-primary); }
 .field-input--error { border-color: #dc2626; }
-.field-error { margin: 0; font-size: 0.6875rem; color: #dc2626; }
+.field-error { margin: 0; font-size: var(--fs-body-sm); color: #dc2626; }
 </style>

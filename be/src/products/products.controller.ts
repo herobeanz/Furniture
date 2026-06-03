@@ -40,6 +40,7 @@ export class ProductsController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'sort', required: false })
   @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({ name: 'featured', required: false, type: Boolean })
   getProducts(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -47,6 +48,7 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('sort') sort?: string,
     @Query('order') order?: 'asc' | 'desc',
+    @Query('featured') featured?: string,
   ) {
     return this.productsService.findAll({
       page: page ? parseInt(page, 10) : undefined,
@@ -55,6 +57,7 @@ export class ProductsController {
       search,
       sort,
       order,
+      featured: featured === 'true',
     });
   }
 

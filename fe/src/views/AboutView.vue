@@ -170,9 +170,7 @@ const primaryCollectionSlug = ref<string | null>(null);
 onMounted(async () => {
   try {
     const list = await collectionApi.getCollections();
-    const match =
-      list.find((c) => c.isActive) ??
-      list[0];
+    const match = list.find((c) => c.isActive) ?? list[0];
     primaryCollectionSlug.value = match?.slug ?? null;
   } catch {
     primaryCollectionSlug.value = null;
@@ -183,17 +181,6 @@ onMounted(async () => {
 <style scoped>
 .about-page {
   background: #faf9f6;
-}
-
-.eyebrow {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 0.5rem;
-  font-family: var(--font-sans);
 }
 
 /* Hero */
@@ -222,7 +209,7 @@ onMounted(async () => {
 
 .about-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: var(--fs-hero-title);
   line-height: 1.15;
   color: var(--color-heading);
   margin-bottom: 1rem;
@@ -230,10 +217,9 @@ onMounted(async () => {
 }
 
 .about-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin-bottom: 2rem;
 }
 
@@ -242,7 +228,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -295,7 +281,7 @@ onMounted(async () => {
 
 .about-story-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.5rem, 3vw, 1.875rem);
+  font-size: var(--fs-section-title);
   color: var(--color-heading);
   margin-bottom: 1.25rem;
   font-weight: 600;
@@ -303,7 +289,7 @@ onMounted(async () => {
 }
 
 .about-story-body {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
   margin-bottom: 2rem;
@@ -344,13 +330,13 @@ onMounted(async () => {
 }
 
 .about-pillar-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
 }
 
 .about-pillar-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   line-height: 1.6;
   margin: 0;
@@ -405,7 +391,7 @@ onMounted(async () => {
 }
 
 .value-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.5rem;
@@ -413,7 +399,7 @@ onMounted(async () => {
 }
 
 .value-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   line-height: 1.6;
   margin: 0;
@@ -447,7 +433,7 @@ onMounted(async () => {
   z-index: 1;
   background: var(--color-primary);
   color: #fff;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
@@ -465,7 +451,7 @@ onMounted(async () => {
 }
 
 .process-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.25rem;
@@ -473,7 +459,7 @@ onMounted(async () => {
 }
 
 .process-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   line-height: 1.45;
   margin: 0;
@@ -482,7 +468,7 @@ onMounted(async () => {
 /* Stats */
 .stats-heading {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -528,14 +514,14 @@ onMounted(async () => {
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   font-weight: 700;
   color: var(--color-heading);
   font-family: var(--font-sans);
 }
 
 .stat-label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin-top: 0.125rem;
 }

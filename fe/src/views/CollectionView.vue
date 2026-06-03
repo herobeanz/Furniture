@@ -75,7 +75,7 @@ const heroDescription = computed(() =>
 }
 
 .collection-hero-title {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: var(--fs-page-title);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.75rem;
@@ -85,10 +85,9 @@ const heroDescription = computed(() =>
 
 .collection-hero-text {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   line-height: 1.6;
   color: var(--color-text-muted);
-  max-width: 36rem;
 }
 
 .collection-hero-image {

@@ -269,7 +269,7 @@ onMounted(() => {
 }
 
 .page-header h1 {
-  font-size: 1.75rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #1e293b;
   margin: 0;
@@ -302,7 +302,7 @@ onMounted(() => {
 }
 
 .section-title {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 600;
   margin: 0 0 1.5rem;
   color: #1e293b;
@@ -323,7 +323,7 @@ onMounted(() => {
 .btn {
   padding: 0.625rem 1.25rem;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -361,7 +361,7 @@ onMounted(() => {
 
 .form-hint {
   margin: 0.25rem 0 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
@@ -381,13 +381,13 @@ onMounted(() => {
 }
 
 .info-label {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
   font-weight: 500;
 }
 
 .info-value {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #1e293b;
   font-weight: 600;
 }

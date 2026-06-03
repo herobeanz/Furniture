@@ -260,7 +260,7 @@ function onDrop(e: DragEvent) {
 }
 
 .upload-icon {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   color: #9ca3af;
   margin-bottom: 0.375rem;
 }
@@ -268,7 +268,7 @@ function onDrop(e: DragEvent) {
 .upload-title {
   font-weight: 700;
   color: #374151;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .upload-btn {
@@ -276,7 +276,7 @@ function onDrop(e: DragEvent) {
   background: #fff;
   border: 1px solid var(--color-border);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   padding: 0.25rem 0.75rem;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -284,19 +284,19 @@ function onDrop(e: DragEvent) {
 
 .upload-hint {
   margin-top: 0.375rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
 .upload-notice {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #b45309;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
 .upload-error {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #dc2626;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -334,14 +334,14 @@ function onDrop(e: DragEvent) {
   background: rgba(17, 24, 39, 0.65);
   color: #fff;
   cursor: pointer;
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
 }
 
 .primary-badge {
   position: absolute;
   left: 0.25rem;
   bottom: 0.25rem;
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   background: var(--color-primary);
   color: #fff;
@@ -364,7 +364,7 @@ function onDrop(e: DragEvent) {
   right: 0.25rem;
   width: 1rem;
   height: 1rem;
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
 }
 
 .upload-zone--compact {
@@ -375,11 +375,11 @@ function onDrop(e: DragEvent) {
 
 .upload-zone--compact .upload-icon {
   margin-bottom: 0.25rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .upload-subtitle {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 500;
   color: #9ca3af;
   margin-top: 0.125rem;
@@ -388,7 +388,7 @@ function onDrop(e: DragEvent) {
 .upload-hint--below {
   margin-top: 0.375rem;
   margin-bottom: 0;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   font-weight: 400;
 }

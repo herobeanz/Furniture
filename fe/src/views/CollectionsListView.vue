@@ -229,7 +229,7 @@ watch(totalPages, (total) => {
 
 .collections-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(2.25rem, 5vw, 3rem);
+  font-size: var(--fs-hero-title);
   letter-spacing: 0.04em;
   color: var(--color-primary);
   margin: 0 0 1rem;
@@ -238,10 +238,9 @@ watch(totalPages, (total) => {
 }
 
 .collections-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin: 0;
 }
 
@@ -290,7 +289,7 @@ watch(totalPages, (total) => {
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   padding: 0.5rem 2rem 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   font-family: inherit;
 }
@@ -305,13 +304,13 @@ watch(totalPages, (total) => {
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   pointer-events: none;
 }
 
 .collections-result-count {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 1rem 0 0;
 }
@@ -344,7 +343,7 @@ watch(totalPages, (total) => {
   align-items: center;
   gap: 0.375rem;
   padding: 2.5rem 0 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -358,7 +357,7 @@ watch(totalPages, (total) => {
   border: 1px solid var(--color-border);
   background: #fff;
   color: var(--color-text);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   cursor: pointer;
   transition: background var(--transition-fast);
@@ -382,7 +381,7 @@ watch(totalPages, (total) => {
 }
 
 .collections-page-btn i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .collections-page-ellipsis {

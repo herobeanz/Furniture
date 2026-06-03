@@ -96,22 +96,22 @@ export const ABOUT_PROCESS_STEPS = [
 export const ABOUT_STATS = [
   {
     icon: "fa-regular fa-calendar-check",
-    value: "10+",
+    value: "5+",
     label: "Năm kinh nghiệm trong ngành nội thất gỗ",
   },
   {
     icon: "fa-solid fa-users",
-    value: "5.000+",
+    value: "1000+",
     label: "Khách hàng đã tin tưởng lựa chọn",
   },
   {
     icon: "fa-solid fa-couch",
-    value: "500+",
+    value: "50+",
     label: "Sản phẩm đa dạng và chất lượng",
   },
   {
     icon: "fa-solid fa-map-location-dot",
-    value: "63",
+    value: "20+",
     label: "Tỉnh thành đã giao hàng toàn quốc",
   },
 ] as const;

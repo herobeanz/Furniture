@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsBoolean, MaxLength } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -22,6 +22,10 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsInt()
   orderIndex?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @IsOptional()
   @IsString()

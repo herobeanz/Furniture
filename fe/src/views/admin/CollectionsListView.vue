@@ -310,14 +310,14 @@ onMounted(fetchList)
 .page-intro h1 {
   margin: 0;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
 }
 
 .page-intro p {
   margin: 0.375rem 0 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 
@@ -376,7 +376,7 @@ onMounted(fetchList)
   border: 1px solid #e5e7eb;
   border-radius: 0.25rem;
   padding: 0.375rem 2rem 0.375rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #4b5563;
 }
 
@@ -390,7 +390,7 @@ onMounted(fetchList)
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -413,7 +413,7 @@ onMounted(fetchList)
   border: 1px solid #e5e7eb;
   border-radius: 0.25rem;
   padding: 0.375rem 2rem 0.375rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #4b5563;
   cursor: pointer;
 }
@@ -428,7 +428,7 @@ onMounted(fetchList)
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -440,7 +440,7 @@ onMounted(fetchList)
   align-self: flex-end;
   background: #5c3c24;
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -461,12 +461,12 @@ onMounted(fetchList)
 }
 
 .btn-primary i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .reorder-hint {
   margin: 0 0 0.75rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #78350f;
   display: flex;
   align-items: center;
@@ -480,7 +480,7 @@ onMounted(fetchList)
 .state-box {
   padding: 2rem 1rem;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
@@ -495,14 +495,14 @@ onMounted(fetchList)
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .data-table thead tr {
   border-bottom: 1px solid #f3f4f6;
   background: rgba(249, 250, 251, 0.4);
   color: #9ca3af;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
@@ -586,7 +586,7 @@ onMounted(fetchList)
 }
 
 .thumb-placeholder {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #d1d5db;
 }
 
@@ -597,7 +597,7 @@ onMounted(fetchList)
 }
 
 .collection-sub {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 400;
   color: #9ca3af;
   margin-top: 0.125rem;
@@ -610,7 +610,7 @@ onMounted(fetchList)
 
 .slug-text {
   font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #6b7280;
   background: #f9fafb;
@@ -629,7 +629,7 @@ onMounted(fetchList)
 }
 
 .status-tag {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
@@ -681,7 +681,7 @@ onMounted(fetchList)
 .table-footer {
   padding-top: 1rem;
   margin-top: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
   font-weight: 500;
 }

@@ -94,14 +94,14 @@ const embedded = computed(() => route.name !== 'not-found')
 .not-found-title {
   margin: 0 0 0.75rem;
   font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
-  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  font-size: var(--fs-subtitle);
   font-weight: 500;
   color: var(--color-heading);
 }
 
 .not-found-desc {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.65;
   color: var(--color-text-muted);
   padding: 0 1rem;
@@ -111,7 +111,7 @@ const embedded = computed(() => route.name !== 'not-found')
   display: inline-block;
   margin-top: 1.5rem;
   padding: 0.625rem 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -167,7 +167,7 @@ const embedded = computed(() => route.name !== 'not-found')
 
 .not-found-suggestions-title {
   margin: 0 0 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -208,7 +208,7 @@ const embedded = computed(() => route.name !== 'not-found')
 }
 
 .not-found-suggestion-icon {
-  font-size: 1.125rem;
+  font-size: var(--fs-body-lg);
   color: var(--color-text-muted);
   transition: color 0.2s ease;
 }
@@ -219,7 +219,7 @@ const embedded = computed(() => route.name !== 'not-found')
 }
 
 .not-found-suggestion-label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--color-text);
   transition: color 0.2s ease;
@@ -231,7 +231,7 @@ const embedded = computed(() => route.name !== 'not-found')
 
 .not-found-suggestion-arrow {
   margin-top: 0.125rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   transition: color 0.2s ease;
 }

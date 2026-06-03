@@ -4,7 +4,7 @@
     <section class="blog-hero">
       <div class="container blog-hero-inner">
         <div class="blog-hero-copy">
-          <span class="eyebrow">Blog</span>
+          <span class="eyebrow">Cẩm nang</span>
           <h1 class="blog-hero-title">Cảm hứng<br />từ không gian sống</h1>
           <p class="blog-hero-text">
             Những bài viết chia sẻ kiến thức, xu hướng nội thất và cảm hứng giúp
@@ -249,17 +249,6 @@ watch(totalPages, (total) => {
   background: #faf9f6;
 }
 
-.eyebrow {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-  font-family: var(--font-sans);
-}
-
 /* Hero */
 .blog-hero {
   background: #f5f2eb;
@@ -288,7 +277,7 @@ watch(totalPages, (total) => {
 
 .blog-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   line-height: 1.15;
   color: var(--color-heading);
   margin-bottom: 1rem;
@@ -296,10 +285,9 @@ watch(totalPages, (total) => {
 }
 
 .blog-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin: 0;
 }
 
@@ -345,7 +333,7 @@ watch(totalPages, (total) => {
 }
 
 .blog-filter-btn {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 0.125rem;
@@ -389,7 +377,7 @@ watch(totalPages, (total) => {
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   padding: 0.5rem 2.25rem 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-family: inherit;
   color: var(--color-heading);
 }
@@ -435,7 +423,7 @@ watch(totalPages, (total) => {
   align-items: center;
   gap: 0.375rem;
   padding-bottom: 4rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -449,7 +437,7 @@ watch(totalPages, (total) => {
   border: 1px solid var(--color-border);
   background: #fff;
   color: var(--color-text);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   cursor: pointer;
   transition:

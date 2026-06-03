@@ -215,7 +215,7 @@ const paginationItems = computed((): PaginationItem[] => {
 .category-hero-title {
   margin: 0 0 0.75rem;
   font-family: var(--font-serif, Georgia, serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   font-weight: 600;
   color: #111827;
   letter-spacing: 0.04em;
@@ -223,8 +223,7 @@ const paginationItems = computed((): PaginationItem[] => {
 
 .category-hero-text {
   margin: 0 0 1rem;
-  max-width: 20rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.65;
   color: #4b5563;
 }
@@ -234,13 +233,13 @@ const paginationItems = computed((): PaginationItem[] => {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
 .category-hero-count-icon {
   color: var(--color-primary);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .category-hero-visual {
@@ -291,7 +290,7 @@ const paginationItems = computed((): PaginationItem[] => {
   align-items: center;
   gap: 0.375rem;
   padding: 3rem 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #4b5563;
 }
 

@@ -1,27 +1,20 @@
-import { ref, computed, watch } from 'vue'
-import { categoryApi, type Category } from '../../services/api/categories'
+import { ref } from 'vue'
 import { productApi, type Product } from '../../services/api/products'
 import { blogApi, type BlogPost } from '../../services/api/blog'
 import { collectionApi, type Collection } from '../../services/api/collections'
+import { HOME_FEATURED_PRODUCTS_LIMIT } from '../../constants/home'
 import { logger } from '../../utils/logger'
-import { useRouterLoadingStore } from '@/stores/routerLoading'
-
 /**
  * Composable for home page data fetching and management
  */
 export function useHomeData() {
-  const routerLoading = useRouterLoadingStore()
-  const categories = ref<Category[]>([])
   const blogPosts = ref<BlogPost[]>([])
   const featuredCollections = ref<Collection[]>([])
   const collectionsLoading = ref(true)
   const loading = ref(true)
   const loadingBlogs = ref(false)
-  const tabProducts = ref<Product[]>([])
-  const tabProductsLoading = ref(false)
-  const activeTab = ref('')
-
-  const rootCategories = computed(() => categories.value)
+  const topProducts = ref<Product[]>([])
+  const topProductsLoading = ref(false)
 
   async function loadFeaturedCollections() {
     collectionsLoading.value = true
@@ -35,30 +28,21 @@ export function useHomeData() {
     }
   }
 
-  async function loadTabProducts() {
-    if (!activeTab.value) return
-    tabProductsLoading.value = true
-    routerLoading.start('Đang tải sản phẩm...')
+  async function loadTopProducts() {
+    topProductsLoading.value = true
     try {
       const res = await productApi.getProducts({
-        category: activeTab.value,
-        limit: 8,
+        featured: true,
+        limit: HOME_FEATURED_PRODUCTS_LIMIT,
+        sort: 'sort_order',
+        order: 'asc',
       })
-      tabProducts.value = res.data || []
-    } catch {
-      tabProducts.value = []
-    } finally {
-      tabProductsLoading.value = false
-      routerLoading.stop()
-    }
-  }
-
-  async function loadCategories() {
-    try {
-      categories.value = await categoryApi.getCategories()
+      topProducts.value = res.data || []
     } catch (e) {
-      logger.error('Failed to load categories:', e)
-      categories.value = []
+      logger.error('Failed to load featured home products:', e)
+      topProducts.value = []
+    } finally {
+      topProductsLoading.value = false
     }
   }
 
@@ -77,14 +61,10 @@ export function useHomeData() {
   async function loadInitialData() {
     try {
       await Promise.all([
-        loadCategories(),
+        loadTopProducts(),
         loadBlogPosts(),
         loadFeaturedCollections(),
       ])
-
-      if (categories.value.length && !activeTab.value) {
-        activeTab.value = categories.value[0]?.slug ?? ''
-      }
     } catch (e) {
       logger.error('Failed to load initial data:', e)
     } finally {
@@ -92,34 +72,17 @@ export function useHomeData() {
     }
   }
 
-  watch(activeTab, () => {
-    loadTabProducts()
-  })
-
-  watch(
-    () => categories.value.length,
-    (len) => {
-      if (len && !activeTab.value) {
-        activeTab.value = categories.value[0]?.slug ?? ''
-      }
-    }
-  )
-
   return {
-    categories,
     blogPosts,
     featuredCollections,
     collectionsLoading,
     loading,
     loadingBlogs,
-    tabProducts,
-    tabProductsLoading,
-    activeTab,
-    rootCategories,
+    topProducts,
+    topProductsLoading,
     loadInitialData,
     loadFeaturedCollections,
-    loadTabProducts,
-    loadCategories,
+    loadTopProducts,
     loadBlogPosts,
   }
 }

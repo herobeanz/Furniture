@@ -247,7 +247,7 @@ function onSortChange(e: Event) {
 .products-hero-title {
   margin: 0 0 1rem;
   font-family: var(--font-serif, Georgia, serif);
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   font-weight: 600;
   color: var(--color-heading);
   letter-spacing: 0.02em;
@@ -255,8 +255,7 @@ function onSortChange(e: Event) {
 
 .products-hero-text {
   margin: 0;
-  max-width: 20rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.6;
   color: var(--color-text-muted);
 }
@@ -305,7 +304,7 @@ function onSortChange(e: Event) {
   padding: 0.75rem 0.5rem;
   border: none;
   border-radius: 0.375rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   font-family: inherit;
   color: var(--color-text-muted);
@@ -329,7 +328,7 @@ function onSortChange(e: Event) {
 }
 
 .products-strip-item i {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .products-toolbar-section {
@@ -348,7 +347,7 @@ function onSortChange(e: Event) {
 
 .products-result-count {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
 }
 
@@ -362,7 +361,7 @@ function onSortChange(e: Event) {
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   background: #fff;
   appearance: none;
@@ -378,7 +377,7 @@ function onSortChange(e: Event) {
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   pointer-events: none;
 }
@@ -404,7 +403,7 @@ function onSortChange(e: Event) {
 }
 
 .products-loading-spinner {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   color: var(--color-primary);
 }
 
@@ -414,7 +413,7 @@ function onSortChange(e: Event) {
   align-items: center;
   gap: 0.375rem;
   margin-top: 3rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .products-page-btn {
@@ -457,7 +456,7 @@ function onSortChange(e: Event) {
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   background: #fff;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   cursor: pointer;
 }
 

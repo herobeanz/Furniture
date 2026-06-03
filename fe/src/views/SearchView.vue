@@ -132,14 +132,14 @@ onMounted(() => {
 }
 
 .search-title {
-  font-size: 1.75rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--color-text);
 }
 
 .search-query {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--color-text-muted);
 }
 
@@ -158,11 +158,11 @@ onMounted(() => {
   }
 
   .search-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-section-title);
   }
 
   .search-query {
-    font-size: 0.9rem;
+    font-size: var(--fs-body-sm);
     line-height: 1.5;
   }
 }
@@ -173,11 +173,11 @@ onMounted(() => {
   }
 
   .search-title {
-    font-size: 1.25rem;
+    font-size: var(--fs-card-title);
   }
 
   .search-query {
-    font-size: 0.85rem;
+    font-size: var(--fs-body-sm);
   }
 }
 </style>

@@ -387,7 +387,7 @@ async function save() {
 
 .page-title {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
   line-height: 1.3;
@@ -399,7 +399,7 @@ async function save() {
   align-items: center;
   gap: 0.35rem;
   margin-top: 0.125rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #9ca3af;
 }
@@ -415,7 +415,7 @@ async function save() {
 }
 
 .page-breadcrumb i {
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
 }
 
 .page-breadcrumb span {
@@ -425,7 +425,7 @@ async function save() {
 .form-loading {
   padding: 3rem;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: #6b7280;
 }
@@ -436,7 +436,7 @@ async function save() {
   border-radius: 0.25rem;
   box-shadow: var(--shadow-sm);
   padding: 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 @media (min-width: 640px) {
@@ -446,7 +446,7 @@ async function save() {
 }
 
 .section-heading {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -521,7 +521,7 @@ async function save() {
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #1f2937;
   transition: border-color 0.15s;
@@ -538,7 +538,7 @@ async function save() {
 }
 
 .field-hint {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 400;
   color: #9ca3af;
   line-height: 1.4;
@@ -552,7 +552,7 @@ async function save() {
   position: absolute;
   right: 0.75rem;
   bottom: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -632,7 +632,7 @@ async function save() {
   min-width: 0;
   border: none;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #1f2937;
   padding: 0.375rem 0.25rem;
@@ -655,7 +655,7 @@ async function save() {
   flex-direction: column;
   border-left: 1px solid var(--color-border);
   background: #f9fafb;
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -692,7 +692,7 @@ async function save() {
 .btn-cancel,
 .btn-preview,
 .btn-save {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.5rem 1.25rem;
   border-radius: 0.25rem;

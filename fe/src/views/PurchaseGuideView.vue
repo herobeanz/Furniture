@@ -8,9 +8,9 @@
             Đặt mua dễ dàng<br />chỉ với 3 cách
           </h1>
           <p class="purchase-guide-hero-text">
-            {{ BRAND_NAME }} mang đến trải nghiệm mua sắm đơn giản, thuận tiện với
-            nhiều kênh đặt hàng nhanh chóng, giúp bạn sở hữu những sản phẩm nội thất
-            gỗ chất lượng dễ dàng hơn bao giờ hết.
+            {{ BRAND_NAME }} mang đến trải nghiệm mua sắm đơn giản, thuận tiện
+            với nhiều kênh đặt hàng nhanh chóng, giúp bạn sở hữu những sản phẩm
+            nội thất gỗ chất lượng dễ dàng hơn bao giờ hết.
           </p>
         </div>
         <div class="purchase-guide-hero-visual">
@@ -28,10 +28,12 @@
       <div class="container">
         <div class="purchase-guide-section-head">
           <span class="eyebrow">Các hình thức đặt hàng</span>
-          <h2 class="purchase-guide-section-title">Chọn cách phù hợp với bạn</h2>
+          <h2 class="purchase-guide-section-title">
+            Chọn cách phù hợp với bạn
+          </h2>
           <p class="purchase-guide-section-sub">
-            {{ BRAND_NAME }} hỗ trợ đặt hàng nhanh chóng qua các kênh bên dưới. Bạn
-            có thể chọn cách thuận tiện nhất cho mình.
+            {{ BRAND_NAME }} hỗ trợ đặt hàng nhanh chóng qua các kênh bên dưới.
+            Bạn có thể chọn cách thuận tiện nhất cho mình.
           </p>
         </div>
 
@@ -43,14 +45,20 @@
           >
             <div>
               <div class="purchase-guide-card-head">
-                <span class="purchase-guide-card-num">{{ channel.number }}</span>
+                <span class="purchase-guide-card-num">{{
+                  channel.number
+                }}</span>
                 <h3 class="purchase-guide-card-title">{{ channel.title }}</h3>
               </div>
               <p class="purchase-guide-card-intro">{{ channel.intro }}</p>
 
               <div class="purchase-guide-channel-body">
                 <i
-                  :class="[channel.icon, 'purchase-guide-channel-icon', `purchase-guide-channel-icon--${channel.iconTone}`]"
+                  :class="[
+                    channel.icon,
+                    'purchase-guide-channel-icon',
+                    `purchase-guide-channel-icon--${channel.iconTone}`,
+                  ]"
                   aria-hidden="true"
                 />
                 <ul class="purchase-guide-benefits">
@@ -73,8 +81,8 @@
               <i class="fa-regular fa-paper-plane" aria-hidden="true" />
             </a>
             <a
-              v-else-if="channel.cta.type === 'messenger' && facebookUrl"
-              :href="facebookUrl"
+              v-else-if="channel.cta.type === 'messenger' && messengerUrl"
+              :href="messengerUrl"
               target="_blank"
               rel="noopener noreferrer"
               class="purchase-guide-cta-btn purchase-guide-cta-btn--primary"
@@ -99,9 +107,12 @@
       <div class="container">
         <div class="purchase-guide-section-head">
           <span class="eyebrow">Quy trình đặt hàng</span>
-          <h2 class="purchase-guide-section-title">4 bước đơn giản để sở hữu sản phẩm</h2>
+          <h2 class="purchase-guide-section-title">
+            4 bước đơn giản để sở hữu sản phẩm
+          </h2>
           <p class="purchase-guide-section-sub">
-            Quy trình đặt hàng tại {{ BRAND_NAME }} đơn giản, minh bạch và nhanh chóng.
+            Quy trình đặt hàng tại {{ BRAND_NAME }} đơn giản, minh bạch và nhanh
+            chóng.
           </p>
         </div>
 
@@ -135,7 +146,11 @@
             class="purchase-guide-value"
             :class="{ 'purchase-guide-value--bordered': index > 0 }"
           >
-            <i :class="item.icon" class="purchase-guide-value-icon" aria-hidden="true" />
+            <i
+              :class="item.icon"
+              class="purchase-guide-value-icon"
+              aria-hidden="true"
+            />
             <div>
               <h4 class="purchase-guide-value-title">{{ item.title }}</h4>
               <p class="purchase-guide-value-desc">{{ item.description }}</p>
@@ -149,20 +164,29 @@
       <div class="container">
         <div class="purchase-guide-cta-banner">
           <div class="purchase-guide-cta-copy">
-            <i class="fa-regular fa-circle-question purchase-guide-cta-question" aria-hidden="true" />
+            <i
+              class="fa-regular fa-circle-question purchase-guide-cta-question"
+              aria-hidden="true"
+            />
             <div>
               <h3 class="purchase-guide-cta-title">Cần hỗ trợ đặt hàng?</h3>
               <p class="purchase-guide-cta-text">
-                Đội ngũ {{ BRAND_NAME }} luôn sẵn sàng tư vấn và hỗ trợ bạn chọn lựa
-                sản phẩm phù hợp nhất.
+                Đội ngũ {{ BRAND_NAME }} luôn sẵn sàng tư vấn và hỗ trợ bạn chọn
+                lựa sản phẩm phù hợp nhất.
               </p>
             </div>
           </div>
           <div class="purchase-guide-cta-links">
             <a :href="'tel:' + phoneTel" class="purchase-guide-cta-link">
-              <i class="fa-solid fa-phone-volume purchase-guide-cta-link-icon--phone" aria-hidden="true" />
-              Hotline
-              <span class="purchase-guide-cta-link-strong">{{ phoneDisplay }}</span>
+              <span class="purchase-guide-cta-link-icon" aria-hidden="true">
+                <i
+                  class="fa-solid fa-phone-volume purchase-guide-cta-link-icon--phone"
+                />
+              </span>
+              <span class="purchase-guide-cta-link-label">Hotline</span>
+              <span class="purchase-guide-cta-link-strong">{{
+                phoneDisplay
+              }}</span>
             </a>
             <a
               v-if="zaloUrl"
@@ -171,22 +195,27 @@
               rel="noopener noreferrer"
               class="purchase-guide-cta-link"
             >
-              <i class="fa-solid fa-comment-sms purchase-guide-cta-link-icon--zalo" aria-hidden="true" />
-              Zalo
+              <span class="purchase-guide-cta-link-icon" aria-hidden="true">
+                <i
+                  class="fa-solid fa-comment-sms purchase-guide-cta-link-icon--zalo"
+                />
+              </span>
+              <span class="purchase-guide-cta-link-label">Zalo</span>
               <span class="purchase-guide-cta-link-muted">Chat ngay</span>
             </a>
             <a
-              v-if="facebookUrl"
-              :href="facebookUrl"
+              v-if="messengerUrl"
+              :href="messengerUrl"
               target="_blank"
               rel="noopener noreferrer"
               class="purchase-guide-cta-link"
             >
-              <i
-                class="fa-brands fa-facebook-messenger purchase-guide-cta-link-icon--messenger"
-                aria-hidden="true"
-              />
-              Messenger
+              <span class="purchase-guide-cta-link-icon" aria-hidden="true">
+                <i
+                  class="fa-brands fa-facebook-messenger purchase-guide-cta-link-icon--messenger"
+                />
+              </span>
+              <span class="purchase-guide-cta-link-label">Messenger</span>
               <span class="purchase-guide-cta-link-muted">Chat ngay</span>
             </a>
           </div>
@@ -197,32 +226,21 @@
 </template>
 
 <script setup lang="ts">
-import { BRAND_NAME } from '@/constants/brand'
+import { BRAND_NAME } from "@/constants/brand";
 import {
   PURCHASE_GUIDE_HERO_IMAGE,
   PURCHASE_ORDER_CHANNELS,
   PURCHASE_PROCESS_STEPS,
   PURCHASE_VALUE_PROPS,
-} from '@/constants/purchase-guide'
-import { useContactInfo } from '@/composables/common/useContactInfo'
+} from "@/constants/purchase-guide";
+import { useContactInfo } from "@/composables/common/useContactInfo";
 
-const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
+const { phoneDisplay, phoneTel, messengerUrl, zaloUrl } = useContactInfo();
 </script>
 
 <style scoped>
 .purchase-guide-page {
   background: #faf9f6;
-}
-
-.eyebrow {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-  font-family: var(--font-sans);
 }
 
 /* Hero */
@@ -254,7 +272,7 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 
 .purchase-guide-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   line-height: 1.15;
   color: var(--color-heading);
   margin-bottom: 1rem;
@@ -262,10 +280,9 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 }
 
 .purchase-guide-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin: 0;
 }
 
@@ -296,14 +313,14 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 
 .purchase-guide-section-title {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   color: var(--color-heading);
   margin: 0 0 0.5rem;
   font-weight: 600;
 }
 
 .purchase-guide-section-sub {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin: 0;
 }
@@ -342,7 +359,7 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 .purchase-guide-card-num {
   background: #f5f2eb;
   color: var(--color-primary-dark);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.25rem 0.5rem;
   border-radius: 2px;
@@ -350,14 +367,14 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 }
 
 .purchase-guide-card-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0;
 }
 
 .purchase-guide-card-intro {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.65;
   margin: 0 0 1rem;
@@ -371,7 +388,7 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 }
 
 .purchase-guide-channel-icon {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   margin-top: 0.25rem;
   flex-shrink: 0;
 }
@@ -392,7 +409,7 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text);
   display: flex;
   flex-direction: column;
@@ -406,7 +423,7 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 }
 
 .purchase-guide-benefits i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-primary);
 }
 
@@ -416,16 +433,18 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   padding: 0.625rem 1rem;
   border-radius: 2px;
   text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .purchase-guide-cta-btn i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .purchase-guide-cta-btn--primary {
@@ -495,7 +514,7 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
   align-items: center;
   justify-content: center;
   color: var(--color-primary);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   margin-bottom: 1rem;
   transition: transform 0.2s ease;
 }
@@ -505,14 +524,14 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 }
 
 .purchase-guide-step-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.5rem;
 }
 
 .purchase-guide-step-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   line-height: 1.55;
   max-width: 12.5rem;
@@ -572,19 +591,19 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 
 .purchase-guide-value-icon {
   color: var(--color-primary);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   flex-shrink: 0;
 }
 
 .purchase-guide-value-title {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.125rem;
 }
 
 .purchase-guide-value-desc {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   margin: 0;
   line-height: 1.4;
@@ -622,20 +641,20 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 }
 
 .purchase-guide-cta-question {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .purchase-guide-cta-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.25rem;
 }
 
 .purchase-guide-cta-text {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   line-height: 1.55;
   margin: 0;
@@ -646,24 +665,23 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  width: 100%;
 }
 
 @media (min-width: 768px) {
   .purchase-guide-cta-links {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    justify-content: flex-end;
-    align-items: center;
+    width: max-content;
+    min-width: 15.5rem;
+    margin-left: auto;
   }
 }
 
 .purchase-guide-cta-link {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.25rem 5.75rem 1fr;
+  column-gap: 0.5rem;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--fs-body-sm);
   color: var(--color-text);
   text-decoration: none;
   transition: color 0.2s ease;
@@ -671,6 +689,26 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
 
 .purchase-guide-cta-link:hover {
   color: var(--color-primary);
+}
+
+.purchase-guide-cta-link:hover .purchase-guide-cta-link-label {
+  color: var(--color-primary);
+}
+
+.purchase-guide-cta-link-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.purchase-guide-cta-link-icon i {
+  font-size: 1.125rem;
+  line-height: 1;
+  width: 1.125rem;
+  text-align: center;
 }
 
 .purchase-guide-cta-link-icon--phone {
@@ -685,15 +723,22 @@ const { phoneDisplay, phoneTel, facebookUrl, zaloUrl } = useContactInfo()
   color: #9333ea;
 }
 
+.purchase-guide-cta-link-label {
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
 .purchase-guide-cta-link-strong {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
+  white-space: nowrap;
 }
 
 .purchase-guide-cta-link-muted {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 400;
   color: var(--color-text-light);
+  white-space: nowrap;
 }
 </style>

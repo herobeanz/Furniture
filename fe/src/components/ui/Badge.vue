@@ -21,7 +21,7 @@ withDefaults(
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   border-radius: 999px;
 }

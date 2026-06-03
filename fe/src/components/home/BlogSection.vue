@@ -95,7 +95,7 @@ const fallbackImage =
 }
 
 .blog-date {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0 0 0.25rem;
   font-family: var(--font-sans);
@@ -103,7 +103,7 @@ const fallbackImage =
 
 .blog-title {
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   line-height: 1.4;
@@ -118,7 +118,7 @@ const fallbackImage =
 
 .blog-loading,
 .blog-empty {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   text-align: center;
   padding: 2rem 0;

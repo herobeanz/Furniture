@@ -24,7 +24,8 @@ export function useContactForm() {
   const submitMessage = ref('')
   const submitError = ref(false)
 
-  const { facebookUrl, zaloUrl, hasSocialLinks } = useContactInfo()
+  const { facebookUrl, messengerUrl, zaloUrl, tiktokUrl, hasSocialLinks } =
+    useContactInfo()
 
   async function submit(source: 'contact' | 'product' = 'contact', productId?: number) {
     sending.value = true
@@ -97,7 +98,9 @@ export function useContactForm() {
     submitMessage,
     submitError,
     facebookUrl,
+    messengerUrl,
     zaloUrl,
+    tiktokUrl,
     hasSocialLinks,
     submit,
     reset,

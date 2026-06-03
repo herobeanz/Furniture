@@ -2,24 +2,11 @@
   <section class="home-top-products section-shell section-shell--white">
     <div class="container">
       <div class="section-header-row">
-        <h2 class="section-heading">Sản phẩm bán chạy</h2>
-        <RouterLink v-if="viewAllHref" :to="viewAllHref" class="section-link">
+        <h2 class="section-heading">Sản phẩm nổi bật</h2>
+        <RouterLink to="/san-pham" class="section-link">
           Xem tất cả sản phẩm
           <i class="fa-solid fa-arrow-right" aria-hidden="true" />
         </RouterLink>
-      </div>
-
-      <div class="tabs">
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          type="button"
-          class="tab-btn"
-          :class="{ active: activeTab === category.slug }"
-          @click="$emit('changeTab', category.slug)"
-        >
-          {{ category.name }}
-        </button>
       </div>
 
       <div class="products-wrap">
@@ -27,83 +14,111 @@
         <div v-else-if="products.length === 0" class="empty">
           Chưa có sản phẩm.
         </div>
-        <div v-else class="product-grid four-cols">
-          <ProductCard
-            v-for="product in products"
-            :key="product.id"
-            :product="product"
-            :show-hot-tag="product.isHot"
-            variant="compact"
-          />
-        </div>
+        <template v-else>
+          <div class="product-grid four-cols">
+            <ProductCard
+              v-for="product in visibleProducts"
+              :key="product.id"
+              :product="product"
+              :show-hot-tag="product.isHot"
+              variant="compact"
+            />
+          </div>
 
-        <div v-if="loading && products.length > 0" class="products-overlay" aria-live="polite">
-          <i class="fa-solid fa-spinner fa-spin products-overlay-spinner" aria-hidden="true" />
-        </div>
+          <nav
+            v-if="showNav"
+            class="carousel-nav"
+            aria-label="Điều hướng sản phẩm nổi bật"
+          >
+            <button
+              type="button"
+              class="carousel-arrow"
+              aria-label="Trang trước"
+              @click="prevPage"
+            >
+              <i class="fa-solid fa-chevron-left" aria-hidden="true" />
+            </button>
+            <div class="carousel-dots">
+              <button
+                v-for="i in totalPages"
+                :key="i"
+                type="button"
+                class="carousel-dot"
+                :class="{ active: currentPage === i - 1 }"
+                :aria-label="`Trang ${i}`"
+                @click="goToPage(i - 1)"
+              />
+            </div>
+            <button
+              type="button"
+              class="carousel-arrow"
+              aria-label="Trang sau"
+              @click="nextPage"
+            >
+              <i class="fa-solid fa-chevron-right" aria-hidden="true" />
+            </button>
+          </nav>
+        </template>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { RouterLink } from "vue-router";
-import ProductCard from "../ProductCard.vue";
-import ProductGridSkeleton from "../skeleton/ProductGridSkeleton.vue";
+import { ref, computed, watch } from 'vue'
+import { RouterLink } from 'vue-router'
+import ProductCard from '../ProductCard.vue'
+import ProductGridSkeleton from '../skeleton/ProductGridSkeleton.vue'
 import type { Product } from '@/services/api/products'
-import type { Category } from "@/services/api/categories";
 
-interface Props {
-  categories: Category[];
-  products: Product[];
-  activeTab: string;
-  loading?: boolean;
+const PAGE_SIZE = 4
+
+const props = withDefaults(
+  defineProps<{
+    products: Product[]
+    loading?: boolean
+  }>(),
+  { loading: false },
+)
+
+const currentPage = ref(0)
+
+const showNav = computed(() => props.products.length > PAGE_SIZE)
+
+const totalPages = computed(() =>
+  showNav.value ? Math.ceil(props.products.length / PAGE_SIZE) : 1,
+)
+
+const visibleProducts = computed(() => {
+  if (!showNav.value) return props.products
+  const start = currentPage.value * PAGE_SIZE
+  return props.products.slice(start, start + PAGE_SIZE)
+})
+
+function goToPage(index: number) {
+  if (index < 0 || index >= totalPages.value) return
+  currentPage.value = index
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  loading: false,
-});
+function nextPage() {
+  if (totalPages.value <= 1) return
+  currentPage.value = (currentPage.value + 1) % totalPages.value
+}
 
-defineEmits<{
-  changeTab: [slug: string];
-}>();
+function prevPage() {
+  if (totalPages.value <= 1) return
+  currentPage.value = (currentPage.value - 1 + totalPages.value) % totalPages.value
+}
 
-const viewAllHref = computed(() =>
-  props.activeTab ? `/san-pham/${props.activeTab}` : undefined,
-);
+watch(
+  () => props.products,
+  () => {
+    currentPage.value = 0
+  },
+)
 </script>
 
 <style scoped>
-.tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.tab-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  font-size: 0.8125rem;
-  background: var(--color-page-bg);
-  border: 1px solid var(--color-border-light);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  color: var(--color-text-muted);
-}
-
-.tab-btn:hover {
-  border-color: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.tab-btn.active {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-}
-
 .product-grid {
   display: grid;
   gap: 1.5rem;
@@ -129,21 +144,60 @@ const viewAllHref = computed(() =>
   color: var(--color-text-muted);
 }
 
-.products-overlay {
-  position: absolute;
-  inset: 0;
+.carousel-nav {
+  margin-top: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(1px);
-  border-radius: 0.375rem;
-  pointer-events: none;
+  gap: 1rem;
 }
 
-.products-overlay-spinner {
-  font-size: 1.25rem;
+.carousel-arrow {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid rgba(92, 60, 36, 0.35);
+  background: #fff;
   color: var(--color-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-body-sm);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.carousel-arrow:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.carousel-dots {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.carousel-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: #d1d5db;
+  cursor: pointer;
+  transition:
+    width var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.carousel-dot.active {
+  width: 1.25rem;
+  background: var(--color-primary);
 }
 
 @media (max-width: 768px) {

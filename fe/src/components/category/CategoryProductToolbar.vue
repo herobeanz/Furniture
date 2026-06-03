@@ -59,7 +59,7 @@ function onSortChange(e: Event) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .category-toolbar-label {
@@ -73,7 +73,7 @@ function onSortChange(e: Event) {
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   background: #fff;
   appearance: none;
@@ -90,7 +90,7 @@ function onSortChange(e: Event) {
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   pointer-events: none;
 }

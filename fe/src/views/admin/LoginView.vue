@@ -81,7 +81,7 @@ async function onSubmit() {
   max-width: 360px;
 }
 .login-card h1 {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   margin-bottom: 1.5rem;
 }
 .form-group {
@@ -89,7 +89,7 @@ async function onSubmit() {
 }
 .form-group label {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   margin-bottom: 0.35rem;
 }
@@ -98,11 +98,11 @@ async function onSubmit() {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 .error {
   color: var(--color-primary);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   margin-bottom: 0.75rem;
 }
 .btn {
@@ -114,7 +114,7 @@ async function onSubmit() {
   display: block;
   text-align: center;
   margin-top: 1rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 .back-link:hover {

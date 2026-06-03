@@ -19,12 +19,12 @@ defineProps<Props>()
   margin-bottom: 1.5rem;
 }
 .collection-title {
-  font-size: 1.75rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 .collection-desc {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
 }
 </style>

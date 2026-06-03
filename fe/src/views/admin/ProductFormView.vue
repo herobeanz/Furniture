@@ -627,7 +627,7 @@ async function onSubmit() {
 
 <style scoped>
 .product-form-page {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #1f2937;
 }
 
@@ -673,7 +673,7 @@ async function onSubmit() {
 
 .page-title {
   font-family: var(--font-serif, Georgia, serif);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
   line-height: 1.3;
@@ -681,7 +681,7 @@ async function onSubmit() {
 
 .page-breadcrumb {
   margin-top: 0.125rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #9ca3af;
   display: flex;
@@ -700,7 +700,7 @@ async function onSubmit() {
 }
 
 .page-breadcrumb i {
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
 }
 
 .page-header-actions {
@@ -749,7 +749,7 @@ async function onSubmit() {
 }
 
 .section-heading {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -825,7 +825,7 @@ async function onSubmit() {
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #1f2937;
   transition: border-color 0.15s;
@@ -851,7 +851,7 @@ async function onSubmit() {
 }
 
 .field-hint {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 400;
   color: #9ca3af;
 }
@@ -871,7 +871,7 @@ async function onSubmit() {
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -908,7 +908,7 @@ async function onSubmit() {
 }
 
 .contact-info {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   cursor: help;
 }
@@ -925,7 +925,7 @@ async function onSubmit() {
   position: absolute;
   right: 0.75rem;
   bottom: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -961,7 +961,7 @@ async function onSubmit() {
 
 .editor-stats {
   text-align: right;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   margin-top: 0.5rem;
 }
@@ -986,7 +986,7 @@ async function onSubmit() {
   align-items: center;
   gap: 0.375rem;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   border: 1px solid transparent;

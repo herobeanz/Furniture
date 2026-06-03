@@ -2,7 +2,13 @@
   <header class="site-header">
     <div class="container header-inner">
       <RouterLink to="/" class="logo">
-        <span class="logo-mark" aria-hidden="true">{{ SITE.brand.logoMark }}</span>
+        <img
+          :src="SITE.brand.logoMarkSrc"
+          :alt="SITE.brand.name"
+          class="logo-mark"
+          width="36"
+          height="36"
+        />
         <span class="logo-text-stack">
           <span class="logo-line logo-line--sm">{{ SITE.brand.logoLineSm }}</span>
           <span class="logo-line logo-line--lg">{{ SITE.brand.logoLineLg }}</span>
@@ -152,16 +158,11 @@ function handleSearch() {
 }
 
 .logo-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.125rem;
-  border-radius: 2px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .logo-text-stack {
@@ -176,13 +177,13 @@ function handleSearch() {
 }
 
 .logo-line--sm {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   letter-spacing: 0.12em;
   color: #78350f;
 }
 
 .logo-line--lg {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: var(--color-primary);
 }
 
@@ -197,7 +198,7 @@ function handleSearch() {
 .nav-menu > a,
 .nav-link {
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #374151;
   text-decoration: none;
   position: relative;
@@ -288,11 +289,11 @@ function handleSearch() {
 
   .nav-menu {
     gap: 1.25rem;
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 
   .logo {
-    font-size: 1.35rem;
+    font-size: var(--fs-subtitle);
   }
 
   .logo-mark {
@@ -312,7 +313,7 @@ function handleSearch() {
   }
 
   .logo {
-    font-size: 1.25rem;
+    font-size: var(--fs-card-title);
     order: 1;
   }
 
@@ -340,7 +341,7 @@ function handleSearch() {
 @media (max-width: 640px) {
   .nav-menu {
     gap: 0.75rem;
-    font-size: 0.8125rem;
+    font-size: var(--fs-body-sm);
   }
 
   .nav-menu > a,
@@ -355,7 +356,7 @@ function handleSearch() {
   }
 
   .logo {
-    font-size: 1.125rem;
+    font-size: var(--fs-body-lg);
   }
 
   .logo-mark {
@@ -365,7 +366,7 @@ function handleSearch() {
 
   .nav-menu {
     gap: 0.5rem;
-    font-size: 0.75rem;
+    font-size: var(--fs-body-sm);
   }
 
   .icon-button {
@@ -428,7 +429,7 @@ function handleSearch() {
   right: 25px;
   border: none;
   background: transparent;
-  font-size: 40px;
+  font-size: var(--fs-hero-title);
   line-height: 1;
   cursor: pointer;
   color: #999;
@@ -450,7 +451,7 @@ function handleSearch() {
 /* Title */
 .search-title {
   text-align: center;
-  font-size: 42px;
+  font-size: var(--fs-hero-title);
   margin-bottom: 40px;
   font-weight: 700;
   color: #1a1a1a;
@@ -470,7 +471,7 @@ function handleSearch() {
   border: 1px solid #eee;
   border-radius: 999px;
   padding: 0 60px 0 25px;
-  font-size: 16px;
+  font-size: var(--fs-body);
   outline: none;
   background: #f7f7f7;
   transition: all var(--transition-base);
@@ -495,7 +496,7 @@ function handleSearch() {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 20px;
+  font-size: var(--fs-card-title);
   padding: 8px;
   display: flex;
   align-items: center;
@@ -522,7 +523,7 @@ function handleSearch() {
 .popular-searches .label {
   font-weight: 600;
   color: #222;
-  font-size: 15px;
+  font-size: var(--fs-body);
   margin-right: 4px;
 }
 
@@ -533,7 +534,7 @@ function handleSearch() {
   border-radius: 999px;
   cursor: pointer;
   transition: all var(--transition-base);
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
   color: #333;
   text-decoration: none;
   display: inline-block;
@@ -556,7 +557,7 @@ function handleSearch() {
   }
 
   .search-title {
-    font-size: 36px;
+    font-size: var(--fs-hero-title);
     margin-bottom: 35px;
   }
 }
@@ -576,13 +577,13 @@ function handleSearch() {
   .close-btn {
     top: 15px;
     right: 15px;
-    font-size: 36px;
+    font-size: var(--fs-hero-title);
     width: 36px;
     height: 36px;
   }
 
   .search-title {
-    font-size: 32px;
+    font-size: var(--fs-page-title);
     margin-bottom: 30px;
   }
 
@@ -592,13 +593,13 @@ function handleSearch() {
 
   .search-input {
     height: 52px;
-    font-size: 15px;
+    font-size: var(--fs-body);
     padding: 0 55px 0 20px;
   }
 
   .search-btn {
     right: 15px;
-    font-size: 18px;
+    font-size: var(--fs-body-lg);
   }
 
   .popular-searches {
@@ -624,13 +625,13 @@ function handleSearch() {
   }
 
   .search-title {
-    font-size: 28px;
+    font-size: var(--fs-section-title);
     margin-bottom: 25px;
   }
 
   .search-input {
     height: 48px;
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
   }
 
   .popular-searches {
@@ -639,7 +640,7 @@ function handleSearch() {
 
   .popular-btn {
     padding: 7px 15px;
-    font-size: 13px;
+    font-size: var(--fs-body-sm);
   }
 }
 
@@ -657,25 +658,25 @@ function handleSearch() {
   .close-btn {
     top: 12px;
     right: 12px;
-    font-size: 32px;
+    font-size: var(--fs-page-title);
     width: 32px;
     height: 32px;
   }
 
   .search-title {
-    font-size: 24px;
+    font-size: var(--fs-subtitle);
     margin-bottom: 20px;
   }
 
   .search-input {
     height: 46px;
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
     padding: 0 50px 0 18px;
   }
 
   .search-btn {
     right: 12px;
-    font-size: 16px;
+    font-size: var(--fs-body);
   }
 
   .popular-searches {
@@ -684,12 +685,12 @@ function handleSearch() {
   }
 
   .popular-searches .label {
-    font-size: 14px;
+    font-size: var(--fs-body-sm);
   }
 
   .popular-btn {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: var(--fs-caption);
   }
 }
 </style>

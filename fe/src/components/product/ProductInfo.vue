@@ -33,8 +33,8 @@
         Đặt hàng qua Zalo
       </a>
       <a
-        v-if="facebookUrl"
-        :href="facebookUrl"
+        v-if="messengerUrl"
+        :href="messengerUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="product-cta product-cta--outline"
@@ -61,7 +61,7 @@ const props = defineProps<{
   product: Product
 }>()
 
-const { phoneDisplay, phoneTel: telHref, facebookUrl, zaloUrl } = useContactInfo()
+const { phoneDisplay, phoneTel: telHref, messengerUrl, zaloUrl } = useContactInfo()
 
 const hasDiscount = computed(
   () =>
@@ -90,7 +90,7 @@ const summaryText = computed(() => props.product.shortDescription?.trim() || '')
 
 .product-title {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
   font-weight: 600;
   color: #111827;
   margin: 0 0 0.5rem;
@@ -106,23 +106,23 @@ const summaryText = computed(() => props.product.shortDescription?.trim() || '')
 }
 
 .price-display {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .price-contact {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
 }
 
 .price-old {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
   text-decoration: line-through;
 }
 
 .product-summary {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.7;
   color: var(--color-text-muted);
   margin: 0 0 1.5rem;
@@ -142,7 +142,7 @@ const summaryText = computed(() => props.product.shortDescription?.trim() || '')
   gap: 0.5rem;
   width: 100%;
   padding: 0.75rem 1rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -176,7 +176,7 @@ const summaryText = computed(() => props.product.shortDescription?.trim() || '')
 
 .product-cta--outline i {
   color: #2563eb;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .product-cta--call {
@@ -191,6 +191,6 @@ const summaryText = computed(() => props.product.shortDescription?.trim() || '')
 }
 
 .product-cta i {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 </style>

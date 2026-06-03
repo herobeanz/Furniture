@@ -2,6 +2,8 @@
 
 Nguồn sự thật: mockup HTML Tailwind (`font-serif` + palette amber/stone). Vue map qua CSS variables trong `fe/src/style.css`.
 
+**Mục lục docs:** [README.md](./README.md) · Typography chi tiết: [TYPOGRAPHY.md](./TYPOGRAPHY.md)
+
 ## Màu sắc
 
 | Token | Giá trị | Tailwind tương đương |
@@ -31,14 +33,20 @@ Nguồn sự thật: mockup HTML Tailwind (`font-serif` + palette amber/stone). 
 
 ## Typography
 
-| Vai trò | Font | Size | Weight | Ghi chú |
-|---------|------|------|--------|---------|
-| Body | Segoe UI | 16px base | 400 | `body`, form, nav |
-| Tiêu đề section | Playfair Display | **1.5rem** (`text-2xl`) | 600 | class `.section-heading` |
-| Hero H1 | Playfair Display | clamp 2rem–3rem | 600 | lớn hơn section |
-| Eyebrow | Segoe UI | 0.75rem | 600 | uppercase, `tracking-widest`, primary |
-| Card title / giá | Segoe UI | 0.75rem–0.875rem | 700 / 600 | **không** dùng serif |
-| Link phụ | Segoe UI | 0.75rem | 600 | primary, mũi tên 10px |
+Scale responsive (56 → 12px) và breakpoint 767 / 1023 / 1024 — xem **[TYPOGRAPHY.md](./TYPOGRAPHY.md)**.
+
+| Vai trò | Token / class | Ghi chú |
+|---------|---------------|---------|
+| Body | `--fs-body`, `body` | 16px desktop, responsive |
+| Hero trang chủ | `--fs-hero-title`, `.text-hero-title` | Playfair, 56px desktop |
+| Tiêu đề trang | `--fs-page-title` | Policy, about hero |
+| Tiêu đề section | `--fs-section-title`, `.section-heading` | Playfair |
+| Tiêu đề card | `--fs-card-title` | Sans, không serif |
+| Eyebrow | `.eyebrow`, `--fs-caption` | Uppercase, primary |
+| Nút | `--fs-button`, `.btn` | |
+| Link phụ | `--fs-body-sm` | `.section-link` |
+
+Trang chính sách: body/list **16px** (`--fs-body`), không dùng 11px cho đoạn văn.
 
 ## Layout
 
@@ -64,10 +72,9 @@ Nguồn sự thật: mockup HTML Tailwind (`font-serif` + palette amber/stone). 
 
 ### Khách hàng nói về chúng tôi
 - Tiêu đề **căn giữa**
-- Grid **3 cột** (1 cột mobile), không carousel trượt ngang
-- Card: sao amber → quote italic → avatar **trái** + tên/địa điểm
-- Dots: `8px`, active `#92400e`, inactive `#d1d5db`
-- Phân trang 3 review/trang nếu > 3 mục
+- **Swiper** carousel (`ReviewsCarousel.vue`), 1 slide mobile / 2 tablet / 3 desktop
+- Card: sao amber → quote italic → **ảnh avatar URL** (fallback chữ cái nếu lỗi) + tên/địa điểm
+- Dữ liệu: `fe/src/constants/home-reviews.ts`
 
 ### Bài viết nổi bật
 - Header row: tiêu đề serif trái, link phải
