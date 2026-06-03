@@ -34,20 +34,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
-import ErrorState from '@/components/common/ErrorState.vue'
-import CollectionProductsSection from '@/components/collection/CollectionProductsSection.vue'
-import { useCollectionData } from '@/composables/collection/useCollectionData'
-import { collectionPublicDescription } from '@/utils/collectionDescription'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
+import NotFoundView from "@/views/NotFoundView.vue";
+import ErrorState from "@/components/common/ErrorState.vue";
+import CollectionProductsSection from "@/components/collection/CollectionProductsSection.vue";
+import { useCollectionData } from "@/composables/collection/useCollectionData";
+import { collectionPublicDescription } from "@/utils/collectionDescription";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
-const { collection, products, loading, error, isNotFound } = useCollectionData()
+const { collection, products, loading, error, isNotFound } =
+  useCollectionData();
 
 const heroDescription = computed(() =>
   collectionPublicDescription(collection.value?.description),
-)
+);
 </script>
 
 <style scoped>

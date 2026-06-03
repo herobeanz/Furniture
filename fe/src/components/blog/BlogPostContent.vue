@@ -9,11 +9,15 @@
     </nav>
 
     <header class="post-header">
-      <span v-if="post.category" class="post-category">{{ post.category }}</span>
+      <span v-if="post.category" class="post-category">{{
+        post.category
+      }}</span>
       <h1 class="post-title">{{ post.title }}</h1>
       <div class="post-meta">
         <span v-if="post.author">{{ post.author }}</span>
-        <span v-if="post.publishedAt">{{ formatBlogDate(post.publishedAt) }}</span>
+        <span v-if="post.publishedAt">{{
+          formatBlogDate(post.publishedAt)
+        }}</span>
       </div>
     </header>
 
@@ -26,17 +30,17 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate } from '@/utils/format'
-import RichHtmlContent from '@/components/common/RichHtmlContent.vue'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { RouterLink } from "vue-router";
+import type { BlogPost } from "@/services/api/blog";
+import { formatBlogDate } from "@/utils/format";
+import RichHtmlContent from "@/components/common/RichHtmlContent.vue";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 interface Props {
-  post: BlogPost
+  post: BlogPost;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <style scoped>

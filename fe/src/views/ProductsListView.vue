@@ -98,14 +98,22 @@
           v-else-if="products.length === 0"
           message="Chưa có sản phẩm nào."
         />
-        <ProductGrid v-else :products="products" :columns="4" variant="compact" />
+        <ProductGrid
+          v-else
+          :products="products"
+          :columns="4"
+          variant="compact"
+        />
 
         <div
           v-if="loading && products.length > 0"
           class="products-loading-overlay"
           aria-live="polite"
         >
-          <i class="fa-solid fa-spinner fa-spin products-loading-spinner" aria-hidden="true" />
+          <i
+            class="fa-solid fa-spinner fa-spin products-loading-spinner"
+            aria-hidden="true"
+          />
         </div>
       </div>
 
@@ -180,7 +188,7 @@ const {
 } = useProductsListPage();
 
 const selectedCategory = computed(() =>
-  categories.value.find((cat) => cat.slug === selectedCategorySlug.value)
+  categories.value.find((cat) => cat.slug === selectedCategorySlug.value),
 );
 
 const heroImage = computed(() => {
@@ -192,7 +200,7 @@ const heroImage = computed(() => {
 const heroAlt = computed(() =>
   selectedCategory.value
     ? `Sản phẩm danh mục ${selectedCategory.value.name}`
-    : "Tổng hợp nội thất gỗ"
+    : "Tổng hợp nội thất gỗ",
 );
 
 const pageNumbers = computed(() => {

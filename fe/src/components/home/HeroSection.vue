@@ -49,30 +49,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { RouterLink } from "vue-router";
-import type { Product } from "@/services/api/products";
-import type { Collection } from "@/services/api/collections";
+import { HOME_HERO_IMAGE } from "@/constants/home";
 import { VALUE_PROPS } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/utils/mediaUrl";
 
-interface Props {
-  products?: Product[];
-  collections?: Collection[];
-}
-
-const props = defineProps<Props>();
-
 const valueProps = VALUE_PROPS;
-
-const heroImage = computed(() => {
-  const product = props.products?.[0];
-  const img = product?.thumbnail || product?.images?.[0];
-  if (img) return resolveMediaUrl(img);
-  const collection =
-    props.collections?.find((c) => c.thumbnail) ?? props.collections?.[0];
-  return resolveMediaUrl(collection?.thumbnail);
-});
+const heroImage = resolveMediaUrl(HOME_HERO_IMAGE);
 
 function valueIconClass(icon: string): string {
   const map: Record<string, string> = {

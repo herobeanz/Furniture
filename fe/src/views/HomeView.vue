@@ -1,9 +1,6 @@
 <template>
   <div class="home-page">
-    <HeroSection
-      :collections="showcaseCollections"
-      :products="products"
-    />
+    <HeroSection />
     <FeaturedCollectionsSection
       :collections="featuredCollections"
       :loading="collectionsLoading"
@@ -30,10 +27,8 @@ import ReviewsCarousel, { type Review } from '../components/ReviewsCarousel.vue'
 import { useHomeData } from '../composables/home/useHomeData'
 
 const {
-  products,
   blogPosts,
   featuredCollections,
-  showcaseCollections,
   collectionsLoading,
   loadingBlogs,
   tabProducts,

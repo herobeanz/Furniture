@@ -25,7 +25,9 @@
               loading="lazy"
             />
           </div>
-          <p v-if="post.publishedAt" class="blog-date">{{ formatBlogDate(post.publishedAt) }}</p>
+          <p v-if="post.publishedAt" class="blog-date">
+            {{ formatBlogDate(post.publishedAt) }}
+          </p>
           <h3 class="blog-title">{{ post.title }}</h3>
         </RouterLink>
       </div>
@@ -36,18 +38,18 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate } from '@/utils/format'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { RouterLink } from "vue-router";
+import type { BlogPost } from "@/services/api/blog";
+import { formatBlogDate } from "@/utils/format";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 defineProps<{
-  posts: BlogPost[]
-  loading?: boolean
-}>()
+  posts: BlogPost[];
+  loading?: boolean;
+}>();
 
 const fallbackImage =
-  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80'
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80";
 </script>
 
 <style scoped>

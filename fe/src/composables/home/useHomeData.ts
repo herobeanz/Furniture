@@ -12,7 +12,6 @@ import { useRouterLoadingStore } from '@/stores/routerLoading'
 export function useHomeData() {
   const routerLoading = useRouterLoadingStore()
   const categories = ref<Category[]>([])
-  const products = ref<Product[]>([])
   const blogPosts = ref<BlogPost[]>([])
   const featuredCollections = ref<Collection[]>([])
   const collectionsLoading = ref(true)
@@ -22,14 +21,6 @@ export function useHomeData() {
   const tabProductsLoading = ref(false)
   const activeTab = ref('')
 
-  const showcaseCollections = computed(() =>
-    [...featuredCollections.value]
-      .filter((c) => c.isActive !== false)
-      .sort((a, b) => a.orderIndex - b.orderIndex || a.id - b.id)
-      .slice(0, 4)
-  )
-
-  const heroTiles = computed(() => showcaseCollections.value)
   const rootCategories = computed(() => categories.value)
 
   async function loadFeaturedCollections() {
@@ -85,13 +76,11 @@ export function useHomeData() {
 
   async function loadInitialData() {
     try {
-      const [res] = await Promise.all([
-        productApi.getProducts({ limit: 12 }),
+      await Promise.all([
         loadCategories(),
         loadBlogPosts(),
         loadFeaturedCollections(),
       ])
-      products.value = res.data || []
 
       if (categories.value.length && !activeTab.value) {
         activeTab.value = categories.value[0]?.slug ?? ''
@@ -118,17 +107,14 @@ export function useHomeData() {
 
   return {
     categories,
-    products,
     blogPosts,
     featuredCollections,
-    showcaseCollections,
     collectionsLoading,
     loading,
     loadingBlogs,
     tabProducts,
     tabProductsLoading,
     activeTab,
-    heroTiles,
     rootCategories,
     loadInitialData,
     loadFeaturedCollections,

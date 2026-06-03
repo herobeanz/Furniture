@@ -2,13 +2,13 @@
   <div class="product-form-page">
     <div class="page-header">
       <div class="page-header-left">
-        <RouterLink to="/admin/products" class="back-btn" title="Quay lại">
+        <RouterLink to="/admin/products/list" class="back-btn" title="Quay lại">
           <i class="fa-solid fa-arrow-left" />
         </RouterLink>
         <div>
           <h1 class="page-title">{{ isEdit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
           <p class="page-breadcrumb">
-            <RouterLink to="/admin/products">Sản phẩm</RouterLink>
+            <RouterLink to="/admin/products/list">Sản phẩm</RouterLink>
             <i class="fa-solid fa-chevron-right" />
             <span>{{ isEdit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm' }}</span>
           </p>
@@ -285,7 +285,7 @@
       <p v-if="error" class="form-error">{{ error }}</p>
 
       <div class="form-footer">
-        <RouterLink to="/admin/products" class="btn btn-outline">Hủy</RouterLink>
+        <RouterLink to="/admin/products/list" class="btn btn-outline">Hủy</RouterLink>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           {{ saving ? 'Đang lưu...' : 'Lưu thay đổi' }}
         </button>
@@ -514,7 +514,7 @@ async function loadProduct() {
   } catch (e) {
     logger.error(e)
     alert('Không thể tải dữ liệu sản phẩm.')
-    router.push('/admin/products')
+    router.push('/admin/products/list')
   } finally {
     loading.value = false
   }
@@ -615,7 +615,7 @@ async function onSubmit() {
       await productApi.create(formPayload.value)
     }
     clearDraft()
-    router.push('/admin/products')
+    router.push('/admin/products/list')
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } }; message?: string }
     error.value = err?.response?.data?.message || err?.message || 'Lưu thất bại.'

@@ -25,7 +25,10 @@
         product.name
       }}</RouterLink>
       <p
-        v-if="variant === 'compact' && (product.material || product.shortDescription)"
+        v-if="
+          variant === 'compact' &&
+          (product.material || product.shortDescription)
+        "
         class="product-card-subtitle"
       >
         {{ product.material || product.shortDescription }}

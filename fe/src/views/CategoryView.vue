@@ -103,18 +103,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import ProductGrid from '@/components/ProductGrid.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
-import CategoryProductToolbar from '@/components/category/CategoryProductToolbar.vue'
-import LoadingState from '@/components/common/LoadingState.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
-import ErrorState from '@/components/common/ErrorState.vue'
-import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
-import { useCategoryData } from '@/composables/category/useCategoryData'
-import { categoryStripIcon } from '@/constants/products-page'
-import { PRODUCTS_HERO_IMAGE } from '@/constants/category-page'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import ProductGrid from "@/components/ProductGrid.vue";
+import NotFoundView from "@/views/NotFoundView.vue";
+import CategoryProductToolbar from "@/components/category/CategoryProductToolbar.vue";
+import LoadingState from "@/components/common/LoadingState.vue";
+import EmptyState from "@/components/common/EmptyState.vue";
+import ErrorState from "@/components/common/ErrorState.vue";
+import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
+import { useCategoryData } from "@/composables/category/useCategoryData";
+import { categoryStripIcon } from "@/constants/products-page";
+import { PRODUCTS_HERO_IMAGE } from "@/constants/category-page";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 const {
   category,
@@ -128,48 +128,48 @@ const {
   isNotFound,
   totalPages,
   goPage,
-} = useCategoryData()
+} = useCategoryData();
 
 const categoryIcon = computed(() =>
-  category.value ? categoryStripIcon(category.value.slug) : 'fa-box',
-)
+  category.value ? categoryStripIcon(category.value.slug) : "fa-box",
+);
 
 const heroImage = computed(() => {
-  const thumb = category.value?.thumbnail?.trim()
-  if (thumb) return resolveMediaUrl(thumb)
-  return PRODUCTS_HERO_IMAGE
-})
+  const thumb = category.value?.thumbnail?.trim();
+  if (thumb) return resolveMediaUrl(thumb);
+  return PRODUCTS_HERO_IMAGE;
+});
 
-const productCountLabel = computed(() => `${totalProducts.value} sản phẩm`)
+const productCountLabel = computed(() => `${totalProducts.value} sản phẩm`);
 
-type PaginationItem = number | 'ellipsis'
+type PaginationItem = number | "ellipsis";
 
 const paginationItems = computed((): PaginationItem[] => {
-  const total = totalPages.value
-  const current = page.value
+  const total = totalPages.value;
+  const current = page.value;
   if (total <= 7) {
-    return Array.from({ length: total }, (_, i) => i + 1)
+    return Array.from({ length: total }, (_, i) => i + 1);
   }
 
-  const items: PaginationItem[] = [1]
-  const windowStart = Math.max(2, current - 1)
-  const windowEnd = Math.min(total - 1, current + 1)
+  const items: PaginationItem[] = [1];
+  const windowStart = Math.max(2, current - 1);
+  const windowEnd = Math.min(total - 1, current + 1);
 
   if (windowStart > 2) {
-    items.push('ellipsis')
+    items.push("ellipsis");
   }
 
   for (let p = windowStart; p <= windowEnd; p += 1) {
-    items.push(p)
+    items.push(p);
   }
 
   if (windowEnd < total - 1) {
-    items.push('ellipsis')
+    items.push("ellipsis");
   }
 
-  items.push(total)
-  return items
-})
+  items.push(total);
+  return items;
+});
 </script>
 
 <style scoped>
@@ -280,7 +280,8 @@ const paginationItems = computed((): PaginationItem[] => {
   background: #f9fafb;
 }
 
-.category-grid-section :deep(.product-card--compact:hover .product-card-image img) {
+.category-grid-section
+  :deep(.product-card--compact:hover .product-card-image img) {
   transform: scale(1.02);
 }
 

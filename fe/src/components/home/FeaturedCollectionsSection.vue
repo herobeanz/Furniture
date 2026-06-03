@@ -4,7 +4,8 @@
       <div class="section-head">
         <h2 class="section-heading">Bộ sưu tập nổi bật</h2>
         <p class="section-desc">
-          Những thiết kế được yêu thích nhất, mang dấu ấn riêng của {{ BRAND_NAME }}.
+          Những thiết kế được yêu thích nhất, mang dấu ấn riêng của
+          {{ BRAND_NAME }}.
         </p>
       </div>
 
@@ -16,7 +17,9 @@
         </div>
       </div>
 
-      <div v-else-if="tiles.length === 0" class="empty">Chưa có bộ sưu tập nào.</div>
+      <div v-else-if="tiles.length === 0" class="empty">
+        Chưa có bộ sưu tập nào.
+      </div>
 
       <div v-else class="bento-grid">
         <RouterLink
@@ -57,7 +60,9 @@
             <div v-else class="bento-img bento-img--placeholder" />
             <div class="bento-overlay">
               <span class="bento-label">{{ tile.subtitle }}</span>
-              <h3 class="bento-heading bento-heading--sm">{{ tile.tagline }}</h3>
+              <h3 class="bento-heading bento-heading--sm">
+                {{ tile.tagline }}
+              </h3>
               <span class="bento-cta bento-cta--icon" aria-hidden="true">
                 <i class="fa-solid fa-arrow-right" />
               </span>
@@ -70,44 +75,46 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import type { Collection } from '@/services/api/collections'
-import { BRAND_NAME } from '@/constants/brand'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import type { Collection } from "@/services/api/collections";
+import { BRAND_NAME } from "@/constants/brand";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 export interface FeaturedTile {
-  id: number
-  name: string
-  thumbnail?: string
-  subtitle: string
-  tagline: string
-  href: string
+  id: number;
+  name: string;
+  thumbnail?: string;
+  subtitle: string;
+  tagline: string;
+  href: string;
 }
 
 interface Props {
-  collections: Collection[]
-  loading?: boolean
+  collections: Collection[];
+  loading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
-})
+});
 
-const loading = computed(() => props.loading)
+const loading = computed(() => props.loading);
 
 const tiles = computed<FeaturedTile[]>(() => {
-  const fromCollections: FeaturedTile[] = props.collections.slice(0, 3).map((c) => ({
-    id: c.id,
-    name: c.name,
-    thumbnail: c.thumbnail,
-    subtitle: c.name,
-    tagline: c.description?.trim() || 'Khám phá bộ sưu tập',
-    href: `/bo-suu-tap/${c.slug}`,
-  }))
+  const fromCollections: FeaturedTile[] = props.collections
+    .slice(0, 3)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      thumbnail: c.thumbnail,
+      subtitle: c.name,
+      tagline: c.description?.trim() || "Khám phá bộ sưu tập",
+      href: `/bo-suu-tap/${c.slug}`,
+    }));
 
-  return fromCollections.slice(0, 3)
-})
+  return fromCollections.slice(0, 3);
+});
 </script>
 
 <style scoped>
@@ -236,7 +243,9 @@ const tiles = computed<FeaturedTile[]>(() => {
   background: rgba(255, 255, 255, 0.2);
   font-size: var(--icon-size-sm);
   line-height: 1;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .group:hover .bento-cta--icon {

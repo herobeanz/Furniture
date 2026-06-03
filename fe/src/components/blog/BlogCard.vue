@@ -11,7 +11,9 @@
       </div>
       <div class="blog-card-body">
         <div class="blog-card-meta">
-          <span v-if="categoryLabel" class="blog-card-category">{{ categoryLabel }}</span>
+          <span v-if="categoryLabel" class="blog-card-category">{{
+            categoryLabel
+          }}</span>
           <span v-if="post.publishedAt" class="blog-card-date">{{
             formatBlogDate(post.publishedAt)
           }}</span>
@@ -28,28 +30,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate } from '@/utils/format'
-import { BLOG_FALLBACK_THUMBNAIL } from '@/constants/blog'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import type { BlogPost } from "@/services/api/blog";
+import { formatBlogDate } from "@/utils/format";
+import { BLOG_FALLBACK_THUMBNAIL } from "@/constants/blog";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 interface Props {
-  post: BlogPost
+  post: BlogPost;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const categoryLabel = computed(() => props.post.category?.trim() ?? '')
+const categoryLabel = computed(() => props.post.category?.trim() ?? "");
 
 const excerptText = computed(() => {
-  const text = props.post.excerpt?.trim()
-  if (text) return text
-  const plain = props.post.content?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  if (!plain) return ''
-  return plain.length > 140 ? `${plain.slice(0, 140)}…` : plain
-})
+  const text = props.post.excerpt?.trim();
+  if (text) return text;
+  const plain = props.post.content
+    ?.replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!plain) return "";
+  return plain.length > 140 ? `${plain.slice(0, 140)}…` : plain;
+});
 </script>
 
 <style scoped>
