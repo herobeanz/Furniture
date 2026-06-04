@@ -14,7 +14,7 @@ Backend là NestJS trong thư mục `be`. Không dùng Render Blueprint hay `ren
 URL production backend (tham chiếu trong doc):
 
 ```text
-https://backend-furniture-rvyn.onrender.com
+https://backend-furniture-g98d.onrender.com
 ```
 
 ## 1. Chuẩn bị trước khi deploy
@@ -45,7 +45,7 @@ Trong Supabase Dashboard, lấy 2 connection strings:
 Dùng pooled connection cho runtime traffic:
 
 ```text
-postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+postgres://postgres.bdsgmnmcinlubhowzbna:<password>@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
 ```
 
 #### `DIRECT_URL`
@@ -53,7 +53,7 @@ postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/p
 Dùng **session pooler** (port `5432` trên host `*.pooler.supabase.com`) cho Prisma migrations trên Render. Không dùng `db.<project-ref>.supabase.co` — Render thường không reach được (lỗi P1001).
 
 ```text
-postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:5432/postgres?sslmode=require
+postgres://postgres.bdsgmnmcinlubhowzbna:<password>@aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 Tham chiếu mẫu: `be/.env.render.example`.
@@ -158,7 +158,7 @@ Couldn't find a package.json file in "/opt/render/project/src"
 Health check:
 
 ```text
-https://backend-furniture-rvyn.onrender.com/health
+https://backend-furniture-g98d.onrender.com/health
 ```
 
 Kết quả mong muốn:
@@ -173,7 +173,7 @@ Kết quả mong muốn:
 API base URL cho frontend:
 
 ```text
-https://backend-furniture-rvyn.onrender.com/api/v1
+https://backend-furniture-g98d.onrender.com/api/v1
 ```
 
 ## 4. Cấu hình frontend trên Vercel
@@ -181,7 +181,7 @@ https://backend-furniture-rvyn.onrender.com/api/v1
 Frontend Vite cần biến môi trường production:
 
 ```text
-VITE_API_BASE_URL=https://backend-furniture-rvyn.onrender.com/api/v1
+VITE_API_BASE_URL=https://backend-furniture-g98d.onrender.com/api/v1
 ```
 
 Các bước:
@@ -191,7 +191,7 @@ Các bước:
 3. Vào **Settings** → **Environment Variables**.
 4. Thêm hoặc sửa:
    - Key: `VITE_API_BASE_URL`
-   - Value: `https://backend-furniture-rvyn.onrender.com/api/v1`
+   - Value: `https://backend-furniture-g98d.onrender.com/api/v1`
    - Environment: Production
 5. Bấm **Save**.
 6. Redeploy frontend production.
@@ -213,7 +213,7 @@ https://dogohungcuong.vercel.app
 4. Kiểm tra request API phải gọi tới:
 
 ```text
-https://backend-furniture-rvyn.onrender.com/api/v1/...
+https://backend-furniture-g98d.onrender.com/api/v1/...
 ```
 
 Không được còn gọi:
@@ -300,7 +300,7 @@ Backend Render:
 - [ ] Build command đúng (npm + prisma + build)
 - [ ] Start command là `npm run start:prod`
 - [ ] Health check path là `/health`
-- [ ] Service URL là `https://backend-furniture-rvyn.onrender.com`
+- [ ] Service URL là `https://backend-furniture-g98d.onrender.com`
 - [ ] `DATABASE_URL` và `DIRECT_URL` đã set
 - [ ] JWT secret đã set
 - [ ] Cloudinary env đã set nếu dùng upload
@@ -308,7 +308,7 @@ Backend Render:
 
 Frontend Vercel:
 
-- [ ] `VITE_API_BASE_URL` trỏ tới `https://backend-furniture-rvyn.onrender.com/api/v1`
+- [ ] `VITE_API_BASE_URL` trỏ tới `https://backend-furniture-g98d.onrender.com/api/v1`
 - [ ] `VITE_APP_URL=https://dogohungcuong.vercel.app`
 - [ ] Redeploy production sau khi đổi env
 - [ ] Network tab không còn gọi localhost
