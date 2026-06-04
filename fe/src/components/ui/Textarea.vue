@@ -36,7 +36,7 @@ const textareaId = computed(() => props.textareaId || 'textarea-' + Math.random(
 .ui-textarea {
   width: 100%;
   padding: 0.625rem 0.75rem;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.5;
   border: 1px solid #d1d5db;
   border-radius: 6px;

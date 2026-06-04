@@ -48,7 +48,7 @@ watch(() => props.sortOption, (newVal) => {
   border-bottom: 1px solid var(--color-border);
 }
 .product-count {
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 .sort-select {
@@ -57,7 +57,7 @@ watch(() => props.sortOption, (newVal) => {
   border-radius: 4px;
   background: var(--color-bg);
   color: var(--color-text);
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   cursor: pointer;
   min-width: 150px;
 }
@@ -77,12 +77,12 @@ watch(() => props.sortOption, (newVal) => {
   }
 
   .product-count {
-    font-size: 0.85rem;
+    font-size: var(--fs-body-sm);
   }
 
   .sort-select {
     width: 100%;
-    font-size: 0.85rem;
+    font-size: var(--fs-body-sm);
     padding: 0.625rem 0.875rem;
   }
 }
@@ -93,11 +93,11 @@ watch(() => props.sortOption, (newVal) => {
   }
 
   .product-count {
-    font-size: 0.8rem;
+    font-size: var(--fs-body-sm);
   }
 
   .sort-select {
-    font-size: 0.8rem;
+    font-size: var(--fs-body-sm);
     padding: 0.5rem 0.75rem;
   }
 }

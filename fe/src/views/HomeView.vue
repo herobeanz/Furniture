@@ -1,93 +1,43 @@
 <template>
   <div class="home-page">
-    <HeroSection
-      :collections="showcaseCollections"
-      :products="products"
-    />
+    <HeroSection />
     <FeaturedCollectionsSection
       :collections="featuredCollections"
       :loading="collectionsLoading"
     />
     <TopProductsSection
-      :categories="rootCategories"
-      :products="tabProducts"
-      :active-tab="activeTab"
-      :loading="tabProductsLoading"
-      @change-tab="activeTab = $event"
+      :products="topProducts"
+      :loading="topProductsLoading"
     />
-    <ReviewsCarousel :reviews="mockReviews" />
+    <ReviewsCarousel :reviews="homeReviews" />
     <BlogSection :posts="blogPosts" :loading="loadingBlogs" />
   </div>
 </template>
 
 <script setup lang="ts">
-defineOptions({ name: 'HomeView' })
-
-import { onMounted, onActivated } from 'vue'
+import { onMounted } from 'vue'
 import HeroSection from '../components/home/HeroSection.vue'
 import FeaturedCollectionsSection from '../components/home/FeaturedCollectionsSection.vue'
 import TopProductsSection from '../components/home/TopProductsSection.vue'
 import BlogSection from '../components/home/BlogSection.vue'
-import ReviewsCarousel, { type Review } from '../components/ReviewsCarousel.vue'
+import ReviewsCarousel from '../components/ReviewsCarousel.vue'
+import { HOME_REVIEWS } from '../constants/home-reviews'
 import { useHomeData } from '../composables/home/useHomeData'
 
 const {
-  products,
   blogPosts,
   featuredCollections,
-  showcaseCollections,
   collectionsLoading,
-  loading,
   loadingBlogs,
-  tabProducts,
-  tabProductsLoading,
-  activeTab,
-  rootCategories,
+  topProducts,
+  topProductsLoading,
   loadInitialData,
 } = useHomeData()
 
-const mockReviews: Review[] = [
-  {
-    id: '1',
-    author: 'Nguyễn Minh Tuấn',
-    location: 'Hà Nội',
-    content:
-      'Chất lượng sản phẩm vượt mong đợi. Gỗ đẹp, chắc chắn và tinh tế trong từng chi tiết.',
-  },
-  {
-    id: '2',
-    author: 'Trần Thị Mai',
-    location: 'Đà Nẵng',
-    content: 'Dịch vụ rất chuyên nghiệp, giao hàng nhanh và hỗ trợ lắp đặt tận nơi nhiệt tình.',
-  },
-  {
-    id: '3',
-    author: 'Lê Hoàng Nam',
-    location: 'TP. Hồ Chí Minh',
-    content: 'Không gian nhà tôi đẹp hơn hẳn từ khi dùng nội thất gỗ của Hùng Cường.',
-  },
-  {
-    id: '4',
-    author: 'Mạnh Hùng',
-    location: 'Ninh Bình',
-    content: 'Phục vụ rất nhiệt tình, sản phẩm đúng mô tả. Tôi rất hài lòng.',
-  },
-  {
-    id: '5',
-    author: 'Lan Nguyễn',
-    location: 'Hà Nội',
-    content: 'Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ lâu dài.',
-  },
-]
+const homeReviews = HOME_REVIEWS
 
 onMounted(() => {
-  void loadInitialData()
-})
-
-onActivated(() => {
-  if (!loading.value && products.value.length === 0) {
-    void loadInitialData()
-  }
+  loadInitialData()
 })
 </script>
 

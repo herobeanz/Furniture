@@ -360,7 +360,7 @@ onMounted(fetchList)
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 @media (min-width: 1024px) {
@@ -402,7 +402,7 @@ onMounted(fetchList)
   border: 1px solid #e5e7eb;
   border-radius: 0.25rem;
   padding: 0.375rem 2rem 0.375rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #4b5563;
 }
 
@@ -416,7 +416,7 @@ onMounted(fetchList)
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -443,7 +443,7 @@ onMounted(fetchList)
   border: 1px solid #e5e7eb;
   border-radius: 0.25rem;
   padding: 0.375rem 2rem 0.375rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #4b5563;
   cursor: pointer;
 }
@@ -458,7 +458,7 @@ onMounted(fetchList)
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -470,7 +470,7 @@ onMounted(fetchList)
   align-self: flex-end;
   background: #5c3c24;
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -491,13 +491,13 @@ onMounted(fetchList)
 }
 
 .btn-primary i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .state-box {
   padding: 2rem 1rem;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
@@ -512,14 +512,14 @@ onMounted(fetchList)
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .data-table thead tr {
   border-bottom: 1px solid #f3f4f6;
   background: rgba(249, 250, 251, 0.4);
   color: #9ca3af;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
@@ -548,7 +548,7 @@ onMounted(fetchList)
 
 .reorder-hint {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #78350f;
   display: flex;
   align-items: center;
@@ -619,7 +619,7 @@ onMounted(fetchList)
 }
 
 .product-sub {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 400;
   color: #9ca3af;
   margin-top: 0.125rem;
@@ -632,7 +632,7 @@ onMounted(fetchList)
 
 .sku-text {
   font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #6b7280;
   background: transparent;
@@ -656,7 +656,7 @@ onMounted(fetchList)
 }
 
 .status-tag {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
@@ -679,17 +679,17 @@ onMounted(fetchList)
 
 .star-active {
   color: #f59e0b;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .star-inactive {
   color: #d1d5db;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .col-date {
   width: 7rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 
@@ -728,7 +728,7 @@ onMounted(fetchList)
 
 .table-footer {
   padding-top: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
   font-weight: 500;
 }

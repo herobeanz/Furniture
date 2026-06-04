@@ -55,7 +55,7 @@ const checkboxId = computed(() => props.checkboxId || 'checkbox-' + Math.random(
 }
 
 .ui-checkbox-label {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #374151;
   cursor: pointer;
   user-select: none;

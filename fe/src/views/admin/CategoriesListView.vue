@@ -58,7 +58,25 @@
                   <i class="fa-solid fa-bars" />
                 </span>
               </td>
-              <td class="col-name">{{ item.name }}</td>
+              <td class="col-name">
+                <div class="category-cell">
+                  <div class="category-thumb">
+                    <img
+                      v-if="item.thumbnail"
+                      :src="resolveMediaUrl(item.thumbnail)"
+                      :alt="item.name"
+                      class="thumb-img"
+                    />
+                    <i v-else class="fa-regular fa-images thumb-placeholder" />
+                  </div>
+                  <div class="category-text">
+                    <div class="category-name">{{ item.name }}</div>
+                    <div v-if="item.description" class="category-sub">
+                      {{ truncateDescription(item.description) }}
+                    </div>
+                  </div>
+                </div>
+              </td>
               <td class="col-slug">
                 <code class="slug-text">{{ item.slug }}</code>
               </td>
@@ -106,6 +124,7 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { categoryApi, type Category } from '@/services/api/categories'
 import { logger } from '@/utils/logger'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
 const items = ref<Category[]>([])
 const loading = ref(true)
@@ -119,6 +138,11 @@ function sortByOrder(list: Category[]): Category[] {
   return [...list].sort(
     (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || a.id - b.id,
   )
+}
+
+function truncateDescription(text: string, max = 72): string {
+  if (text.length <= max) return text
+  return `${text.slice(0, max - 3)}...`
 }
 
 function onDragStart(index: number, e: DragEvent) {
@@ -235,7 +259,7 @@ onMounted(fetchList)
 
 .panel-head h2 {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -244,7 +268,7 @@ onMounted(fetchList)
 
 .panel-head p {
   margin: 0.125rem 0 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 
@@ -254,7 +278,7 @@ onMounted(fetchList)
   gap: 0.375rem;
   background: #5c3c24;
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -269,12 +293,12 @@ onMounted(fetchList)
 }
 
 .btn-primary i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .reorder-hint {
   margin: 0 0 0.75rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -284,7 +308,7 @@ onMounted(fetchList)
 .state-box {
   padding: 2rem 1rem;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
@@ -299,14 +323,14 @@ onMounted(fetchList)
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .data-table thead tr {
   border-bottom: 1px solid #f3f4f6;
   background: rgba(249, 250, 251, 0.4);
   color: #9ca3af;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
@@ -368,8 +392,50 @@ onMounted(fetchList)
 }
 
 .col-name {
+  min-width: 14rem;
+}
+
+.category-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.category-thumb {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-placeholder {
+  font-size: var(--fs-body-sm);
+  color: #d1d5db;
+}
+
+.category-name {
   font-weight: 700;
   color: #111827;
+  line-height: 1.3;
+}
+
+.category-sub {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  color: #9ca3af;
+  margin-top: 0.125rem;
+  line-height: 1.3;
 }
 
 .col-slug {
@@ -379,7 +445,7 @@ onMounted(fetchList)
 
 .slug-text {
   font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #6b7280;
   background: #f9fafb;
@@ -404,7 +470,7 @@ onMounted(fetchList)
 }
 
 .status-tag {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
@@ -450,7 +516,7 @@ onMounted(fetchList)
 .table-footer {
   padding-top: 1rem;
   margin-top: 0.5rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 </style>

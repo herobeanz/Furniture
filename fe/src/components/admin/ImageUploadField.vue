@@ -261,7 +261,7 @@ function onDrop(e: DragEvent) {
 }
 
 .upload-icon {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   color: #9ca3af;
   margin-bottom: 0.5rem;
 }
@@ -269,7 +269,7 @@ function onDrop(e: DragEvent) {
 .upload-title {
   font-weight: 700;
   color: #374151;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .upload-btn {
@@ -277,7 +277,7 @@ function onDrop(e: DragEvent) {
   background: #fff;
   border: 1px solid var(--color-border);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   padding: 0.25rem 0.75rem;
   border-radius: 0.25rem;
   color: #374151;
@@ -291,20 +291,20 @@ function onDrop(e: DragEvent) {
 
 .upload-hint {
   margin-top: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
 .upload-error {
   margin-top: 0.5rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #dc2626;
   font-weight: 600;
 }
 
 .field-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #374151;
   margin-bottom: 0.375rem;
@@ -335,12 +335,12 @@ function onDrop(e: DragEvent) {
   align-items: center;
   gap: 0.375rem;
   color: #9ca3af;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
 .thumb-preview-empty i {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
 }
 
 .thumb-inline {
@@ -369,7 +369,7 @@ function onDrop(e: DragEvent) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
 }
 
 .remove-btn:hover {
@@ -407,19 +407,19 @@ function onDrop(e: DragEvent) {
   align-items: center;
   gap: 0.375rem;
   color: #9ca3af;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
 .hero-preview-empty i {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
 }
 
 .hero-change-btn {
   width: 100%;
   border: 1px solid var(--color-border);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   background: #fff;

@@ -15,7 +15,9 @@ export function useContactInfo() {
   const phoneNumber = computed(() => SITE.contact.phone)
   const email = computed(() => SITE.contact.email)
   const facebookUrl = computed(() => SITE.social.facebook || '')
+  const messengerUrl = computed(() => SITE.social.messenger || '')
   const zaloUrl = computed(() => SITE.social.zalo || '')
+  const tiktokUrl = computed(() => SITE.social.tiktok || '')
   const instagramUrl = computed(() => SITE.social.instagram || '')
   const youtubeUrl = computed(() => SITE.social.youtube || '')
   const mapUrl = computed(() => SITE.contact.mapUrl)
@@ -30,7 +32,9 @@ export function useContactInfo() {
     () =>
       !!(
         facebookUrl.value ||
+        messengerUrl.value ||
         zaloUrl.value ||
+        tiktokUrl.value ||
         instagramUrl.value ||
         youtubeUrl.value
       )
@@ -42,7 +46,9 @@ export function useContactInfo() {
     phoneTel,
     email,
     facebookUrl,
+    messengerUrl,
     zaloUrl,
+    tiktokUrl,
     instagramUrl,
     youtubeUrl,
     mapUrl,

@@ -66,7 +66,7 @@ const editorInit = computed(() => ({
     'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | ' +
     'bullist numlist outdent indent | link image table | removeformat code',
   content_style:
-    'body { font-family: Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1f2937; }',
+    'body { font-family: Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #1f2937; }',
   automatic_uploads: true,
   images_upload_handler: uploadEditorImage,
   convert_urls: false,

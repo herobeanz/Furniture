@@ -9,39 +9,38 @@
     </nav>
 
     <header class="post-header">
-      <span v-if="post.category" class="post-category">{{ post.category }}</span>
+      <span v-if="post.category" class="post-category">{{
+        post.category
+      }}</span>
       <h1 class="post-title">{{ post.title }}</h1>
       <div class="post-meta">
         <span v-if="post.author">{{ post.author }}</span>
-        <span v-if="post.publishedAt">{{ formatBlogDate(post.publishedAt) }}</span>
+        <span v-if="post.publishedAt">{{
+          formatBlogDate(post.publishedAt)
+        }}</span>
       </div>
     </header>
-
-    <div v-if="post.thumbnail" class="post-image">
-      <img :src="resolveMediaUrl(post.thumbnail)" :alt="post.title" />
-    </div>
 
     <RichHtmlContent class="post-content" :html="post.content" />
   </article>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate } from '@/utils/format'
-import RichHtmlContent from '@/components/common/RichHtmlContent.vue'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { RouterLink } from "vue-router";
+import type { BlogPost } from "@/services/api/blog";
+import { formatBlogDate } from "@/utils/format";
+import RichHtmlContent from "@/components/common/RichHtmlContent.vue";
 
 interface Props {
-  post: BlogPost
+  post: BlogPost;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <style scoped>
 .breadcrumb {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin-bottom: 1.5rem;
 }
@@ -56,7 +55,7 @@ defineProps<Props>()
 }
 .post-category {
   display: inline-block;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   color: var(--color-primary);
@@ -64,28 +63,17 @@ defineProps<Props>()
   letter-spacing: 0.5px;
 }
 .post-title {
-  font-size: 2rem;
+  font-size: var(--fs-page-title);
   font-weight: 700;
   margin-bottom: 1rem;
   line-height: 1.3;
   color: #1a1a1a;
 }
 .post-meta {
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   display: flex;
   gap: 1rem;
   align-items: center;
-}
-.post-image {
-  width: 100%;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.post-image img {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 </style>

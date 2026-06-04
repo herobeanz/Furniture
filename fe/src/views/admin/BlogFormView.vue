@@ -559,7 +559,7 @@ async function save() {
 
 <style scoped>
 .blog-form-page {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #1f2937;
 }
 
@@ -583,7 +583,7 @@ async function save() {
 .page-title {
   margin: 0;
   font-family: var(--font-serif, Georgia, serif);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
 }
@@ -594,7 +594,7 @@ async function save() {
   align-items: center;
   gap: 0.375rem;
   margin: 0.25rem 0 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #9ca3af;
 }
@@ -613,7 +613,7 @@ async function save() {
 }
 
 .page-breadcrumb i {
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
 }
 
 .page-header-actions {
@@ -673,7 +673,7 @@ async function save() {
 }
 
 .section-heading {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -739,12 +739,12 @@ async function save() {
   justify-content: center;
   gap: 0.375rem;
   color: #d1d5db;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 
 .blog-card-image-placeholder i {
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
 }
 
 .blog-thumb-remove {
@@ -761,7 +761,7 @@ async function save() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .blog-thumb-remove:hover {
@@ -787,7 +787,7 @@ async function save() {
 .field-sublabel {
   font-weight: 600;
   color: #6b7280;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .required {
@@ -800,7 +800,7 @@ async function save() {
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #1f2937;
 }
@@ -816,7 +816,7 @@ async function save() {
 }
 
 .field-hint {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   line-height: 1.4;
   margin: 0;
@@ -835,7 +835,7 @@ async function save() {
   position: absolute;
   right: 0.75rem;
   bottom: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -869,7 +869,7 @@ async function save() {
   right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -902,7 +902,7 @@ async function save() {
   align-items: center;
   justify-content: space-between;
   margin-top: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -949,7 +949,7 @@ async function save() {
 }
 
 .status-badge {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
@@ -1001,7 +1001,7 @@ async function save() {
   align-items: center;
   gap: 0.375rem;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   border: 1px solid transparent;

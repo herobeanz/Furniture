@@ -47,6 +47,7 @@ export interface ProductQueryParams {
   search?: string
   sort?: string
   order?: 'asc' | 'desc'
+  featured?: boolean
 }
 
 export const productApi = {

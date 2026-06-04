@@ -1,9 +1,15 @@
 <template>
   <article class="collection-card">
-    <RouterLink :to="'/bo-suu-tap/' + collection.slug" class="collection-card-link">
+    <RouterLink
+      :to="'/bo-suu-tap/' + collection.slug"
+      class="collection-card-link"
+    >
       <div class="collection-card-image-wrap">
         <img
-          :src="resolveMediaUrl(collection.thumbnail) || COLLECTIONS_FALLBACK_THUMBNAIL"
+          :src="
+            resolveMediaUrl(collection.thumbnail) ||
+            COLLECTIONS_FALLBACK_THUMBNAIL
+          "
           :alt="collection.name"
           class="collection-card-image"
           loading="lazy"
@@ -23,22 +29,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import type { Collection } from '@/services/api/collections'
-import { COLLECTIONS_FALLBACK_THUMBNAIL } from '@/constants/collections-page'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import type { Collection } from "@/services/api/collections";
+import { COLLECTIONS_FALLBACK_THUMBNAIL } from "@/constants/collections-page";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 interface Props {
-  collection: Collection
+  collection: Collection;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const productCountLabel = computed(() => {
-  const n = props.collection.productCount ?? 0
-  return `${n} sản phẩm`
-})
+  const n = props.collection.productCount ?? 0;
+  return `${n} sản phẩm`;
+});
 </script>
 
 <style scoped>
@@ -90,7 +96,7 @@ const productCountLabel = computed(() => {
 }
 
 .collection-card-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0;
@@ -98,7 +104,7 @@ const productCountLabel = computed(() => {
 }
 
 .collection-card-count {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0.125rem 0 0;
 }
@@ -128,7 +134,7 @@ const productCountLabel = computed(() => {
 }
 
 .collection-card-arrow i {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   line-height: 1;
 }
 </style>

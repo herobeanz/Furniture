@@ -1,4 +1,4 @@
-import { ref, computed, watch, onActivated } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { categoryApi, type Category } from '@/services/api/categories'
 import type { Product } from '@/services/api/products'
@@ -10,15 +10,14 @@ import {
   productsSortToApi,
   type ProductsPageSortKey,
 } from '@/constants/category-page'
-import { useProductsCacheStore } from '@/stores/productsCache'
-import { logger } from '@/utils/logger'
+import { useRouterLoadingStore } from '@/stores/routerLoading'
 
 /**
  * Composable for Category page (/san-pham/:categorySlug)
  */
 export function useCategoryData() {
+  const routerLoading = useRouterLoadingStore()
   const route = useRoute()
-  const productsCache = useProductsCacheStore()
   const categorySlug = computed(
     () => (route.params.categorySlug as string) ?? '',
   )
@@ -51,67 +50,12 @@ export function useCategoryData() {
     Math.max(1, Math.ceil(totalProducts.value / CATEGORY_PAGE_SIZE)),
   )
 
-  function buildProductParams(): Record<string, unknown> {
-    const { sort, order } = productsSortToApi(sortKey.value)
-    return {
-      page: page.value,
-      limit: CATEGORY_PAGE_SIZE,
-      sort,
-      order,
-    }
-  }
-
-  async function fetchProducts(options?: { force?: boolean }) {
-    if (!category.value || error.value) return
-    const slug = category.value.slug
-    const params = buildProductParams()
-    const cached = productsCache.peekCategoryList(slug, params)
-
-    if (cached && !options?.force) {
-      products.value = cached.data
-      totalProducts.value = cached.total
-      loadingProducts.value = false
-      if (!productsCache.isCategoryListFresh(slug, params)) {
-        void revalidateProducts(slug, params)
-      }
-      return
-    }
-
-    loadingProducts.value = true
-    try {
-      const res = await productsCache.fetchCategoryList(slug, params, options)
-      products.value = res.data
-      totalProducts.value = res.total
-    } catch {
-      if (!cached) {
-        products.value = []
-        totalProducts.value = 0
-      }
-    } finally {
-      loadingProducts.value = false
-    }
-  }
-
-  async function revalidateProducts(
-    slug: string,
-    params: Record<string, unknown>,
-  ) {
-    try {
-      const res = await productsCache.fetchCategoryList(slug, params, {
-        force: true,
-      })
-      products.value = res.data
-      totalProducts.value = res.total
-    } catch (e) {
-      logger.error('Failed to refresh category products:', e)
-    }
-  }
-
   async function fetchCategory() {
     if (!categorySlug.value) return
     loading.value = true
     error.value = ''
     isNotFound.value = false
+    routerLoading.start('Đang tải danh mục...')
 
     if (isPreviewMode.value) {
       const preview = getPreviewData('category', categorySlug.value)
@@ -135,6 +79,30 @@ export function useCategoryData() {
       category.value = null
     } finally {
       loading.value = false
+      routerLoading.stop()
+    }
+  }
+
+  async function fetchProducts() {
+    if (!category.value || error.value) return
+    loadingProducts.value = true
+    routerLoading.start('Đang tải sản phẩm...')
+    try {
+      const { sort, order } = productsSortToApi(sortKey.value)
+      const res = await categoryApi.getCategoryProducts(category.value.slug, {
+        page: page.value,
+        limit: CATEGORY_PAGE_SIZE,
+        sort,
+        order,
+      })
+      products.value = (res.data ?? []) as Product[]
+      totalProducts.value = res.total ?? 0
+    } catch {
+      products.value = []
+      totalProducts.value = 0
+    } finally {
+      loadingProducts.value = false
+      routerLoading.stop()
     }
   }
 
@@ -159,7 +127,7 @@ export function useCategoryData() {
     () => {
       reset()
       if (categorySlug.value) {
-        void fetchCategory()
+        fetchCategory()
       }
     },
     { immediate: true },
@@ -171,13 +139,7 @@ export function useCategoryData() {
 
   watch([page, sortKey], () => {
     if (category.value) {
-      void fetchProducts()
-    }
-  })
-
-  onActivated(() => {
-    if (category.value) {
-      void fetchProducts()
+      fetchProducts()
     }
   })
 

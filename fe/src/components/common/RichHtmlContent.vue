@@ -14,30 +14,8 @@ const resolvedHtml = computed(() => formatRichContent(props.html))
 </script>
 
 <style scoped>
-.rich-html-content {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: #333;
-}
-
 .rich-html-content :deep(p) {
   margin-bottom: 1.25rem;
-}
-
-.rich-html-content :deep(h2) {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  color: #1a1a1a;
-}
-
-.rich-html-content :deep(h3) {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: #1a1a1a;
 }
 
 .rich-html-content :deep(ul),

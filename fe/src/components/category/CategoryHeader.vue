@@ -19,13 +19,13 @@ defineProps<Props>()
   margin-bottom: 1.5rem;
 }
 .category-title {
-  font-size: 1.75rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 .category-desc {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--fs-body);
   line-height: 1.5;
 }
 
@@ -35,11 +35,11 @@ defineProps<Props>()
   }
 
   .category-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-section-title);
   }
 
   .category-desc {
-    font-size: 0.9rem;
+    font-size: var(--fs-body-sm);
   }
 }
 
@@ -49,11 +49,11 @@ defineProps<Props>()
   }
 
   .category-title {
-    font-size: 1.25rem;
+    font-size: var(--fs-card-title);
   }
 
   .category-desc {
-    font-size: 0.85rem;
+    font-size: var(--fs-body-sm);
   }
 }
 </style>

@@ -4,6 +4,7 @@ import { useToast } from '@/composables/useToast'
 import { extractErrorMessage } from '@/utils/error'
 import { useContactInfo } from '@/composables/common/useContactInfo'
 import { CONTACT_TOPICS } from '@/constants/contact'
+import { validateEmailStrict, validatePhoneVN } from '@/utils/inputValidation'
 
 /**
  * Composable for Contact form logic
@@ -23,13 +24,30 @@ export function useContactForm() {
   const submitMessage = ref('')
   const submitError = ref(false)
 
-  const { facebookUrl, zaloUrl, hasSocialLinks } = useContactInfo()
+  const { facebookUrl, messengerUrl, zaloUrl, tiktokUrl, hasSocialLinks } =
+    useContactInfo()
 
   async function submit(source: 'contact' | 'product' = 'contact', productId?: number) {
     sending.value = true
     submitMessage.value = ''
     submitError.value = false
     try {
+      const phoneCheck = validatePhoneVN(form.phone)
+      if (!phoneCheck.valid) {
+        submitError.value = true
+        submitMessage.value = phoneCheck.message || 'Số điện thoại không hợp lệ'
+        toast.error('Gửi thất bại', submitMessage.value)
+        return false
+      }
+
+      const emailCheck = validateEmailStrict(form.email)
+      if (!emailCheck.valid) {
+        submitError.value = true
+        submitMessage.value = emailCheck.message || 'Email không đúng định dạng'
+        toast.error('Gửi thất bại', submitMessage.value)
+        return false
+      }
+
       const topicLabel = CONTACT_TOPICS.find((t) => t.value === form.topic)?.label
       const topicLine =
         form.topic && topicLabel && topicLabel !== 'Chọn chủ đề'
@@ -80,7 +98,9 @@ export function useContactForm() {
     submitMessage,
     submitError,
     facebookUrl,
+    messengerUrl,
     zaloUrl,
+    tiktokUrl,
     hasSocialLinks,
     submit,
     reset,

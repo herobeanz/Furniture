@@ -47,7 +47,7 @@ const isProductsTab = computed(() => route.path.startsWith('/admin/products/list
 .page-intro h1 {
   margin: 0;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
 }
@@ -57,7 +57,7 @@ const isProductsTab = computed(() => route.path.startsWith('/admin/products/list
   gap: 1.5rem;
   margin-top: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
 }
 

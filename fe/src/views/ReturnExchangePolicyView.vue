@@ -8,9 +8,9 @@
             Dễ dàng đổi trả<br />An tâm mua sắm
           </h1>
           <p class="return-policy-hero-text">
-            {{ BRAND_NAME }} luôn mong muốn mang đến trải nghiệm mua sắm tốt nhất
-            cho khách hàng. Chúng tôi hỗ trợ đổi trả sản phẩm nhanh chóng, minh
-            bạch và thuận tiện.
+            {{ BRAND_NAME }} luôn mong muốn mang đến trải nghiệm mua sắm tốt
+            nhất cho khách hàng. Chúng tôi hỗ trợ đổi trả sản phẩm nhanh chóng,
+            minh bạch và thuận tiện.
           </p>
         </div>
         <div class="return-policy-hero-visual">
@@ -38,7 +38,9 @@
             />
             <div>
               <h4 class="return-policy-feature-title">{{ feature.title }}</h4>
-              <p class="return-policy-feature-desc">{{ feature.description }}</p>
+              <p class="return-policy-feature-desc">
+                {{ feature.description }}
+              </p>
             </div>
           </div>
         </div>
@@ -49,7 +51,9 @@
       <div class="container">
         <div class="return-policy-terms-head">
           <span class="eyebrow">Nội dung chính sách</span>
-          <h2 class="return-policy-terms-title">Điều kiện và quy định đổi trả</h2>
+          <h2 class="return-policy-terms-title">
+            Điều kiện và quy định đổi trả
+          </h2>
           <p class="return-policy-terms-sub">
             Vui lòng đọc kỹ các điều kiện dưới đây để đảm bảo quyền lợi của bạn.
           </p>
@@ -67,7 +71,9 @@
               <h3 class="return-policy-card-title">{{ card.title }}</h3>
             </div>
 
-            <p v-if="card.intro" class="return-policy-card-intro">{{ card.intro }}</p>
+            <p v-if="card.intro" class="return-policy-card-intro">
+              {{ card.intro }}
+            </p>
 
             <ul v-if="card.items?.length" class="return-policy-card-list">
               <li v-for="(item, i) in card.items" :key="i">
@@ -84,7 +90,11 @@
                 :key="step.title"
                 class="return-policy-step"
               >
-                <i :class="step.icon" class="return-policy-step-icon" aria-hidden="true" />
+                <i
+                  :class="step.icon"
+                  class="return-policy-step-icon"
+                  aria-hidden="true"
+                />
                 <p>
                   <strong>{{ step.title }}</strong> {{ step.text }}
                 </p>
@@ -109,8 +119,8 @@
             <div>
               <h3 class="return-policy-cta-title">Cần hỗ trợ đổi trả?</h3>
               <p class="return-policy-cta-text">
-                Đội ngũ chăm sóc khách hàng của {{ BRAND_NAME }} luôn sẵn sàng hỗ
-                trợ bạn nhanh chóng và tận tâm nhất.
+                Đội ngũ chăm sóc khách hàng của {{ BRAND_NAME }} luôn sẵn sàng
+                hỗ trợ bạn nhanh chóng và tận tâm nhất.
               </p>
             </div>
           </div>
@@ -118,9 +128,11 @@
             <p>
               <i class="fa-solid fa-phone" aria-hidden="true" />
               Hotline:
-              <a :href="'tel:' + phoneTel" class="return-policy-contact-strong">{{
-                phoneDisplay
-              }}</a>
+              <a
+                :href="'tel:' + phoneTel"
+                class="return-policy-contact-strong"
+                >{{ phoneDisplay }}</a
+              >
             </p>
             <p>
               <i class="fa-regular fa-envelope" aria-hidden="true" />
@@ -141,31 +153,25 @@
 </template>
 
 <script setup lang="ts">
-import { BRAND_NAME } from '@/constants/brand'
+import { BRAND_NAME } from "@/constants/brand";
 import {
   RETURN_EXCHANGE_HERO_FEATURES,
   RETURN_EXCHANGE_HERO_IMAGE,
   RETURN_EXCHANGE_TERM_CARDS,
-} from '@/constants/return-exchange-policy'
-import { useContactInfo } from '@/composables/common/useContactInfo'
+} from "@/constants/return-exchange-policy";
+import { useContactInfo } from "@/composables/common/useContactInfo";
 
-const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useContactInfo()
+const {
+  phoneDisplay,
+  phoneTel,
+  email,
+  hoursShort: CONTACT_HOURS_SHORT,
+} = useContactInfo();
 </script>
 
 <style scoped>
 .return-policy-page {
   background: #faf9f6;
-}
-
-.eyebrow {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-  font-family: var(--font-sans);
 }
 
 .return-policy-hero {
@@ -196,18 +202,17 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 .return-policy-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
-  line-height: 1.15;
+  font-size: var(--fs-page-title);
+  line-height: var(--lh-h1);
   color: var(--color-heading);
   margin-bottom: 1rem;
   font-weight: 600;
 }
 
 .return-policy-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-lg);
   color: var(--color-text-muted);
-  line-height: 1.7;
-  max-width: 20rem;
+  line-height: var(--lh-body);
   margin: 0;
 }
 
@@ -276,27 +281,27 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 .return-policy-feature-icon {
   color: var(--color-primary);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin-top: 0.125rem;
   flex-shrink: 0;
 }
 
 .return-policy-feature-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.25rem;
 }
 
 .return-policy-feature-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
-  line-height: 1.5;
+  line-height: var(--lh-body);
   margin: 0;
 }
 
 .return-policy-terms {
-  padding-top: 0;
+  padding-top: 2rem;
 }
 
 .return-policy-terms-head {
@@ -306,14 +311,16 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 .return-policy-terms-title {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
+  line-height: var(--lh-h2);
   color: var(--color-heading);
   margin: 0 0 0.5rem;
   font-weight: 600;
 }
 
 .return-policy-terms-sub {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body);
   color: var(--color-text-muted);
   margin: 0;
 }
@@ -332,7 +339,7 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 
 @media (min-width: 1024px) {
   .return-policy-cards {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -360,7 +367,7 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 .return-policy-card-num {
   background: #f5f2eb;
   color: var(--color-primary-dark);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.25rem 0.5rem;
   border-radius: 2px;
@@ -368,23 +375,24 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 }
 
 .return-policy-card-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-card-title);
+  line-height: var(--lh-h3);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0;
 }
 
 .return-policy-card-intro {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text-muted);
-  line-height: 1.65;
+  line-height: var(--lh-body);
   margin: 0 0 0.75rem;
 }
 
 .return-policy-card-list {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text);
-  line-height: 1.55;
+  line-height: var(--lh-body);
   margin: 0 0 1rem;
   padding-left: 1rem;
   list-style: disc;
@@ -409,9 +417,9 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
   display: flex;
   align-items: flex-start;
   gap: 0.625rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body);
   color: var(--color-text);
-  line-height: 1.55;
+  line-height: var(--lh-body);
 }
 
 .return-policy-step-icon {
@@ -428,16 +436,16 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 .return-policy-card-note {
   background: #fcfbfa;
   border: 1px solid var(--color-border-light);
-  padding: 0.625rem;
+  padding: 0.75rem;
   border-radius: 2px;
-  font-size: 0.625rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
-  line-height: 1.55;
+  line-height: var(--lh-body);
   margin-top: auto;
 }
 
 .return-policy-cta {
-  padding-top: 0;
+  padding-top: 2.5rem;
   padding-bottom: 4rem;
 }
 
@@ -477,20 +485,21 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 
 .return-policy-cta-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-card-title);
+  line-height: var(--lh-h3);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.25rem;
 }
 
 .return-policy-cta-text {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
-  line-height: 1.55;
+  line-height: var(--lh-body);
   margin: 0;
   max-width: 28rem;
 }
@@ -498,17 +507,17 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
 .return-policy-cta-contact {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.75rem;
+  gap: 0.625rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text);
+  width: 100%;
 }
 
 @media (min-width: 768px) {
   .return-policy-cta-contact {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    align-items: center;
+    width: auto;
+    min-width: 16rem;
+    flex-shrink: 0;
   }
 }
 
@@ -517,7 +526,12 @@ const { phoneDisplay, phoneTel, email, hoursShort: CONTACT_HOURS_SHORT } = useCo
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.35rem 0.5rem;
+  line-height: 1.5;
+}
+
+.return-policy-cta-contact .return-policy-contact-link {
+  word-break: break-all;
 }
 
 .return-policy-cta-contact i {

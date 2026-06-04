@@ -5,22 +5,6 @@
     <ErrorState v-else-if="error" :message="error" />
 
     <template v-else-if="category">
-      <nav class="category-breadcrumb container" aria-label="Breadcrumb">
-        <RouterLink to="/" class="category-breadcrumb-link">Trang chủ</RouterLink>
-        <i
-          class="fa-solid fa-chevron-right category-breadcrumb-sep"
-          aria-hidden="true"
-        />
-        <RouterLink to="/san-pham" class="category-breadcrumb-link">
-          Sản phẩm
-        </RouterLink>
-        <i
-          class="fa-solid fa-chevron-right category-breadcrumb-sep"
-          aria-hidden="true"
-        />
-        <span class="category-breadcrumb-current">{{ category.name }}</span>
-      </nav>
-
       <section class="category-hero">
         <div class="container category-hero-inner">
           <div class="category-hero-copy">
@@ -48,11 +32,11 @@
         </div>
       </section>
 
-      <section class="category-toolbar-section container">
+      <section class="container category-toolbar-section">
         <CategoryProductToolbar v-model:sort-key="sortKey" />
       </section>
 
-      <section class="category-grid-section container">
+      <section class="container category-grid-section">
         <ProductGridSkeleton v-if="loadingProducts" :columns="4" :count="8" />
         <EmptyState
           v-else-if="products.length === 0"
@@ -119,21 +103,18 @@
 </template>
 
 <script setup lang="ts">
-defineOptions({ name: 'CategoryView' })
-
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import ProductGrid from '@/components/ProductGrid.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
-import CategoryProductToolbar from '@/components/category/CategoryProductToolbar.vue'
-import LoadingState from '@/components/common/LoadingState.vue'
-import EmptyState from '@/components/common/EmptyState.vue'
-import ErrorState from '@/components/common/ErrorState.vue'
-import ProductGridSkeleton from '@/components/skeleton/ProductGridSkeleton.vue'
-import { useCategoryData } from '@/composables/category/useCategoryData'
-import { categoryStripIcon } from '@/constants/products-page'
-import { PRODUCTS_HERO_IMAGE } from '@/constants/category-page'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import ProductGrid from "@/components/ProductGrid.vue";
+import NotFoundView from "@/views/NotFoundView.vue";
+import CategoryProductToolbar from "@/components/category/CategoryProductToolbar.vue";
+import LoadingState from "@/components/common/LoadingState.vue";
+import EmptyState from "@/components/common/EmptyState.vue";
+import ErrorState from "@/components/common/ErrorState.vue";
+import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
+import { useCategoryData } from "@/composables/category/useCategoryData";
+import { categoryStripIcon } from "@/constants/products-page";
+import { PRODUCTS_HERO_IMAGE } from "@/constants/category-page";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 const {
   category,
@@ -147,81 +128,54 @@ const {
   isNotFound,
   totalPages,
   goPage,
-} = useCategoryData()
+} = useCategoryData();
 
 const categoryIcon = computed(() =>
-  category.value ? categoryStripIcon(category.value.slug) : 'fa-box',
-)
+  category.value ? categoryStripIcon(category.value.slug) : "fa-box",
+);
 
 const heroImage = computed(() => {
-  const thumb = category.value?.thumbnail?.trim()
-  if (thumb) return resolveMediaUrl(thumb)
-  return PRODUCTS_HERO_IMAGE
-})
+  const thumb = category.value?.thumbnail?.trim();
+  if (thumb) return resolveMediaUrl(thumb);
+  return PRODUCTS_HERO_IMAGE;
+});
 
-const productCountLabel = computed(() => `${totalProducts.value} sản phẩm`)
+const productCountLabel = computed(() => `${totalProducts.value} sản phẩm`);
 
-type PaginationItem = number | 'ellipsis'
+type PaginationItem = number | "ellipsis";
 
 const paginationItems = computed((): PaginationItem[] => {
-  const total = totalPages.value
-  const current = page.value
+  const total = totalPages.value;
+  const current = page.value;
   if (total <= 7) {
-    return Array.from({ length: total }, (_, i) => i + 1)
+    return Array.from({ length: total }, (_, i) => i + 1);
   }
 
-  const items: PaginationItem[] = [1]
-  const windowStart = Math.max(2, current - 1)
-  const windowEnd = Math.min(total - 1, current + 1)
+  const items: PaginationItem[] = [1];
+  const windowStart = Math.max(2, current - 1);
+  const windowEnd = Math.min(total - 1, current + 1);
 
   if (windowStart > 2) {
-    items.push('ellipsis')
+    items.push("ellipsis");
   }
 
   for (let p = windowStart; p <= windowEnd; p += 1) {
-    items.push(p)
+    items.push(p);
   }
 
   if (windowEnd < total - 1) {
-    items.push('ellipsis')
+    items.push("ellipsis");
   }
 
-  items.push(total)
-  return items
-})
+  items.push(total);
+  return items;
+});
 </script>
 
 <style scoped>
 .category-page {
   padding-bottom: 0;
   background: #faf9f6;
-}
-
-.category-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1.5rem 0 0;
-  font-size: 0.6875rem;
-  color: #9ca3af;
-}
-
-.category-breadcrumb-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.category-breadcrumb-link:hover {
-  color: var(--color-primary);
-}
-
-.category-breadcrumb-sep {
-  font-size: 0.4375rem;
-}
-
-.category-breadcrumb-current {
-  color: #4b5563;
 }
 
 .category-hero {
@@ -261,7 +215,7 @@ const paginationItems = computed((): PaginationItem[] => {
 .category-hero-title {
   margin: 0 0 0.75rem;
   font-family: var(--font-serif, Georgia, serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   font-weight: 600;
   color: #111827;
   letter-spacing: 0.04em;
@@ -269,8 +223,7 @@ const paginationItems = computed((): PaginationItem[] => {
 
 .category-hero-text {
   margin: 0 0 1rem;
-  max-width: 20rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.65;
   color: #4b5563;
 }
@@ -280,13 +233,13 @@ const paginationItems = computed((): PaginationItem[] => {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
 .category-hero-count-icon {
   color: var(--color-primary);
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .category-hero-visual {
@@ -326,7 +279,8 @@ const paginationItems = computed((): PaginationItem[] => {
   background: #f9fafb;
 }
 
-.category-grid-section :deep(.product-card--compact:hover .product-card-image img) {
+.category-grid-section
+  :deep(.product-card--compact:hover .product-card-image img) {
   transform: scale(1.02);
 }
 
@@ -336,7 +290,7 @@ const paginationItems = computed((): PaginationItem[] => {
   align-items: center;
   gap: 0.375rem;
   padding: 3rem 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #4b5563;
 }
 

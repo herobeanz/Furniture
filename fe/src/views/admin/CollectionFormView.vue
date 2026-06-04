@@ -841,7 +841,7 @@ async function save() {
 
 <style scoped>
 .collection-form-page {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #1f2937;
 }
 
@@ -888,14 +888,14 @@ async function save() {
 
 .page-title {
   font-family: var(--font-serif, Georgia, serif);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 700;
   color: #030712;
 }
 
 .page-breadcrumb {
   margin-top: 0.125rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #9ca3af;
   display: flex;
@@ -914,7 +914,7 @@ async function save() {
 }
 
 .page-breadcrumb i {
-  font-size: 0.5rem;
+  font-size: var(--fs-caption);
 }
 
 .page-header-actions {
@@ -964,7 +964,7 @@ async function save() {
 }
 
 .section-heading {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -1018,7 +1018,7 @@ async function save() {
   border: 1px solid var(--color-border);
   border-radius: 0.25rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #1f2937;
 }
@@ -1038,7 +1038,7 @@ async function save() {
 }
 
 .field-hint {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   line-height: 1.4;
 }
@@ -1056,7 +1056,7 @@ async function save() {
   position: absolute;
   right: 0.75rem;
   bottom: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
   pointer-events: none;
 }
@@ -1104,7 +1104,7 @@ async function save() {
 }
 
 .products-picker-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   text-transform: uppercase;
@@ -1114,13 +1114,13 @@ async function save() {
 
 .products-picker-hint {
   margin: 0.25rem 0 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #9ca3af;
 }
 
 .products-save-first {
   margin: 0.75rem 0 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #b45309;
   font-weight: 600;
 }
@@ -1128,7 +1128,7 @@ async function save() {
 .preview-block-label {
   display: block;
   margin-top: 1rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: #9ca3af;
   text-transform: uppercase;
@@ -1156,7 +1156,7 @@ async function save() {
   align-items: center;
   justify-content: center;
   color: #d1d5db;
-  font-size: 1.5rem;
+  font-size: var(--fs-section-title);
 }
 
 .status-option {
@@ -1199,7 +1199,7 @@ async function save() {
 }
 
 .status-badge {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.5rem;
   border-radius: 0.125rem;
@@ -1218,7 +1218,7 @@ async function save() {
 
 .reorder-hint {
   margin: 0 0 0.75rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #78350f;
   display: flex;
   align-items: center;
@@ -1230,12 +1230,12 @@ async function save() {
   padding: 1.5rem;
   text-align: center;
   color: #6b7280;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .table-hint {
   margin: 0.75rem 0 0;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: #9ca3af;
 }
 
@@ -1246,14 +1246,14 @@ async function save() {
 .products-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .products-table thead tr {
   border-bottom: 1px solid #e5e7eb;
   background: #f9fafb;
   color: #6b7280;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
 }
 
@@ -1369,7 +1369,7 @@ async function save() {
   align-items: center;
   gap: 0.375rem;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   border: 1px solid transparent;
@@ -1385,7 +1385,7 @@ async function save() {
 
 .btn-sm {
   padding: 0.375rem 0.75rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .btn-outline {
@@ -1441,7 +1441,7 @@ async function save() {
 
 .modal-header h3 {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
 }
 
@@ -1518,17 +1518,17 @@ async function save() {
 
 .result-name {
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .result-price {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
   margin-top: 0.125rem;
 }
 
 .badge-added {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   padding: 0.125rem 0.375rem;
   background: #ecfdf5;

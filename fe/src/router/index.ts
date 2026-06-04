@@ -251,9 +251,19 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../views/admin/CollectionFormView.vue"),
       },
       {
+        path: "account/password",
+        name: "admin-change-password",
+        component: () => import("../views/admin/ChangePasswordView.vue"),
+      },
+      {
         path: "account",
         name: "admin-account",
         component: () => import("../views/admin/AccountInfoView.vue"),
+        beforeEnter(to) {
+          if (to.query.tab === "password") {
+            return { path: "/admin/account/password" };
+          }
+        },
       },
       {
         path: "blog",
@@ -378,8 +388,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const routerLoading = useRouterLoadingStore();
 
-  // Start loading indicator (except for same route or admin routes)
-  if (to.path !== from.path && !to.path.startsWith("/admin")) {
+  // Start loading indicator for any meaningful navigation (path/query/hash).
+  if (to.fullPath !== from.fullPath) {
     routerLoading.start();
   }
 

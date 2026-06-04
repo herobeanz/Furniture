@@ -22,14 +22,9 @@
       <div class="hero-visual">
         <img
           v-if="heroImage"
-          :src="heroImageSrc"
-          :srcset="heroImageSrcSet"
-          sizes="(max-width: 1024px) 100vw, 58vw"
+          :src="heroImage"
           alt="Nội thất gỗ cao cấp"
           class="hero-image"
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
         />
         <div v-else class="hero-image hero-image--placeholder" />
       </div>
@@ -54,45 +49,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { RouterLink } from "vue-router";
-import type { Product } from "@/services/api/products";
-import type { Collection } from "@/services/api/collections";
+import { HOME_HERO_IMAGE } from "@/constants/home";
 import { VALUE_PROPS } from "@/constants/design-system";
 import { resolveMediaUrl } from "@/utils/mediaUrl";
-import { optimizeImageUrl } from "@/utils/imageUrl";
-
-interface Props {
-  products?: Product[];
-  collections?: Collection[];
-}
-
-const props = defineProps<Props>();
 
 const valueProps = VALUE_PROPS;
-
-const heroImage = computed(() => {
-  const product = props.products?.[0];
-  const img = product?.thumbnail || product?.images?.[0];
-  if (img) return resolveMediaUrl(img);
-  const collection =
-    props.collections?.find((c) => c.thumbnail) ?? props.collections?.[0];
-  return resolveMediaUrl(collection?.thumbnail);
-});
-
-const heroImageSrc = computed(() =>
-  optimizeImageUrl(heroImage.value, { width: 1280, quality: "auto" }),
-);
-
-const heroImageSrcSet = computed(() => {
-  if (!heroImage.value) return "";
-  return [640, 960, 1280, 1600]
-    .map(
-      (width) =>
-        `${optimizeImageUrl(heroImage.value, { width, quality: "auto" })} ${width}w`,
-    )
-    .join(", ");
-});
+const heroImage = resolveMediaUrl(HOME_HERO_IMAGE);
 
 function valueIconClass(icon: string): string {
   const map: Record<string, string> = {
@@ -130,7 +93,7 @@ function valueIconClass(icon: string): string {
 
 .hero-eyebrow {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -140,7 +103,7 @@ function valueIconClass(icon: string): string {
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: var(--fs-hero-title);
   line-height: 1.15;
   color: #111827;
   margin-bottom: 1rem;
@@ -149,10 +112,9 @@ function valueIconClass(icon: string): string {
 }
 
 .hero-text {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin-bottom: 2rem;
 }
 
@@ -167,7 +129,7 @@ function valueIconClass(icon: string): string {
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -267,14 +229,14 @@ function valueIconClass(icon: string): string {
 }
 
 .value-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: #111827;
   margin: 0 0 0.125rem;
 }
 
 .value-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin: 0;
 }

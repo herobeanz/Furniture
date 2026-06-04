@@ -52,7 +52,7 @@ const { isLoading, loadingMessage } = storeToRefs(routerLoadingStore)
 }
 
 .loading-message {
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin: 0;
 }

@@ -32,7 +32,7 @@ const fieldId = computed(() => props.fieldId || 'field-' + Math.random().toStrin
 }
 
 .form-label {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: #374151;
   display: flex;
@@ -41,20 +41,20 @@ const fieldId = computed(() => props.fieldId || 'field-' + Math.random().toStrin
 }
 
 .form-label-optional {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 400;
   color: #9ca3af;
 }
 
 .form-error {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #dc2626;
 }
 
 .form-hint {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 </style>

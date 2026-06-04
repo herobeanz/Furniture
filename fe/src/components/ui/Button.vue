@@ -31,7 +31,7 @@ defineEmits<{ click: [e: MouseEvent] }>()
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   letter-spacing: 0.02em;
   border-radius: 6px;

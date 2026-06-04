@@ -11,7 +11,9 @@
       </div>
       <div class="blog-card-body">
         <div class="blog-card-meta">
-          <span v-if="categoryLabel" class="blog-card-category">{{ categoryLabel }}</span>
+          <span v-if="categoryLabel" class="blog-card-category">{{
+            categoryLabel
+          }}</span>
           <span v-if="post.publishedAt" class="blog-card-date">{{
             formatBlogDate(post.publishedAt)
           }}</span>
@@ -28,28 +30,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate } from '@/utils/format'
-import { BLOG_FALLBACK_THUMBNAIL } from '@/constants/blog'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import type { BlogPost } from "@/services/api/blog";
+import { formatBlogDate } from "@/utils/format";
+import { BLOG_FALLBACK_THUMBNAIL } from "@/constants/blog";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 interface Props {
-  post: BlogPost
+  post: BlogPost;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const categoryLabel = computed(() => props.post.category?.trim() ?? '')
+const categoryLabel = computed(() => props.post.category?.trim() ?? "");
 
 const excerptText = computed(() => {
-  const text = props.post.excerpt?.trim()
-  if (text) return text
-  const plain = props.post.content?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  if (!plain) return ''
-  return plain.length > 140 ? `${plain.slice(0, 140)}…` : plain
-})
+  const text = props.post.excerpt?.trim();
+  if (text) return text;
+  const plain = props.post.content
+    ?.replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!plain) return "";
+  return plain.length > 140 ? `${plain.slice(0, 140)}…` : plain;
+});
 </script>
 
 <style scoped>
@@ -104,7 +109,7 @@ const excerptText = computed(() => {
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--color-text-light);
   margin-bottom: 0.5rem;
@@ -123,7 +128,7 @@ const excerptText = computed(() => {
 
 .blog-card-title {
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   line-height: 1.4;
@@ -136,7 +141,7 @@ const excerptText = computed(() => {
 }
 
 .blog-card-excerpt {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.55;
   margin: 0 0 1rem;
@@ -149,7 +154,7 @@ const excerptText = computed(() => {
 }
 
 .blog-card-read {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   display: inline-flex;
@@ -164,7 +169,7 @@ const excerptText = computed(() => {
 }
 
 .blog-card-read i {
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   line-height: 1;
 }
 </style>

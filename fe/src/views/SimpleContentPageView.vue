@@ -25,7 +25,7 @@ defineProps<{
 }
 
 .simple-content-page h1 {
-  font-size: 1.75rem;
+  font-size: var(--fs-subtitle);
   margin-bottom: 1rem;
 }
 

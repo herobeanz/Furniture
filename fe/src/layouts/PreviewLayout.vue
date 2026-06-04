@@ -73,7 +73,7 @@ function closePreview() {
 }
 
 .toolbar-label {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
 }
 
@@ -90,7 +90,7 @@ function closePreview() {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   transition: background 0.2s;
 }
 

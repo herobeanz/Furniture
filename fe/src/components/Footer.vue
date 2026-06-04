@@ -5,7 +5,14 @@
         <!-- Column 1: Brand intro + socials -->
         <div class="footer-col footer-brand">
           <div class="footer-logo-row">
-            <span class="footer-mark" aria-hidden="true">{{ SITE.brand.logoMark }}</span>
+            <img
+              :src="SITE.brand.logoMarkSrc"
+              :alt="SITE.brand.name"
+              class="footer-mark"
+              width="28"
+              height="28"
+              loading="lazy"
+            />
             <span class="footer-logo-text">{{ SITE.brand.footerTitle }}</span>
           </div>
           <p class="footer-desc">
@@ -22,13 +29,13 @@
               ><i class="fa-brands fa-facebook"
             /></a>
             <a
-              v-if="instagramUrl"
-              :href="instagramUrl"
+              v-if="tiktokUrl"
+              :href="tiktokUrl"
               class="social-link"
-              aria-label="Instagram"
+              aria-label="TikTok"
               target="_blank"
               rel="noopener noreferrer"
-              ><i class="fa-brands fa-instagram"
+              ><i class="fa-brands fa-tiktok"
             /></a>
             <a
               v-if="youtubeUrl"
@@ -55,13 +62,19 @@
           <h4>Hỗ trợ</h4>
           <ul>
             <li>
-              <RouterLink to="/chinh-sach-bao-hanh">Chính sách bảo hành</RouterLink>
+              <RouterLink to="/chinh-sach-bao-hanh"
+                >Chính sách bảo hành</RouterLink
+              >
             </li>
             <li>
-              <RouterLink to="/chinh-sach-doi-tra">Chính sách đổi trả</RouterLink>
+              <RouterLink to="/chinh-sach-doi-tra"
+                >Chính sách đổi trả</RouterLink
+              >
             </li>
             <li>
-              <RouterLink to="/huong-dan-mua-hang">Hướng dẫn mua hàng</RouterLink>
+              <RouterLink to="/huong-dan-mua-hang"
+                >Hướng dẫn mua hàng</RouterLink
+              >
             </li>
             <!-- <li><a href="/cau-hoi-thuong-gap">Câu hỏi thường gặp</a></li> -->
           </ul>
@@ -124,7 +137,7 @@ const {
   addressFull,
   mapUrl,
   facebookUrl,
-  instagramUrl,
+  tiktokUrl,
   youtubeUrl,
 } = useContactInfo();
 </script>
@@ -135,7 +148,7 @@ const {
   background: var(--color-footer-bg);
   color: #a8a29e;
   margin-top: auto;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .footer-cols {
@@ -162,33 +175,28 @@ const {
 }
 
 .footer-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.875rem;
-  border-radius: 2px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .footer-logo-text {
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   letter-spacing: 0.05em;
 }
 
 .footer-desc {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #78716c;
   margin: 0 0 1rem;
   line-height: 1.7;
 }
 
 .footer-col h4 {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin-bottom: 1.25rem;
   font-weight: 600;
   color: #fff;
@@ -217,7 +225,7 @@ const {
 
 .footer-col a {
   color: #9ca3af;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   text-decoration: none;
   transition: all var(--transition-fast);
   display: inline-block;
@@ -245,7 +253,7 @@ const {
 }
 
 .footer-address {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #9ca3af;
   text-decoration: none;
   transition: color var(--transition-fast);
@@ -276,7 +284,7 @@ const {
 }
 
 .footer-contact-list li {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   margin-bottom: 0.875rem;
   display: flex;
   align-items: flex-start;
@@ -285,7 +293,7 @@ const {
 }
 
 .footer-email {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: #9ca3af;
   text-decoration: none;
   transition: color var(--transition-fast);
@@ -305,6 +313,9 @@ const {
   font-size: var(--icon-size-md);
   transition: color 0.2s;
   line-height: 1;
+  width: 1.3rem;
+  height: 2.25rem;
+  font-size: var(--fs-subtitle);
 }
 
 .social-link:hover {
@@ -336,7 +347,7 @@ const {
 
 .footer-bottom-inner p {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: #57534e;
 }
 
@@ -393,27 +404,27 @@ const {
   }
 
   .footer-logo {
-    font-size: 1.25rem;
+    font-size: var(--fs-card-title);
   }
 
   .footer-desc {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 
   .footer-col h4 {
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     margin-bottom: 1rem;
   }
 
   .footer-col a,
   .footer-contact-list li {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 
   .social-icon {
     width: 36px;
     height: 36px;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
   }
 
   .footer-bottom {
@@ -421,7 +432,7 @@ const {
   }
 
   .footer-bottom-inner p {
-    font-size: 0.8125rem;
+    font-size: var(--fs-body-sm);
   }
 }
 </style>

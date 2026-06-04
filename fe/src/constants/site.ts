@@ -3,6 +3,9 @@
  * Override qua biến môi trường Vite (xem fe/.env.example).
  */
 
+import { BRAND_LOGO_MARK_SRC } from '@/constants/brand-assets'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
+
 function env(key: string, fallback: string): string {
   const value = import.meta.env[key];
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -18,7 +21,6 @@ function envNumber(key: string, fallback: number): number {
 const DEFAULTS = {
   brand: {
     name: "Đồ gỗ Hùng Cường",
-    logoMark: "H",
     logoLineSm: "ĐỒ GỖ",
     logoLineLg: "HÙNG CƯỜNG",
     footerTitle: "ĐỒ GỖ HÙNG CƯỜNG",
@@ -40,7 +42,9 @@ const DEFAULTS = {
   },
   social: {
     facebook: "https://www.facebook.com/dogohungcuong",
+    messenger: "",
     zalo: "https://zalo.me/0357803837",
+    tiktok: "",
     instagram: "",
     youtube: "",
   },
@@ -49,7 +53,9 @@ const DEFAULTS = {
 export const SITE = {
   brand: {
     name: env("VITE_BRAND_NAME", DEFAULTS.brand.name),
-    logoMark: env("VITE_BRAND_LOGO_MARK", DEFAULTS.brand.logoMark),
+    logoMarkSrc: resolveMediaUrl(
+      env("VITE_BRAND_LOGO_URL", BRAND_LOGO_MARK_SRC),
+    ),
     logoLineSm: env("VITE_BRAND_LOGO_LINE_SM", DEFAULTS.brand.logoLineSm),
     logoLineLg: env("VITE_BRAND_LOGO_LINE_LG", DEFAULTS.brand.logoLineLg),
     footerTitle: env("VITE_BRAND_FOOTER_TITLE", DEFAULTS.brand.footerTitle),
@@ -75,7 +81,9 @@ export const SITE = {
   },
   social: {
     facebook: env("VITE_FACEBOOK_URL", DEFAULTS.social.facebook),
+    messenger: env("VITE_MESSENGER_URL", DEFAULTS.social.messenger),
     zalo: env("VITE_ZALO_URL", DEFAULTS.social.zalo),
+    tiktok: env("VITE_TIKTOK_URL", DEFAULTS.social.tiktok),
     instagram: env("VITE_INSTAGRAM_URL", DEFAULTS.social.instagram),
     youtube: env("VITE_YOUTUBE_URL", DEFAULTS.social.youtube),
   },

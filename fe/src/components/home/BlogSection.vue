@@ -25,7 +25,9 @@
               loading="lazy"
             />
           </div>
-          <p v-if="post.publishedAt" class="blog-date">{{ formatBlogDate(post.publishedAt) }}</p>
+          <p v-if="post.publishedAt" class="blog-date">
+            {{ formatBlogDate(post.publishedAt) }}
+          </p>
           <h3 class="blog-title">{{ post.title }}</h3>
         </RouterLink>
       </div>
@@ -36,18 +38,18 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import type { BlogPost } from '@/services/api/blog'
-import { formatBlogDate } from '@/utils/format'
-import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { RouterLink } from "vue-router";
+import type { BlogPost } from "@/services/api/blog";
+import { formatBlogDate } from "@/utils/format";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 defineProps<{
-  posts: BlogPost[]
-  loading?: boolean
-}>()
+  posts: BlogPost[];
+  loading?: boolean;
+}>();
 
 const fallbackImage =
-  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80'
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80";
 </script>
 
 <style scoped>
@@ -93,7 +95,7 @@ const fallbackImage =
 }
 
 .blog-date {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0 0 0.25rem;
   font-family: var(--font-sans);
@@ -101,7 +103,7 @@ const fallbackImage =
 
 .blog-title {
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   line-height: 1.4;
@@ -116,7 +118,7 @@ const fallbackImage =
 
 .blog-loading,
 .blog-empty {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   text-align: center;
   padding: 2rem 0;

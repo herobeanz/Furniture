@@ -112,7 +112,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
 }
 
@@ -141,7 +141,7 @@ onUnmounted(() => {
 }
 
 .toast-title {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
@@ -149,7 +149,7 @@ onUnmounted(() => {
 }
 
 .toast-description {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin: 0.25rem 0 0 0;
   line-height: 1.4;

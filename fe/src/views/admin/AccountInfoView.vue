@@ -1,32 +1,32 @@
 <template>
-  <div class="account-info">
+  <div class="account-page">
     <div class="page-header">
       <h1>Thông tin tài khoản</h1>
     </div>
 
     <div v-if="loading" class="loading-state">Đang tải...</div>
-    <div v-else-if="error" class="error-state">{{ error }}</div>
+    <div v-else-if="loadError && !hasFormData" class="error-state">{{ loadError }}</div>
 
     <div v-else class="account-content">
-      <!-- Profile Information Section -->
+      <div v-if="actionError" class="action-error" role="alert">{{ actionError }}</div>
+      <div v-if="loadError" class="action-error action-error--warning" role="status">
+        {{ loadError }}
+      </div>
+
       <section class="info-section">
         <h2 class="section-title">Thông tin cá nhân</h2>
-        <form @submit.prevent="updateProfile" class="form-container">
+        <form @submit.prevent="updateProfile" class="form-container" novalidate>
           <FormField label="Tên đăng nhập">
             <UiInput v-model="form.username" :disabled="true" />
             <p class="form-hint">Tên đăng nhập không thể thay đổi</p>
           </FormField>
 
           <FormField label="Email" :required="true">
-            <UiInput v-model="form.email" type="email" placeholder="Nhập email" :required="true" />
-          </FormField>
-
-          <FormField label="Họ và tên" optional>
-            <UiInput v-model="form.fullname" placeholder="Nhập họ và tên" />
+            <UiInput v-model="form.email" type="email" placeholder="Nhập email" />
           </FormField>
 
           <FormField label="Vai trò">
-            <UiInput v-model="roleLabel" :disabled="true" />
+            <UiInput :model-value="roleLabel" :disabled="true" />
             <p class="form-hint">Vai trò không thể thay đổi</p>
           </FormField>
 
@@ -34,56 +34,10 @@
             <button type="submit" class="btn btn-primary" :disabled="saving">
               {{ saving ? 'Đang lưu...' : 'Cập nhật thông tin' }}
             </button>
-            <button type="button" class="btn btn-outline" @click="handleChangePassword">
-              Đổi mật khẩu
-            </button>
           </div>
         </form>
       </section>
 
-      <!-- Change Password Section -->
-      <section v-if="showPasswordForm" class="info-section">
-        <h2 class="section-title">Đổi mật khẩu</h2>
-        <form @submit.prevent="changePassword" class="form-container">
-          <FormField label="Mật khẩu hiện tại" :required="true">
-            <UiInput
-              v-model="passwordForm.currentPassword"
-              type="password"
-              placeholder="Nhập mật khẩu hiện tại"
-              :required="true"
-            />
-          </FormField>
-
-          <FormField label="Mật khẩu mới" :required="true">
-            <UiInput
-              v-model="passwordForm.newPassword"
-              type="password"
-              placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-              :required="true"
-            />
-          </FormField>
-
-          <FormField label="Xác nhận mật khẩu mới" :required="true">
-            <UiInput
-              v-model="passwordForm.confirmPassword"
-              type="password"
-              placeholder="Nhập lại mật khẩu mới"
-              :required="true"
-            />
-          </FormField>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary" :disabled="changingPassword">
-              {{ changingPassword ? 'Đang đổi...' : 'Đổi mật khẩu' }}
-            </button>
-            <button type="button" class="btn btn-outline" @click="cancelChangePassword">
-              Hủy
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <!-- Account Statistics -->
       <section class="info-section">
         <h2 class="section-title">Thông tin đăng nhập</h2>
         <div class="info-grid">
@@ -107,28 +61,33 @@ import { storeToRefs } from 'pinia'
 import { useAdminAuthStore } from '@/stores/adminAuth'
 import apiClient from '@/services/api/client'
 import { FormField, UiInput } from '@/components/ui'
+import { useToast } from '@/composables/useToast'
+import { apiErrorMessage } from '@/utils/apiErrorMessage'
+
+interface AdminMeResponse {
+  username?: string
+  email?: string
+  role?: string
+  last_login_at?: string | null
+  lastLoginAt?: string | null
+}
 
 const authStore = useAdminAuthStore()
 const { admin } = storeToRefs(authStore)
+const { toast } = useToast()
 
 const loading = ref(true)
 const saving = ref(false)
-const changingPassword = ref(false)
-const error = ref('')
-const showPasswordForm = ref(false)
+const loadError = ref('')
+const actionError = ref('')
 
 const form = reactive({
   username: '',
   email: '',
-  fullname: '',
   role: '',
 })
 
-const passwordForm = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-})
+const hasFormData = computed(() => !!form.username || !!form.email)
 
 const roleLabel = computed(() => {
   const roleMap: Record<string, string> = {
@@ -159,28 +118,35 @@ const lastLoginText = computed(() => {
   }
 })
 
-async function loadAccountInfo() {
-  loading.value = true
-  error.value = ''
+function applyAdminToForm(data: AdminMeResponse) {
+  form.username = data.username || ''
+  form.email = data.email || ''
+  form.role = data.role || 'admin'
+  lastLoginAt.value = data.last_login_at ?? data.lastLoginAt ?? null
+}
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+}
+
+async function loadAccountInfo(options: { silent?: boolean } = {}) {
+  if (!options.silent) {
+    loading.value = true
+  }
+  loadError.value = ''
   try {
-    // Fetch fresh data from API
     const data = await authStore.fetchMe()
     if (data) {
-      form.username = data.username || ''
-      form.email = data.email || ''
-      form.fullname = data.fullName || ''
-      form.role = data.role || 'admin'
-      // @ts-ignore - last_login_at might be in the response
-      lastLoginAt.value = data.last_login_at || data.lastLoginAt || null
+      applyAdminToForm(data as AdminMeResponse)
     }
-  } catch (e: any) {
-    error.value = e?.message || 'Không thể tải thông tin tài khoản.'
-    // Fallback to store data
+  } catch (error: unknown) {
+    loadError.value = apiErrorMessage(error, 'Không thể tải thông tin tài khoản mới nhất.')
     if (admin.value) {
-      form.username = admin.value.username || ''
-      form.email = admin.value.email || ''
-      form.fullname = admin.value.fullName || ''
-      form.role = admin.value.role || 'admin'
+      applyAdminToForm({
+        username: admin.value.username,
+        email: admin.value.email,
+        role: admin.value.role,
+      })
     }
   } finally {
     loading.value = false
@@ -188,69 +154,33 @@ async function loadAccountInfo() {
 }
 
 async function updateProfile() {
+  actionError.value = ''
+  const email = form.email.trim()
+  if (!email) {
+    actionError.value = 'Vui lòng nhập email.'
+    toast.error('Cập nhật thất bại', actionError.value)
+    return
+  }
+  if (!isValidEmail(email)) {
+    actionError.value = 'Email không hợp lệ.'
+    toast.error('Cập nhật thất bại', actionError.value)
+    return
+  }
+
   saving.value = true
-  error.value = ''
   try {
-    await apiClient.patch('/auth/profile', {
-      email: form.email,
-      fullname: form.fullname,
-    })
-    // Update store
+    await apiClient.patch('/auth/profile', { email })
     if (admin.value) {
-      admin.value.email = form.email
-      admin.value.fullName = form.fullname
+      admin.value.email = email
     }
-    // Reload account info to get latest data
-    await loadAccountInfo()
-    alert('Cập nhật thông tin thành công!')
-  } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Cập nhật thông tin thất bại.'
-    alert(error.value)
+    form.email = email
+    await loadAccountInfo({ silent: true })
+    toast.success('Cập nhật thông tin thành công')
+  } catch (error: unknown) {
+    actionError.value = apiErrorMessage(error, 'Cập nhật thông tin thất bại.')
+    toast.error('Cập nhật thất bại', actionError.value)
   } finally {
     saving.value = false
-  }
-}
-
-function handleChangePassword() {
-  showPasswordForm.value = true
-  passwordForm.currentPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
-}
-
-function cancelChangePassword() {
-  showPasswordForm.value = false
-  passwordForm.currentPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
-}
-
-async function changePassword() {
-  if (passwordForm.newPassword.length < 6) {
-    alert('Mật khẩu mới phải có ít nhất 6 ký tự.')
-    return
-  }
-
-  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    alert('Mật khẩu mới và xác nhận không khớp.')
-    return
-  }
-
-  changingPassword.value = true
-  error.value = ''
-  try {
-    await apiClient.patch('/auth/change-password', {
-      currentPassword: passwordForm.currentPassword,
-      newPassword: passwordForm.newPassword,
-    })
-    alert('Đổi mật khẩu thành công!')
-    cancelChangePassword()
-  } catch (e: any) {
-    const errorMessage = e?.response?.data?.message || e?.message || 'Đổi mật khẩu thất bại.'
-    error.value = errorMessage
-    alert(errorMessage)
-  } finally {
-    changingPassword.value = false
   }
 }
 
@@ -260,7 +190,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.account-info {
+.account-page {
   max-width: 800px;
 }
 
@@ -269,7 +199,7 @@ onMounted(() => {
 }
 
 .page-header h1 {
-  font-size: 1.75rem;
+  font-size: var(--fs-subtitle);
   font-weight: 700;
   color: #1e293b;
   margin: 0;
@@ -288,6 +218,19 @@ onMounted(() => {
   border-radius: 8px;
 }
 
+.action-error {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: var(--fs-body-sm);
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.action-error--warning {
+  color: #92400e;
+  background: #fef3c7;
+}
+
 .account-content {
   display: flex;
   flex-direction: column;
@@ -302,7 +245,7 @@ onMounted(() => {
 }
 
 .section-title {
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 600;
   margin: 0 0 1.5rem;
   color: #1e293b;
@@ -323,7 +266,7 @@ onMounted(() => {
 .btn {
   padding: 0.625rem 1.25rem;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -361,7 +304,7 @@ onMounted(() => {
 
 .form-hint {
   margin: 0.25rem 0 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
 }
 
@@ -381,13 +324,13 @@ onMounted(() => {
 }
 
 .info-label {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #6b7280;
   font-weight: 500;
 }
 
 .info-value {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   color: #1e293b;
   font-weight: 600;
 }

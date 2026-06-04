@@ -77,7 +77,7 @@ const chartOptions = {
 }
 
 .chart-legend {
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: #4b5563;
 }

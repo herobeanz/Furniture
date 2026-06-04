@@ -9,22 +9,16 @@
         required
         autocomplete="name"
       />
-      <input
+      <PhoneInput
         v-model="form.phone"
-        type="tel"
-        class="contact-field"
         placeholder="Số điện thoại *"
-        required
-        autocomplete="tel"
+        :required="true"
       />
     </div>
 
-    <input
+    <EmailInput
       v-model="form.email"
-      type="email"
-      class="contact-field"
       placeholder="Email"
-      autocomplete="email"
     />
 
     <div class="contact-field-group">
@@ -65,6 +59,7 @@
 
 <script setup lang="ts">
 import { CONTACT_TOPICS } from '@/constants/contact'
+import { PhoneInput, EmailInput } from '@/components/ui/inputs'
 
 interface Props {
   form: {
@@ -114,7 +109,7 @@ const topics = CONTACT_TOPICS
 }
 
 .contact-label {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   color: var(--color-text-light);
 }
@@ -125,7 +120,7 @@ const topics = CONTACT_TOPICS
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-family: inherit;
   color: var(--color-heading);
   transition: border-color var(--transition-fast);
@@ -160,7 +155,7 @@ const topics = CONTACT_TOPICS
   color: #fff;
   border: none;
   border-radius: 0.375rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -184,7 +179,7 @@ const topics = CONTACT_TOPICS
 
 .contact-form-message {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: #15803d;
 }
 

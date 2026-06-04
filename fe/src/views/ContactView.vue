@@ -6,7 +6,8 @@
         <div class="contact-hero-copy">
           <span class="eyebrow">Liên hệ với chúng tôi</span>
           <h1 class="contact-hero-title">
-            Chúng tôi luôn sẵn sàng<br />hỗ trợ bạn
+            Luôn sẵn sàng <br />
+            hỗ trợ bạn
           </h1>
           <p class="contact-hero-text">
             Bạn có câu hỏi về sản phẩm, cần tư vấn thiết kế nội thất hay muốn
@@ -137,7 +138,10 @@
               class="contact-map-open"
             >
               Mở Google Maps
-              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" />
+              <i
+                class="fa-solid fa-arrow-up-right-from-square"
+                aria-hidden="true"
+              />
             </a>
             <div class="contact-map-pin">
               <i class="fa-solid fa-location-dot" aria-hidden="true" />
@@ -173,8 +177,8 @@
             </a>
 
             <a
-              v-if="facebookUrl"
-              :href="facebookUrl"
+              v-if="messengerUrl"
+              :href="messengerUrl"
               target="_blank"
               rel="noopener noreferrer"
               class="contact-quick-link"
@@ -241,18 +245,15 @@ import { useContactForm } from "@/composables/contact/useContactForm";
 import { useContactInfo } from "@/composables/common/useContactInfo";
 import { BRAND_NAME } from "@/constants/brand";
 import { CONTACT_HOURS_LINES, CONTACT_IMAGES } from "@/constants/contact";
-import {
-  CONTACT_MAP_QUERY,
-  getContactMapEmbedUrl,
-} from "@/constants/site";
+import { CONTACT_MAP_QUERY, getContactMapEmbedUrl } from "@/constants/site";
 
-const { form, sending, submitMessage, submitError, facebookUrl, submit } =
-  useContactForm();
+const { form, sending, submitMessage, submitError, submit } = useContactForm();
 
 const {
   phoneDisplay,
   phoneTel,
   email,
+  messengerUrl,
   address: CONTACT_ADDRESS,
   mapUrl: siteMapUrl,
   hoursShort: CONTACT_HOURS_SHORT,
@@ -278,7 +279,7 @@ async function handleSubmit() {
 
 .eyebrow {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -316,7 +317,7 @@ async function handleSubmit() {
 
 .contact-hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.875rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   line-height: 1.15;
   color: var(--color-heading);
   margin-bottom: 1rem;
@@ -324,10 +325,9 @@ async function handleSubmit() {
 }
 
 .contact-hero-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
-  max-width: 20rem;
   margin-bottom: 2rem;
 }
 
@@ -367,7 +367,7 @@ async function handleSubmit() {
 
 .contact-chip-label {
   display: block;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   font-weight: 500;
   color: var(--color-text-light);
@@ -375,7 +375,7 @@ async function handleSubmit() {
 }
 
 .contact-chip-value {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
 }
@@ -444,7 +444,7 @@ async function handleSubmit() {
 }
 
 .contact-info-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.125rem;
@@ -452,7 +452,7 @@ async function handleSubmit() {
 }
 
 .contact-info-text {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.5;
   margin: 0;
@@ -492,7 +492,7 @@ async function handleSubmit() {
 
 .contact-form-eyebrow {
   display: block;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -502,14 +502,14 @@ async function handleSubmit() {
 
 .contact-form-heading {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   color: var(--color-heading);
   margin: 0 0 0.5rem;
   font-weight: 600;
 }
 
 .contact-form-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0 0 1.5rem;
   line-height: 1.5;
@@ -551,7 +551,7 @@ async function handleSubmit() {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--color-border-light);
   box-shadow: var(--shadow-sm);
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--color-primary);
   text-decoration: none;
@@ -576,7 +576,7 @@ async function handleSubmit() {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: var(--color-heading);
   white-space: nowrap;
@@ -599,14 +599,14 @@ async function handleSubmit() {
 }
 
 .contact-quick-title {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
   margin: 0 0 0.125rem;
 }
 
 .contact-quick-desc {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
   margin: 0;
 }
@@ -648,12 +648,12 @@ async function handleSubmit() {
 
 .contact-quick-label {
   display: block;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
 }
 
 .contact-quick-value {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   color: var(--color-heading);
 }
@@ -718,7 +718,7 @@ async function handleSubmit() {
 
 .showroom-eyebrow {
   display: block;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
@@ -728,14 +728,14 @@ async function handleSubmit() {
 
 .showroom-title {
   font-family: var(--font-serif);
-  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-size: var(--fs-subtitle);
   color: var(--color-heading);
   margin: 0 0 0.75rem;
   font-weight: 600;
 }
 
 .showroom-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   line-height: 1.65;
   margin: 0 0 1.5rem;
@@ -749,7 +749,7 @@ async function handleSubmit() {
   padding: 0.625rem 1.25rem;
   background: var(--color-primary);
   color: #fff;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   text-decoration: none;
@@ -763,7 +763,7 @@ async function handleSubmit() {
 }
 
 .showroom-cta i {
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   line-height: 1;
 }
 

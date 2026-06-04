@@ -114,7 +114,7 @@ watch(
 
 .related-carousel-title {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: var(--fs-card-title);
   font-weight: 600;
   color: #111827;
   margin: 0;
@@ -169,7 +169,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   transition:
     background var(--transition-fast),
     color var(--transition-fast),

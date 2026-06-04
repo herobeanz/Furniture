@@ -29,7 +29,10 @@
         product.name
       }}</RouterLink>
       <p
-        v-if="variant === 'compact' && (product.material || product.shortDescription)"
+        v-if="
+          variant === 'compact' &&
+          (product.material || product.shortDescription)
+        "
         class="product-card-subtitle"
       >
         {{ product.material || product.shortDescription }}
@@ -187,14 +190,14 @@ const hasDiscount = computed(() => {
 }
 
 .product-card--compact .product-card-name {
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   margin-bottom: 0.25rem;
   -webkit-line-clamp: 1;
 }
 
 .product-card--compact .product-card-subtitle {
   margin: 0 0 0.25rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   line-height: 1.3;
   -webkit-line-clamp: 1;
@@ -208,7 +211,7 @@ const hasDiscount = computed(() => {
 }
 
 .product-card--compact .price-current {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .product-card--compact .product-quickview-overlay {
@@ -273,7 +276,7 @@ const hasDiscount = computed(() => {
   align-items: center;
   justify-content: center;
   color: var(--color-text-light);
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
   background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
 }
 
@@ -301,7 +304,7 @@ const hasDiscount = computed(() => {
   border-radius: 12px;
   background: #fff;
   color: var(--color-text);
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   box-shadow: var(--shadow-lg);
   transform: translateY(8px);
@@ -316,7 +319,7 @@ const hasDiscount = computed(() => {
 .tag {
   position: absolute;
   top: 12px;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   font-weight: 700;
   padding: 0.375rem 0.75rem;
   border-radius: 8px;
@@ -368,7 +371,7 @@ const hasDiscount = computed(() => {
 }
 
 .product-code {
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   margin-bottom: 0.5rem;
   font-weight: 500;
@@ -378,7 +381,7 @@ const hasDiscount = computed(() => {
 .product-card-name {
   display: block;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin-bottom: 0.75rem;
   color: var(--color-text);
   line-height: 1.5;
@@ -404,14 +407,14 @@ const hasDiscount = computed(() => {
 
 .price-current {
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: var(--fs-body-lg);
   color: var(--color-primary);
   letter-spacing: -0.01em;
 }
 
 .price-contact {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--color-text);
   background: var(--color-bg-alt);
   padding: 0.25rem 0.75rem;
@@ -419,7 +422,7 @@ const hasDiscount = computed(() => {
 }
 
 .price-old {
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   color: var(--color-text-light);
   text-decoration: line-through;
   opacity: 0.7;
@@ -439,12 +442,12 @@ const hasDiscount = computed(() => {
   align-items: center;
   gap: 0.375rem;
   color: var(--color-text-muted);
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
 }
 
 .product-meta .meta-icon {
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 
 .product-meta.rating .meta-icon {
@@ -466,11 +469,11 @@ const hasDiscount = computed(() => {
   }
 
   .product-card-name {
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
   }
 
   .price-current {
-    font-size: 1.0625rem;
+    font-size: var(--fs-body-lg);
   }
 }
 
@@ -484,7 +487,7 @@ const hasDiscount = computed(() => {
   }
 
   .product-card-name {
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     margin-bottom: 0.625rem;
   }
 
@@ -493,11 +496,11 @@ const hasDiscount = computed(() => {
   }
 
   .price-current {
-    font-size: 1rem;
+    font-size: var(--fs-body);
   }
 
   .price-old {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 
   .product-meta-row {
@@ -505,7 +508,7 @@ const hasDiscount = computed(() => {
   }
 
   .product-meta {
-    font-size: 0.75rem;
+    font-size: var(--fs-body-sm);
   }
 }
 
@@ -519,12 +522,12 @@ const hasDiscount = computed(() => {
   }
 
   .product-code {
-    font-size: 0.75rem;
+    font-size: var(--fs-body-sm);
     margin-bottom: 0.375rem;
   }
 
   .product-card-name {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
     line-height: 1.4;
     margin-bottom: 0.5rem;
   }
@@ -535,21 +538,21 @@ const hasDiscount = computed(() => {
   }
 
   .price-current {
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
   }
 
   .price-contact {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
     padding: 0.1875rem 0.625rem;
   }
 
   .price-old {
-    font-size: 0.8125rem;
+    font-size: var(--fs-body-sm);
   }
 
   .tag {
     top: 8px;
-    font-size: 0.6875rem;
+    font-size: var(--fs-body-sm);
     padding: 0.25rem 0.5rem;
     border-radius: 6px;
   }
@@ -562,7 +565,7 @@ const hasDiscount = computed(() => {
 
   .product-quickview-label {
     padding: 0.625rem 1.25rem;
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 
   .product-meta-row {
@@ -571,12 +574,12 @@ const hasDiscount = computed(() => {
   }
 
   .product-meta {
-    font-size: 0.6875rem;
+    font-size: var(--fs-body-sm);
     gap: 0.25rem;
   }
 
   .product-meta .meta-icon {
-    font-size: 0.875rem;
+    font-size: var(--fs-body-sm);
   }
 }
 

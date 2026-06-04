@@ -1,14 +1,5 @@
 <template>
   <div class="products-page">
-    <nav class="products-breadcrumb container" aria-label="Breadcrumb">
-      <RouterLink to="/" class="products-breadcrumb-link">Trang chủ</RouterLink>
-      <i
-        class="fa-solid fa-chevron-right products-breadcrumb-sep"
-        aria-hidden="true"
-      />
-      <span class="products-breadcrumb-current">Sản phẩm</span>
-    </nav>
-
     <section class="products-hero">
       <div class="container products-hero-inner">
         <div class="products-hero-copy">
@@ -20,8 +11,8 @@
         </div>
         <div class="products-hero-visual">
           <img
-            :src="PRODUCTS_HERO_IMAGE"
-            alt="Tổng hợp nội thất gỗ"
+            :src="heroImage"
+            :alt="heroAlt"
             class="products-hero-image"
             loading="eager"
           />
@@ -93,20 +84,38 @@
     <section class="products-grid-section container">
       <div v-if="error" class="products-error">
         <ErrorState :message="error" />
-        <button
-          type="button"
-          class="products-retry-btn"
-          @click="() => fetchProducts({ force: true })"
-        >
+        <button type="button" class="products-retry-btn" @click="fetchProducts">
           Thử lại
         </button>
       </div>
-      <ProductGridSkeleton v-else-if="loading" :count="12" :columns="4" />
-      <EmptyState
-        v-else-if="products.length === 0"
-        message="Chưa có sản phẩm nào."
-      />
-      <ProductGrid v-else :products="products" :columns="4" variant="compact" />
+      <div v-else class="products-grid-wrap">
+        <ProductGridSkeleton
+          v-if="loading && products.length === 0"
+          :count="12"
+          :columns="4"
+        />
+        <EmptyState
+          v-else-if="products.length === 0"
+          message="Chưa có sản phẩm nào."
+        />
+        <ProductGrid
+          v-else
+          :products="products"
+          :columns="4"
+          variant="compact"
+        />
+
+        <div
+          v-if="loading && products.length > 0"
+          class="products-loading-overlay"
+          aria-live="polite"
+        >
+          <i
+            class="fa-solid fa-spinner fa-spin products-loading-spinner"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
 
       <nav
         v-if="!loading && !error && totalPages > 1"
@@ -147,10 +156,7 @@
 </template>
 
 <script setup lang="ts">
-defineOptions({ name: 'ProductsListView' })
-
 import { computed } from "vue";
-import { RouterLink } from "vue-router";
 import ProductGrid from "@/components/ProductGrid.vue";
 import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
@@ -162,6 +168,7 @@ import {
   type ProductsPageSortKey,
 } from "@/constants/products-page";
 import { categoryStripIcon } from "@/constants/products-page";
+import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 const {
   categories,
@@ -173,11 +180,28 @@ const {
   totalPages,
   resultRange,
   selectedCategorySlug,
+  selectedCategoryThumbnail,
   setCategorySlug,
   setSort,
   goToPage,
   fetchProducts,
 } = useProductsListPage();
+
+const selectedCategory = computed(() =>
+  categories.value.find((cat) => cat.slug === selectedCategorySlug.value),
+);
+
+const heroImage = computed(() => {
+  const thumb = selectedCategoryThumbnail.value?.trim();
+  if (thumb) return resolveMediaUrl(thumb);
+  return PRODUCTS_HERO_IMAGE;
+});
+
+const heroAlt = computed(() =>
+  selectedCategory.value
+    ? `Sản phẩm danh mục ${selectedCategory.value.name}`
+    : "Tổng hợp nội thất gỗ",
+);
 
 const pageNumbers = computed(() => {
   const total = totalPages.value;
@@ -199,33 +223,6 @@ function onSortChange(e: Event) {
 .products-page {
   padding-bottom: 3rem;
   background: #faf9f6;
-}
-
-.products-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1.25rem 0 0.5rem;
-  font-size: 0.6875rem;
-  color: var(--color-text-light);
-}
-
-.products-breadcrumb-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.products-breadcrumb-link:hover {
-  color: var(--color-primary);
-}
-
-.products-breadcrumb-sep {
-  font-size: 0.5rem;
-}
-
-.products-breadcrumb-current {
-  color: var(--color-text-muted);
 }
 
 .products-hero {
@@ -250,7 +247,7 @@ function onSortChange(e: Event) {
 .products-hero-title {
   margin: 0 0 1rem;
   font-family: var(--font-serif, Georgia, serif);
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-size: var(--fs-page-title);
   font-weight: 600;
   color: var(--color-heading);
   letter-spacing: 0.02em;
@@ -258,8 +255,7 @@ function onSortChange(e: Event) {
 
 .products-hero-text {
   margin: 0;
-  max-width: 20rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   line-height: 1.6;
   color: var(--color-text-muted);
 }
@@ -308,7 +304,7 @@ function onSortChange(e: Event) {
   padding: 0.75rem 0.5rem;
   border: none;
   border-radius: 0.375rem;
-  font-size: 0.625rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   font-family: inherit;
   color: var(--color-text-muted);
@@ -332,7 +328,7 @@ function onSortChange(e: Event) {
 }
 
 .products-strip-item i {
-  font-size: 0.875rem;
+  font-size: var(--fs-body-sm);
 }
 
 .products-toolbar-section {
@@ -351,7 +347,7 @@ function onSortChange(e: Event) {
 
 .products-result-count {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-light);
 }
 
@@ -365,7 +361,7 @@ function onSortChange(e: Event) {
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
   background: #fff;
   appearance: none;
@@ -381,7 +377,7 @@ function onSortChange(e: Event) {
   right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.5625rem;
+  font-size: var(--fs-caption);
   color: var(--color-text-light);
   pointer-events: none;
 }
@@ -390,13 +386,34 @@ function onSortChange(e: Event) {
   padding: 1.5rem 0 0;
 }
 
+.products-grid-wrap {
+  position: relative;
+}
+
+.products-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(1px);
+  border-radius: 0.375rem;
+  pointer-events: none;
+}
+
+.products-loading-spinner {
+  font-size: var(--fs-card-title);
+  color: var(--color-primary);
+}
+
 .products-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.375rem;
   margin-top: 3rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-body-sm);
 }
 
 .products-page-btn {
@@ -439,7 +456,7 @@ function onSortChange(e: Event) {
   border: 1px solid var(--color-border);
   border-radius: 0.375rem;
   background: #fff;
-  font-size: 0.8125rem;
+  font-size: var(--fs-body-sm);
   cursor: pointer;
 }
 

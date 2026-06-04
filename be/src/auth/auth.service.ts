@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -78,7 +83,7 @@ export class AuthService {
         },
       });
       if (existingAdmin) {
-        throw new UnauthorizedException('Email đã được sử dụng bởi tài khoản khác');
+        throw new BadRequestException('Email đã được sử dụng bởi tài khoản khác');
       }
       updateData.email = dto.email;
     }
@@ -112,7 +117,7 @@ export class AuthService {
     // Verify current password
     const match = await bcrypt.compare(currentPassword, admin.passwordhashed);
     if (!match) {
-      throw new UnauthorizedException('Mật khẩu hiện tại không đúng');
+      throw new BadRequestException('Mật khẩu hiện tại không đúng');
     }
 
     // Hash new password

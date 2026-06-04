@@ -60,7 +60,7 @@ defineEmits<{
   cursor: not-allowed;
 }
 .page-info {
-  font-size: 0.9rem;
+  font-size: var(--fs-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -72,11 +72,11 @@ defineEmits<{
 
   .btn-page {
     padding: 0.45rem 0.875rem;
-    font-size: 0.85rem;
+    font-size: var(--fs-body-sm);
   }
 
   .page-info {
-    font-size: 0.85rem;
+    font-size: var(--fs-body-sm);
   }
 }
 
@@ -88,12 +88,12 @@ defineEmits<{
 
   .btn-page {
     padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
+    font-size: var(--fs-body-sm);
     min-width: 60px;
   }
 
   .page-info {
-    font-size: 0.8rem;
+    font-size: var(--fs-body-sm);
   }
 }
 </style>
