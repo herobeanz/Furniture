@@ -252,9 +252,19 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../views/admin/CollectionFormView.vue"),
       },
       {
+        path: "account/password",
+        name: "admin-change-password",
+        component: () => import("../views/admin/ChangePasswordView.vue"),
+      },
+      {
         path: "account",
         name: "admin-account",
         component: () => import("../views/admin/AccountInfoView.vue"),
+        beforeEnter(to) {
+          if (to.query.tab === "password") {
+            return { path: "/admin/account/password" };
+          }
+        },
       },
       {
         path: "blog",

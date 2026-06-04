@@ -118,7 +118,7 @@ function handleAccountInfo() {
 
 function handleChangePassword() {
   showUserMenu.value = false
-  router.push({ path: '/admin/account', query: { tab: 'password' } })
+  router.push('/admin/account/password')
 }
 
 function logout() {

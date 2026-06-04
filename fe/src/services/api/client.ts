@@ -35,13 +35,24 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
-// Response: handle 401 → logout + redirect
+function shouldForceLogoutOn401(url: string | undefined): boolean {
+  if (!url) return true
+  // Authenticated account actions may return 401 for business errors on older APIs.
+  if (url.includes('/auth/change-password') || url.includes('/auth/profile')) {
+    return false
+  }
+  return true
+}
+
+// Response: handle 401 → logout + redirect (session expired / invalid token)
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    const requestUrl = error.config?.url as string | undefined
+
+    if (status === 401 && shouldForceLogoutOn401(requestUrl)) {
       clearAdminToken()
-      // Redirect to login if not already there
       if (window.location.pathname !== '/admin/login') {
         window.location.href = '/admin/login'
       }

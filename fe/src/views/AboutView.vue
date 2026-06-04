@@ -5,9 +5,9 @@
       <div class="container about-hero-inner">
         <div class="about-hero-copy">
           <span class="eyebrow">Về {{ BRAND_NAME }}</span>
-          <h1 class="about-hero-title">Tinh tế trong<br />từng đường nét</h1>
+          <h1 class="about-hero-title">Kiến tạo giá trị<br />từ gỗ tự nhiên</h1>
           <p class="about-hero-text">
-            {{ BRAND_NAME }} là thương hiệu nội thất gỗ cao cấp với hơn 10 năm
+            {{ BRAND_NAME }} là thương hiệu nội thất gỗ cao cấp với hơn 5 năm
             kinh nghiệm trong thiết kế và sản xuất. Chúng tôi mang đến những sản
             phẩm tinh tế, bền vững và truyền cảm hứng cho không gian sống hiện
             đại.
