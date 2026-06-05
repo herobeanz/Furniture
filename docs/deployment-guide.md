@@ -11,6 +11,30 @@ Dự án deploy theo mô hình tách riêng:
 
 Backend là NestJS trong thư mục `be`. Không dùng Render Blueprint hay `render.yaml` — toàn bộ build/start command và biến môi trường khai báo trực tiếp trên service Render.
 
+### Môi trường local vs production
+
+| Thành phần | Development (local) | Production |
+|------------|---------------------|------------|
+| DB backend | PostgreSQL `localhost` (`be/.env`) | Supabase (`be/.env.production.example` → Render) |
+| API frontend | `fe/.env.development` | Vercel env (`fe/.env.production.example`) |
+| CORS backend | `http://localhost:5173` (`be/.env.development`) | `https://dogohungcuong.vercel.app` |
+
+**Không** dùng chung Supabase cho dev và prod. Dev migrate/seed trên Postgres local; prod migrate trên Supabase qua Render build.
+
+**Setup local lần đầu:**
+
+```bash
+# Backend
+cd be && cp .env.example .env
+# Sửa DATABASE_URL/DIRECT_URL trỏ Postgres local, rồi:
+npm run prisma:migrate:dev
+npm run start:dev
+
+# Frontend
+cd fe && cp .env.example .env
+yarn dev
+```
+
 URL production backend (tham chiếu trong doc):
 
 ```text
@@ -45,7 +69,7 @@ Trong Supabase Dashboard, lấy 2 connection strings:
 Dùng pooled connection cho runtime traffic:
 
 ```text
-postgres://postgres.bdsgmnmcinlubhowzbna:<password>@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+postgres://postgres.lsxtuwergkagsrmayghz:<password>@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
 ```
 
 #### `DIRECT_URL`
@@ -53,10 +77,10 @@ postgres://postgres.bdsgmnmcinlubhowzbna:<password>@aws-1-us-east-1.pooler.supab
 Dùng **session pooler** (port `5432` trên host `*.pooler.supabase.com`) cho Prisma migrations trên Render. Không dùng `db.<project-ref>.supabase.co` — Render thường không reach được (lỗi P1001).
 
 ```text
-postgres://postgres.bdsgmnmcinlubhowzbna:<password>@aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+postgres://postgres.lsxtuwergkagsrmayghz:<password>@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
-Tham chiếu mẫu: `be/.env.render.example`.
+Tham chiếu mẫu: `be/.env.production.example`.
 
 Không commit giá trị thật vào Git.
 
@@ -182,7 +206,12 @@ Frontend Vite cần biến môi trường production:
 
 ```text
 VITE_API_BASE_URL=https://backend-furniture-g98d.onrender.com/api/v1
+VITE_SUPABASE_URL=https://lsxtuwergkagsrmayghz.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
+VITE_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
 ```
+
+Tham chiếu đầy đủ: `fe/.env.production.example`. Nếu Vercel tự inject biến từ Supabase integration (prefix `dogohungcuong_` / `NEXT_PUBLIC_dogohungcuong_`), vẫn cần map sang tên `VITE_*` mà frontend đọc.
 
 Các bước:
 
@@ -193,6 +222,9 @@ Các bước:
    - Key: `VITE_API_BASE_URL`
    - Value: `https://backend-furniture-g98d.onrender.com/api/v1`
    - Environment: Production
+   - Key: `VITE_SUPABASE_URL` → `https://lsxtuwergkagsrmayghz.supabase.co`
+   - Key: `VITE_SUPABASE_ANON_KEY` → anon key từ Supabase Dashboard
+   - Key: `VITE_SUPABASE_PUBLISHABLE_KEY` → publishable key (nếu dùng)
 5. Bấm **Save**.
 6. Redeploy frontend production.
 
@@ -309,6 +341,8 @@ Backend Render:
 Frontend Vercel:
 
 - [ ] `VITE_API_BASE_URL` trỏ tới `https://backend-furniture-g98d.onrender.com/api/v1`
+- [ ] `VITE_SUPABASE_URL=https://lsxtuwergkagsrmayghz.supabase.co`
+- [ ] `VITE_SUPABASE_ANON_KEY` đã set (project `lsxtuwergkagsrmayghz`)
 - [ ] `VITE_APP_URL=https://dogohungcuong.vercel.app`
 - [ ] Redeploy production sau khi đổi env
 - [ ] Network tab không còn gọi localhost

@@ -1,5 +1,5 @@
 /**
- * Supabase client config (project bdsgmnmcinlubhowzbna).
+ * Supabase client config (project lsxtuwergkagsrmayghz).
  * Dùng khi tích hợp Supabase JS; API chính vẫn qua NestJS + VITE_API_BASE_URL.
  */
 export const supabaseConfig = {

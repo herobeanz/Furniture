@@ -5,15 +5,24 @@
         <!-- Column 1: Brand intro + socials -->
         <div class="footer-col footer-brand">
           <div class="footer-logo-row">
-            <img
-              :src="SITE.brand.logoMarkSrc"
-              :alt="SITE.brand.name"
-              class="footer-mark"
-              width="28"
-              height="28"
-              loading="lazy"
-            />
-            <span class="footer-logo-text">{{ SITE.brand.footerTitle }}</span>
+            <div class="footer-logo-mark-wrap">
+              <img
+                :src="SITE.brand.logoMarkSrc"
+                :alt="SITE.brand.name"
+                class="footer-mark"
+                width="55"
+                height="55"
+                loading="lazy"
+              />
+            </div>
+            <div class="footer-logo-text-stack">
+              <span class="footer-logo-line footer-logo-line--sm">{{
+                SITE.brand.logoLineSm
+              }}</span>
+              <span class="footer-logo-line footer-logo-line--lg">{{
+                SITE.brand.logoLineLg
+              }}</span>
+            </div>
           </div>
           <p class="footer-desc">
             {{ SITE.brand.tagline }}
@@ -152,13 +161,13 @@ const {
 }
 
 .footer-cols {
-  padding: 4rem 0 2.5rem;
+  padding: 2.5rem 0 1.75rem;
 }
 
 .footer-cols-inner {
   display: grid;
-  grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
-  gap: 3rem;
+  grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr));
+  gap: 2rem;
   align-items: flex-start;
 }
 
@@ -169,35 +178,62 @@ const {
 .footer-logo-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  color: #fff;
+  margin-bottom: 1.5625rem;
+}
+
+.footer-logo-mark-wrap {
+  width: 3.4375rem;
+  height: 3.4375rem;
+  background-color: #f5eedc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.9375rem;
+  flex-shrink: 0;
 }
 
 .footer-mark {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 3.4375rem;
+  height: 3.4375rem;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
 }
 
-.footer-logo-text {
+.footer-logo-text-stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.footer-logo-line {
+  display: block;
+  color: #dfb78c;
+}
+
+.footer-logo-line--sm {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.125em;
+}
+
+.footer-logo-line--lg {
+  font-size: 1.25rem;
   font-weight: 700;
-  font-size: var(--fs-body-sm);
   letter-spacing: 0.05em;
 }
 
 .footer-desc {
   font-size: var(--fs-body-sm);
   color: #78716c;
-  margin: 0 0 1rem;
-  line-height: 1.7;
+  margin: 0 0 0.75rem;
+  line-height: 1.55;
 }
 
 .footer-col h4 {
   font-size: var(--fs-body);
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   font-weight: 600;
   color: #fff;
   letter-spacing: 0.02em;
@@ -220,7 +256,7 @@ const {
 }
 
 .footer-col li {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .footer-col a {
@@ -280,16 +316,16 @@ const {
 .footer-contact-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
 .footer-contact-list li {
   font-size: var(--fs-body);
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: flex-start;
-  gap: 0.625rem;
-  line-height: 1.6;
+  gap: 0.5rem;
+  line-height: 1.5;
 }
 
 .footer-email {
@@ -334,7 +370,7 @@ const {
 
 .footer-bottom {
   border-top: 1px solid #292524;
-  padding: 1.5rem 0;
+  padding: 1rem 0;
 }
 
 .footer-bottom-inner {
@@ -355,7 +391,7 @@ const {
 @media (max-width: 1024px) {
   .footer-cols-inner {
     grid-template-columns: 1fr 1fr;
-    gap: 2.5rem;
+    gap: 1.75rem;
   }
 
   .footer-brand {
@@ -365,16 +401,20 @@ const {
 
 @media (max-width: 768px) {
   .footer-cols {
-    padding: 3rem 0 2rem;
+    padding: 2rem 0 1.25rem;
   }
 
   .footer-cols-inner {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   .footer-brand {
     text-align: center;
+  }
+
+  .footer-logo-row {
+    justify-content: center;
   }
 
   .footer-socials {
@@ -400,11 +440,15 @@ const {
 
 @media (max-width: 480px) {
   .footer-cols {
-    padding: 2.5rem 0 1.5rem;
+    padding: 1.75rem 0 1.25rem;
   }
 
-  .footer-logo {
-    font-size: var(--fs-card-title);
+  .footer-logo-line--sm {
+    font-size: 0.9375rem;
+  }
+
+  .footer-logo-line--lg {
+    font-size: 1.125rem;
   }
 
   .footer-desc {
@@ -413,7 +457,7 @@ const {
 
   .footer-col h4 {
     font-size: var(--fs-body);
-    margin-bottom: 1rem;
+    margin-bottom: 0.625rem;
   }
 
   .footer-col a,
@@ -421,14 +465,14 @@ const {
     font-size: var(--fs-body-sm);
   }
 
-  .social-icon {
-    width: 36px;
-    height: 36px;
-    font-size: var(--fs-body);
+  .social-link {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.875rem;
   }
 
   .footer-bottom {
-    padding: 1.25rem 0;
+    padding: 0.875rem 0;
   }
 
   .footer-bottom-inner p {

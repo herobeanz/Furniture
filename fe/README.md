@@ -31,8 +31,9 @@ frontend/
 # Install dependencies
 yarn install
 
-# Copy environment variables
+# Copy environment variables (brand, liên hệ, MXH)
 cp .env.example .env
+# Dev URLs: fe/.env.development (đã có sẵn, tự load khi yarn dev)
 ```
 
 ## Development
@@ -60,13 +61,19 @@ yarn preview
 
 ## Environment Variables
 
-Create a `.env` file based on `.env.example`:
+| File | Mục đích |
+|------|----------|
+| `.env` | Brand, liên hệ, MXH (chung dev + prod) |
+| `.env.development` | API/App URL local — tự load khi `yarn dev` |
+| `.env.production.example` | Mẫu biến cho Vercel production |
 
-```env
-VITE_API_BASE_URL=http://localhost:3000/api/v1
-VITE_APP_NAME=Đồ gỗ Hùng Cường
-VITE_APP_URL=http://localhost:5173
+```bash
+cp .env.example .env
 ```
+
+Dev (`yarn dev`): `VITE_API_BASE_URL=http://localhost:3000/api/v1` từ `.env.development`.
+
+Production (Vercel): set `VITE_API_BASE_URL`, `VITE_APP_URL`, Supabase keys theo `.env.production.example`.
 
 ## Features
 

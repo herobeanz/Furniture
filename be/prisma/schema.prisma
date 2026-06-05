@@ -224,31 +224,6 @@ model Inquiry {
 }
 
 // ---------------------------------------------------------------------------
-// CMS Pages (About, Privacy, Terms, etc.)
-// ---------------------------------------------------------------------------
-
-model CmsPage {
-  id              Int       @id @default(autoincrement())
-  title           String
-  slug            String    @unique
-  content         String    @db.Text
-  thumbnail       String?
-  seo_title       String?   @map("seo_title")
-  seo_description String?   @db.Text @map("seo_description")
-  page_type       String?   @map("page_type")
-  is_active       Boolean   @default(true) @map("is_active")
-  meta_keywords   String?   @map("meta_keywords")
-  published_at    DateTime? @map("published_at")
-  created_at      DateTime  @default(now()) @map("created_at")
-  updated_at      DateTime  @updatedAt @map("updated_at")
-
-  @@index([slug])
-  @@index([is_active])
-  @@index([page_type])
-  @@map("cms_pages")
-}
-
-// ---------------------------------------------------------------------------
 // Blog Posts
 // ---------------------------------------------------------------------------
 
