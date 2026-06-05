@@ -2,11 +2,12 @@
   <article class="blog-card">
     <RouterLink :to="`/blog/${post.slug}`" class="blog-card-link">
       <div class="blog-card-image-wrap">
-        <img
-          :src="resolveMediaUrl(post.thumbnail) || BLOG_FALLBACK_THUMBNAIL"
+        <OptimizedImage
+          :src="post.thumbnail || BLOG_FALLBACK_THUMBNAIL"
           :alt="post.title"
-          class="blog-card-image"
-          loading="lazy"
+          img-class="blog-card-image"
+          :widths="IMAGE_WIDTHS.card"
+          :sizes="IMAGE_SIZES.blogCard"
         />
       </div>
       <div class="blog-card-body">
@@ -34,8 +35,9 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import type { BlogPost } from "@/services/api/blog";
 import { formatBlogDate } from "@/utils/format";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import { BLOG_FALLBACK_THUMBNAIL } from "@/constants/blog";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 interface Props {
   post: BlogPost;

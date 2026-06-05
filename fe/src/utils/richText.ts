@@ -1,3 +1,5 @@
+import { optimizeRichContentHtml } from '@/utils/imageUrl'
+
 /** Plain text from HTML (validation, word count). */
 export function stripHtml(html: string): string {
   return html
@@ -29,7 +31,7 @@ export function fromEditorHtml(html: string): string {
   return html ?? ''
 }
 
-/** Public pages: stored HTML already contains absolute image URLs. */
+/** Public pages: resolve Cloudinary URLs with delivery transforms. */
 export function resolveRichContentHtml(html: string): string {
-  return html ?? ''
+  return optimizeRichContentHtml(html ?? '')
 }

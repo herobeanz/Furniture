@@ -43,11 +43,7 @@ export class BlogService {
           { published_at: { lte: new Date() } },
         ],
       },
-      orderBy: [
-        { is_featured: 'desc' },
-        { published_at: 'desc' },
-        { created_at: 'desc' },
-      ],
+      orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }],
     });
     return posts.map(serializeBlogPost);
   }
@@ -100,10 +96,7 @@ export class BlogService {
           { published_at: { lte: new Date() } },
         ],
       },
-      orderBy: [
-        { published_at: 'desc' },
-        { created_at: 'desc' },
-      ],
+      orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }],
       take: limit,
     });
     return posts.map(serializeBlogPost);

@@ -27,11 +27,13 @@
           :to="tiles[0].href"
           class="bento-tile bento-tile--large group"
         >
-          <img
+          <OptimizedImage
             v-if="tiles[0].thumbnail"
-            :src="resolveMediaUrl(tiles[0].thumbnail)"
+            :src="tiles[0].thumbnail"
             :alt="tiles[0].name"
-            class="bento-img"
+            img-class="bento-img"
+            :widths="IMAGE_WIDTHS.bentoLarge"
+            :sizes="IMAGE_SIZES.bentoLarge"
           />
           <div v-else class="bento-img bento-img--placeholder" />
           <div class="bento-overlay">
@@ -51,11 +53,13 @@
             :to="tile.href"
             class="bento-tile bento-tile--small group"
           >
-            <img
+            <OptimizedImage
               v-if="tile.thumbnail"
-              :src="resolveMediaUrl(tile.thumbnail)"
+              :src="tile.thumbnail"
               :alt="tile.name"
-              class="bento-img"
+              img-class="bento-img"
+              :widths="IMAGE_WIDTHS.bentoSmall"
+              :sizes="IMAGE_SIZES.bentoSmall"
             />
             <div v-else class="bento-img bento-img--placeholder" />
             <div class="bento-overlay">
@@ -78,8 +82,9 @@
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import type { Collection } from "@/services/api/collections";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import { BRAND_NAME } from "@/constants/brand";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 export interface FeaturedTile {
   id: number;

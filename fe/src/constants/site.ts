@@ -41,12 +41,12 @@ const DEFAULTS = {
     hoursLine2: "Thứ 2 - Thứ 7",
   },
   social: {
-    facebook: "https://www.facebook.com/dogohungcuong",
-    messenger: "",
+    facebook: "https://www.facebook.com/dogonoithathungcuong",
+    messenger: "https://m.me/dogonoithathungcuong",
     zalo: "https://zalo.me/0357803837",
-    tiktok: "",
+    tiktok: "https://www.tiktok.com/@dogonoithathungcuong",
     instagram: "",
-    youtube: "",
+    youtube: "https://www.youtube.com/@noithathungcuong",
   },
 } as const;
 

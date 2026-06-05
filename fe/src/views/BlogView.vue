@@ -12,11 +12,14 @@
           </p>
         </div>
         <div class="blog-hero-visual">
-          <img
+          <OptimizedImage
             :src="BLOG_HERO_IMAGE"
             alt="Không gian sống đẹp"
-            class="blog-hero-image"
+            img-class="blog-hero-image"
+            :widths="IMAGE_WIDTHS.hero"
+            :sizes="IMAGE_SIZES.hero"
             loading="eager"
+            fetch-priority="high"
           />
         </div>
       </div>
@@ -122,9 +125,11 @@ defineOptions({ name: 'BlogView' })
 
 import { computed, ref, watch } from "vue";
 import BlogCard from "@/components/blog/BlogCard.vue";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import BlogSkeleton from "@/components/skeleton/BlogSkeleton.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
 import ErrorState from "@/components/common/ErrorState.vue";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 import { useBlogListData } from "@/composables/blog/useBlogData";
 import {
   BLOG_FILTER_TABS,

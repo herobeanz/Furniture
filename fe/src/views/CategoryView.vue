@@ -22,11 +22,14 @@
             </p>
           </div>
           <div class="category-hero-visual">
-            <img
+            <OptimizedImage
               :src="heroImage"
               :alt="`Danh mục ${category.name}`"
-              class="category-hero-image"
+              img-class="category-hero-image"
+              :widths="IMAGE_WIDTHS.hero"
+              :sizes="IMAGE_SIZES.hero"
               loading="eager"
+              fetch-priority="high"
             />
           </div>
         </div>
@@ -113,8 +116,9 @@ import ErrorState from "@/components/common/ErrorState.vue";
 import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
 import { useCategoryData } from "@/composables/category/useCategoryData";
 import { categoryStripIcon } from "@/constants/products-page";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import { PRODUCTS_HERO_IMAGE } from "@/constants/category-page";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 const {
   category,
@@ -136,7 +140,7 @@ const categoryIcon = computed(() =>
 
 const heroImage = computed(() => {
   const thumb = category.value?.thumbnail?.trim();
-  if (thumb) return resolveMediaUrl(thumb);
+  if (thumb) return thumb;
   return PRODUCTS_HERO_IMAGE;
 });
 

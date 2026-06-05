@@ -19,10 +19,11 @@
           class="blog-card"
         >
           <div class="blog-image">
-            <img
-              :src="resolveMediaUrl(post.thumbnail) || fallbackImage"
+            <OptimizedImage
+              :src="post.thumbnail || fallbackImage"
               :alt="post.title"
-              loading="lazy"
+              :widths="IMAGE_WIDTHS.card"
+              :sizes="IMAGE_SIZES.blogCard"
             />
           </div>
           <p v-if="post.publishedAt" class="blog-date">
@@ -40,8 +41,9 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 import type { BlogPost } from "@/services/api/blog";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import { formatBlogDate } from "@/utils/format";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 defineProps<{
   posts: BlogPost[];

@@ -10,11 +10,14 @@
           </p>
         </div>
         <div class="collections-hero-visual">
-          <img
+          <OptimizedImage
             :src="COLLECTIONS_HERO_IMAGE"
             alt="Bộ sưu tập gỗ cao cấp"
-            class="collections-hero-image"
+            img-class="collections-hero-image"
+            :widths="IMAGE_WIDTHS.hero"
+            :sizes="IMAGE_SIZES.hero"
             loading="eager"
+            fetch-priority="high"
           />
         </div>
       </div>
@@ -118,8 +121,10 @@ defineOptions({ name: 'CollectionsListView' })
 
 import { computed, ref, watch } from "vue";
 import CollectionCard from "@/components/collection/CollectionCard.vue";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import CollectionCardSkeleton from "@/components/skeleton/CollectionCardSkeleton.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 import ErrorState from "@/components/common/ErrorState.vue";
 import { useCollectionsListPage } from "@/composables/collection/useCollectionsListPage";
 import {

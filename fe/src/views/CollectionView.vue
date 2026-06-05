@@ -14,11 +14,14 @@
             </p>
           </div>
           <div v-if="collection.thumbnail" class="collection-hero-visual">
-            <img
-              :src="resolveMediaUrl(collection.thumbnail)"
+            <OptimizedImage
+              :src="collection.thumbnail"
               :alt="collection.name"
-              class="collection-hero-image"
+              img-class="collection-hero-image"
+              :widths="IMAGE_WIDTHS.hero"
+              :sizes="IMAGE_SIZES.hero"
               loading="eager"
+              fetch-priority="high"
             />
           </div>
         </div>
@@ -41,7 +44,8 @@ import ErrorState from "@/components/common/ErrorState.vue";
 import CollectionProductsSection from "@/components/collection/CollectionProductsSection.vue";
 import { useCollectionData } from "@/composables/collection/useCollectionData";
 import { collectionPublicDescription } from "@/utils/collectionDescription";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 const { collection, products, loading, error, isNotFound } =
   useCollectionData();

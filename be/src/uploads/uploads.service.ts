@@ -50,6 +50,8 @@ export class UploadsService {
           resource_type: 'image',
           folder: this.cloudinaryFolder,
           public_id: randomUUID(),
+          quality: 'auto:good',
+          fetch_format: 'auto',
         },
         (error, result) => {
           if (error || !result) {

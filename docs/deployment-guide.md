@@ -17,7 +17,7 @@ Backend là NestJS trong thư mục `be`. Không dùng Render Blueprint hay `ren
 |------------|---------------------|------------|
 | DB backend | PostgreSQL `localhost` (`be/.env`) | Supabase (`be/.env.production.example` → Render) |
 | API frontend | `fe/.env.development` | Vercel env (`fe/.env.production.example`) |
-| CORS backend | `http://localhost:5173` (`be/.env.development`) | `https://dogohungcuong.vercel.app` |
+| CORS backend | `http://localhost:5173` (`be/.env.development`) | `https://your-frontend.vercel.app` |
 
 **Không** dùng chung Supabase cho dev và prod. Dev migrate/seed trên Postgres local; prod migrate trên Supabase qua Render build.
 
@@ -35,10 +35,10 @@ cd fe && cp .env.example .env
 yarn dev
 ```
 
-URL production backend (tham chiếu trong doc):
+URL production backend (thay bằng URL thật sau khi tạo Render service):
 
 ```text
-https://backend-furniture-g98d.onrender.com
+https://<your-service-name>.onrender.com
 ```
 
 ## 1. Chuẩn bị trước khi deploy
@@ -69,7 +69,7 @@ Trong Supabase Dashboard, lấy 2 connection strings:
 Dùng pooled connection cho runtime traffic:
 
 ```text
-postgres://postgres.lsxtuwergkagsrmayghz:<password>@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
 ```
 
 #### `DIRECT_URL`
@@ -77,7 +77,7 @@ postgres://postgres.lsxtuwergkagsrmayghz:<password>@aws-1-ap-southeast-1.pooler.
 Dùng **session pooler** (port `5432` trên host `*.pooler.supabase.com`) cho Prisma migrations trên Render. Không dùng `db.<project-ref>.supabase.co` — Render thường không reach được (lỗi P1001).
 
 ```text
-postgres://postgres.lsxtuwergkagsrmayghz:<password>@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+postgres://postgres.<project-ref>:<password>@<region>.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 Tham chiếu mẫu: `be/.env.production.example`.
@@ -90,10 +90,10 @@ Không commit giá trị thật vào Git.
 
 1. Mở [Render Dashboard](https://dashboard.render.com).
 2. Chọn **New +** → **Web Service** (không chọn Blueprint).
-3. Connect GitHub repository (ví dụ `herobeanz/Furniture`).
+3. Connect GitHub repository (ví dụ `your-org/your-repo`).
 4. Chọn branch deploy, thường là `main`.
 5. Điền cấu hình:
-   - **Name:** `backend-furniture`
+   - **Name:** `<your-service-name>` (ví dụ `backend-furniture`)
    - **Region:** theo nhu cầu (Free tier có sleep sau idle)
    - **Root Directory:** `be`
    - **Runtime:** Node
@@ -116,7 +116,7 @@ Bắt buộc:
 
 ```text
 NODE_ENV=production
-FRONTEND_URL=https://dogohungcuong.vercel.app
+FRONTEND_URL=https://your-frontend.vercel.app
 DATABASE_URL=<supabase-transaction-pooler-port-6543-pgbouncer=true>
 DIRECT_URL=<supabase-session-pooler-port-5432-on-pooler-host>
 JWT_SECRET=<strong-random-secret>
@@ -149,7 +149,7 @@ Render tự cung cấp `PORT`, không cần set thủ công.
 
 Dùng mục này nếu log còn chạy `yarn install` / `yarn start` hoặc không tìm thấy `package.json`.
 
-Vào service `backend-furniture` → **Settings**:
+Vào service `<your-service-name>` → **Settings**:
 
 ```text
 Root Directory: be
@@ -182,7 +182,7 @@ Couldn't find a package.json file in "/opt/render/project/src"
 Health check:
 
 ```text
-https://backend-furniture-g98d.onrender.com/health
+https://<your-service-name>.onrender.com/health
 ```
 
 Kết quả mong muốn:
@@ -197,7 +197,7 @@ Kết quả mong muốn:
 API base URL cho frontend:
 
 ```text
-https://backend-furniture-g98d.onrender.com/api/v1
+https://<your-service-name>.onrender.com/api/v1
 ```
 
 ## 4. Cấu hình frontend trên Vercel
@@ -205,13 +205,13 @@ https://backend-furniture-g98d.onrender.com/api/v1
 Frontend Vite cần biến môi trường production:
 
 ```text
-VITE_API_BASE_URL=https://backend-furniture-g98d.onrender.com/api/v1
-VITE_SUPABASE_URL=https://lsxtuwergkagsrmayghz.supabase.co
+VITE_API_BASE_URL=https://<your-service-name>.onrender.com/api/v1
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon-key>
 VITE_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
 ```
 
-Tham chiếu đầy đủ: `fe/.env.production.example`. Nếu Vercel tự inject biến từ Supabase integration (prefix `dogohungcuong_` / `NEXT_PUBLIC_dogohungcuong_`), vẫn cần map sang tên `VITE_*` mà frontend đọc.
+Tham chiếu đầy đủ: `fe/.env.production.example`. Nếu Vercel tự inject biến từ Supabase integration (prefix tùy project, ví dụ `<project-prefix>_` / `NEXT_PUBLIC_<project-prefix>_`), vẫn cần map sang tên `VITE_*` mà frontend đọc.
 
 Các bước:
 
@@ -220,9 +220,9 @@ Các bước:
 3. Vào **Settings** → **Environment Variables**.
 4. Thêm hoặc sửa:
    - Key: `VITE_API_BASE_URL`
-   - Value: `https://backend-furniture-g98d.onrender.com/api/v1`
+   - Value: `https://<your-service-name>.onrender.com/api/v1`
    - Environment: Production
-   - Key: `VITE_SUPABASE_URL` → `https://lsxtuwergkagsrmayghz.supabase.co`
+   - Key: `VITE_SUPABASE_URL` → `https://<project-ref>.supabase.co`
    - Key: `VITE_SUPABASE_ANON_KEY` → anon key từ Supabase Dashboard
    - Key: `VITE_SUPABASE_PUBLISHABLE_KEY` → publishable key (nếu dùng)
 5. Bấm **Save**.
@@ -237,7 +237,7 @@ Sau khi backend và frontend đều deploy:
 1. Mở:
 
 ```text
-https://dogohungcuong.vercel.app
+https://your-frontend.vercel.app
 ```
 
 2. Mở DevTools → Network.
@@ -245,7 +245,7 @@ https://dogohungcuong.vercel.app
 4. Kiểm tra request API phải gọi tới:
 
 ```text
-https://backend-furniture-g98d.onrender.com/api/v1/...
+https://<your-service-name>.onrender.com/api/v1/...
 ```
 
 Không được còn gọi:
@@ -313,13 +313,13 @@ Kiểm tra:
 Kiểm tra Render env:
 
 ```text
-FRONTEND_URL=https://dogohungcuong.vercel.app
+FRONTEND_URL=https://your-frontend.vercel.app
 ```
 
 Nếu có nhiều origin, phân tách bằng dấu phẩy:
 
 ```text
-FRONTEND_URL=https://dogohungcuong.vercel.app,http://localhost:5173
+FRONTEND_URL=https://your-frontend.vercel.app,http://localhost:5173
 ```
 
 ## 7. Checklist deploy nhanh
@@ -327,12 +327,12 @@ FRONTEND_URL=https://dogohungcuong.vercel.app,http://localhost:5173
 Backend Render:
 
 - [ ] Web Service đã connect GitHub (không dùng Blueprint)
-- [ ] Service name là `backend-furniture`
+- [ ] Service name đã đặt (ví dụ `<your-service-name>`)
 - [ ] `Root Directory` là `be`
 - [ ] Build command đúng (npm + prisma + build)
 - [ ] Start command là `npm run start:prod`
 - [ ] Health check path là `/health`
-- [ ] Service URL là `https://backend-furniture-g98d.onrender.com`
+- [ ] Service URL là `https://<your-service-name>.onrender.com`
 - [ ] `DATABASE_URL` và `DIRECT_URL` đã set
 - [ ] JWT secret đã set
 - [ ] Cloudinary env đã set nếu dùng upload
@@ -340,10 +340,10 @@ Backend Render:
 
 Frontend Vercel:
 
-- [ ] `VITE_API_BASE_URL` trỏ tới `https://backend-furniture-g98d.onrender.com/api/v1`
-- [ ] `VITE_SUPABASE_URL=https://lsxtuwergkagsrmayghz.supabase.co`
-- [ ] `VITE_SUPABASE_ANON_KEY` đã set (project `lsxtuwergkagsrmayghz`)
-- [ ] `VITE_APP_URL=https://dogohungcuong.vercel.app`
+- [ ] `VITE_API_BASE_URL` trỏ tới `https://<your-service-name>.onrender.com/api/v1`
+- [ ] `VITE_SUPABASE_URL=https://<project-ref>.supabase.co`
+- [ ] `VITE_SUPABASE_ANON_KEY` đã set (project `<project-ref>`)
+- [ ] `VITE_APP_URL=https://your-frontend.vercel.app`
 - [ ] Redeploy production sau khi đổi env
 - [ ] Network tab không còn gọi localhost
 

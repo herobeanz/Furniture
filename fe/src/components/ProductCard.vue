@@ -8,7 +8,7 @@
         v-if="cardImage"
         :src="cardImageSrc"
         :srcset="cardImageSrcSet"
-        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+        :sizes="IMAGE_SIZES.productCard"
         :alt="product.name"
         loading="lazy"
         decoding="async"
@@ -80,7 +80,12 @@ import { computed } from "vue";
 import type { Product } from "@/services/api/products";
 import { formatPrice } from "@/utils/format";
 import { resolveMediaUrl } from "@/utils/mediaUrl";
-import { optimizeImageUrl } from "@/utils/imageUrl";
+import {
+  buildResponsiveSrcSet,
+  IMAGE_SIZES,
+  IMAGE_WIDTHS,
+  optimizeImageUrl,
+} from "@/utils/imageUrl";
 import { getProductDisplayImage } from "@/utils/productGallery";
 import { getProductPath } from "@/utils/navigation";
 
@@ -102,16 +107,9 @@ const cardImageBase = computed(() => resolveMediaUrl(cardImage.value));
 const cardImageSrc = computed(() =>
   optimizeImageUrl(cardImageBase.value, { width: 480, quality: "auto" }),
 );
-const cardImageSrcSet = computed(() => {
-  const base = cardImageBase.value;
-  if (!base) return "";
-  return [320, 480, 640]
-    .map(
-      (width) =>
-        `${optimizeImageUrl(base, { width, quality: "auto" })} ${width}w`,
-    )
-    .join(", ");
-});
+const cardImageSrcSet = computed(() =>
+  buildResponsiveSrcSet(cardImageBase.value, IMAGE_WIDTHS.card),
+);
 
 const hasDiscount = computed(() => {
   return (

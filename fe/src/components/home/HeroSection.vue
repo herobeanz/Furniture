@@ -20,11 +20,15 @@
         </div>
       </div>
       <div class="hero-visual">
-        <img
+        <OptimizedImage
           v-if="heroImage"
           :src="heroImage"
           alt="Nội thất gỗ cao cấp"
-          class="hero-image"
+          img-class="hero-image"
+          :widths="IMAGE_WIDTHS.hero"
+          :sizes="IMAGE_SIZES.hero"
+          loading="eager"
+          fetch-priority="high"
         />
         <div v-else class="hero-image hero-image--placeholder" />
       </div>
@@ -50,12 +54,13 @@
 
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import { HOME_HERO_IMAGE } from "@/constants/home";
 import { VALUE_PROPS } from "@/constants/design-system";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 const valueProps = VALUE_PROPS;
-const heroImage = resolveMediaUrl(HOME_HERO_IMAGE);
+const heroImage = HOME_HERO_IMAGE;
 
 function valueIconClass(icon: string): string {
   const map: Record<string, string> = {

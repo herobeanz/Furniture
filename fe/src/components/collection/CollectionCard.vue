@@ -5,14 +5,12 @@
       class="collection-card-link"
     >
       <div class="collection-card-image-wrap">
-        <img
-          :src="
-            resolveMediaUrl(collection.thumbnail) ||
-            COLLECTIONS_FALLBACK_THUMBNAIL
-          "
+        <OptimizedImage
+          :src="collection.thumbnail || COLLECTIONS_FALLBACK_THUMBNAIL"
           :alt="collection.name"
-          class="collection-card-image"
-          loading="lazy"
+          img-class="collection-card-image"
+          :widths="IMAGE_WIDTHS.card"
+          :sizes="IMAGE_SIZES.collectionCard"
         />
       </div>
       <div class="collection-card-footer">
@@ -32,8 +30,9 @@
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import type { Collection } from "@/services/api/collections";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import { COLLECTIONS_FALLBACK_THUMBNAIL } from "@/constants/collections-page";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 
 interface Props {
   collection: Collection;

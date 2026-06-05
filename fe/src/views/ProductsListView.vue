@@ -10,11 +10,14 @@
           </p>
         </div>
         <div class="products-hero-visual">
-          <img
+          <OptimizedImage
             :src="heroImage"
             :alt="heroAlt"
-            class="products-hero-image"
+            img-class="products-hero-image"
+            :widths="IMAGE_WIDTHS.hero"
+            :sizes="IMAGE_SIZES.hero"
             loading="eager"
+            fetch-priority="high"
           />
         </div>
       </div>
@@ -158,9 +161,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import ProductGrid from "@/components/ProductGrid.vue";
+import OptimizedImage from "@/components/common/OptimizedImage.vue";
 import ProductGridSkeleton from "@/components/skeleton/ProductGridSkeleton.vue";
 import EmptyState from "@/components/common/EmptyState.vue";
 import ErrorState from "@/components/common/ErrorState.vue";
+import { IMAGE_SIZES, IMAGE_WIDTHS } from "@/utils/imageUrl";
 import { useProductsListPage } from "@/composables/product/useProductsListPage";
 import {
   PRODUCTS_HERO_IMAGE,
@@ -168,7 +173,6 @@ import {
   type ProductsPageSortKey,
 } from "@/constants/products-page";
 import { categoryStripIcon } from "@/constants/products-page";
-import { resolveMediaUrl } from "@/utils/mediaUrl";
 
 const {
   categories,
@@ -193,7 +197,7 @@ const selectedCategory = computed(() =>
 
 const heroImage = computed(() => {
   const thumb = selectedCategoryThumbnail.value?.trim();
-  if (thumb) return resolveMediaUrl(thumb);
+  if (thumb) return thumb;
   return PRODUCTS_HERO_IMAGE;
 });
 
