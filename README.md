@@ -1,290 +1,190 @@
-# 🪑 Furniture E-commerce System – Full Architecture (Public Website)
+# Furniture — Website trưng bày & tiếp nhận khách hàng tiềm năng
 
-> Tài liệu mô tả **đầy đủ kiến trúc Backend & Frontend** cho website bán nội thất **public**.
-> ❌ Không đăng ký / đăng nhập
-> 🌐 Tất cả người dùng internet đều truy cập được
-> ❤️ Có wishlist – 🛒 có giỏ hàng – 💬 mua qua Facebook / Zalo / liên hệ
+Website bán nội thất **public** kết hợp **admin panel** để quản lý nội dung. Khách không cần đăng ký; mua hàng qua **liên hệ trực tiếp** (form, Facebook, Zalo).
 
----
-
-## 1. Tổng quan hệ thống
-
-* Mô hình: **Public Furniture Showcase & Lead-based Ordering**
-* Mục tiêu:
-
-  * Trưng bày sản phẩm nội thất
-  * Cho phép khách lưu wishlist & giỏ hàng
-  * Chuyển đổi mua hàng bằng **liên hệ trực tiếp**
-
-Định hướng kiến trúc:
-
-* **Public-first**
-* **SEO-first**
-* **Module-based backend**
-* **Frontend tách biệt, dễ mở rộng sang e-commerce đầy đủ**
+> Không có wishlist · Không có giỏ hàng · Không có thanh toán online cho khách
 
 ---
 
-## 2. User scope
+## Tổng quan
 
-### Public user
+| Thành phần | Mô tả |
+|------------|--------|
+| **Public site** | Trưng bày sản phẩm, bộ sưu tập, blog; tìm kiếm & lọc; gửi yêu cầu tư vấn |
+| **Admin** | Đăng nhập JWT; quản lý sản phẩm, danh mục, bộ sưu tập, blog, lead |
+| **Mô hình kinh doanh** | Lead-based ordering — giá tham khảo, chốt đơn qua kênh liên hệ |
 
-* Không cần tài khoản
-* Có thể:
-
-  * Xem / tìm / lọc sản phẩm
-  * Lưu wishlist
-  * Thêm giỏ hàng
-  * Gửi yêu cầu mua hàng (lead)
-
-Lưu trạng thái bằng:
-
-* localStorage
-* cookie
-* anonymousId
+**Định hướng:** public-first, SEO-first, module-based backend, frontend tách biệt (`fe/` + `be/`).
 
 ---
 
-## 3. Functional Overview
+## Tech stack
 
-* Trang chủ
-* Danh mục & tìm kiếm
-* Trang chi tiết sản phẩm
-* Wishlist
-* Giỏ hàng
-* Liên hệ mua hàng (Messenger / Zalo / Form)
-* Admin quản lý nội dung & lead
+| Layer | Công nghệ |
+|-------|-----------|
+| Frontend | Vue 3, TypeScript, Vite, Vue Router 4, Pinia, Axios |
+| Backend | NestJS, Prisma, PostgreSQL |
+| Upload | Cloudinary (admin) |
+| Deploy | Vercel (FE) · Render (BE) · Supabase (DB) |
 
----
-
-# 🧱 PHẦN A – FRONTEND ARCHITECTURE
-
-## A1. Tổng quan Frontend
-
-* Framework: **VueJS 3 + Vite**
-* Ngôn ngữ: **TypeScript**
-* Routing: **Vue Router 4**
-* State Management: **Pinia**
-* UI: **Shadcn UI (Vue)** (sẽ setup sau)
-* Mục tiêu:
-
-  * SPA với Vue Router
-  * UX mượt, load nhanh
-  * Quản lý state rõ ràng với Pinia
+Chi tiết deploy: [docs/deployment-guide.md](./docs/deployment-guide.md)
 
 ---
 
-## A2. Cấu trúc thư mục Frontend
+## Tính năng hiện có
+
+### Trang public
+
+| Trang | Route |
+|-------|-------|
+| Trang chủ | `/` |
+| Sản phẩm (tất cả) | `/san-pham` |
+| Danh mục sản phẩm | `/san-pham/:categorySlug` |
+| Chi tiết sản phẩm | `/san-pham/:categorySlug/:productSlug` |
+| Bộ sưu tập | `/bo-suu-tap`, `/bo-suu-tap/:slug` |
+| Cẩm nang / Blog | `/blog`, `/blog/:slug` |
+| Tìm kiếm | `/search` |
+| Về chúng tôi | `/ve-chung-toi` |
+| Liên hệ | `/lien-he` |
+| Hướng dẫn mua hàng | `/huong-dan-mua-hang` |
+| Chính sách (bảo hành, đổi trả, vận chuyển, …) | `/chinh-sach-*`, `/privacy-policy`, `/terms`, … |
+
+**Luồng mua hàng:** khách xem sản phẩm → gửi inquiry (form sản phẩm / trang liên hệ) hoặc chat **Facebook / Zalo** (link cấu hình qua env).
+
+**Preview:** admin xem trước nội dung chưa publish qua route `*/preview`.
+
+### Admin (`/admin`)
+
+- Dashboard & báo cáo
+- Sản phẩm & danh mục (CRUD, sắp xếp, upload ảnh)
+- Bộ sưu tập (gán sản phẩm, thứ tự)
+- Blog (TinyMCE)
+- Quản lý inquiry / lead
+- Tài khoản admin (đổi mật khẩu, thông tin)
+
+Đăng nhập admin: `/admin/login` (JWT, không dùng cho khách).
+
+---
+
+## Cấu trúc monorepo
 
 ```text
-frontend/
- ├── src/
- │    ├── assets/           # ảnh, font, global css
- │    ├── components/       # UI components (Button, Card...)
- │    ├── views/            # page components
- │    │    ├── HomeView.vue
- │    │    ├── CategoryView.vue
- │    │    ├── ProductView.vue
- │    │    ├── WishlistView.vue
- │    │    ├── CartView.vue
- │    │    └── ContactView.vue
- │    ├── layouts/          # layout chính (DefaultLayout)
- │    ├── composables/      # logic dùng chung (useCart, useWishlist)
- │    ├── stores/           # Pinia stores
- │    ├── services/         # gọi API backend
- │    ├── utils/            # helper frontend
- │    ├── types/            # TypeScript types
- │    ├── router/           # Vue Router configuration
- │    ├── App.vue           # root component
- │    └── main.ts           # entry point
- ├── public/                # static files
- └── vite.config.ts         # Vite configuration
+Furniture/
+├── fe/                 # Vue 3 frontend
+│   ├── src/
+│   │   ├── components/   # UI & section components
+│   │   ├── composables/  # useProductData, useHomeData, …
+│   │   ├── constants/    # brand, nav, static pages
+│   │   ├── layouts/      # MainLayout, AdminLayout, PreviewLayout
+│   │   ├── router/
+│   │   ├── services/api/ # gọi REST backend
+│   │   ├── stores/       # Pinia (cache, auth, toast)
+│   │   ├── views/        # public + admin pages
+│   │   └── style.css     # design tokens
+│   └── docs/             # DESIGN_SYSTEM, TYPOGRAPHY
+├── be/                 # NestJS API
+│   ├── prisma/           # schema, migrations, seed
+│   └── src/
+│       ├── auth/
+│       ├── products/
+│       ├── categories/
+│       ├── collections/
+│       ├── blog/
+│       ├── inquiries/
+│       ├── reports/
+│       ├── uploads/
+│       ├── health/
+│       └── shared/
+└── docs/               # deployment, performance, changelog
 ```
 
 ---
 
-## A3. State Management (Pinia)
+## Backend modules & API
 
-### useCartStore
+REST API, prefix `/api/v1`, JSON.
 
-* items[]
-* addItem()
-* removeItem()
-* updateQuantity()
-* persist localStorage
+| Module | Vai trò |
+|--------|---------|
+| `products` | Danh sách, chi tiết, related, CRUD admin |
+| `categories` | Cây danh mục, sản phẩm theo danh mục |
+| `collections` | Bộ sưu tập curated (M2M với sản phẩm) |
+| `blog` | Bài viết cẩm nang |
+| `inquiries` | Lead từ form / sản phẩm (public create, admin quản lý) |
+| `auth` | Đăng nhập admin JWT |
+| `reports` | Thống kê dashboard |
+| `uploads` | Upload ảnh Cloudinary |
+| `health` | Health check (`/health`) |
 
-### useWishlistStore
+### Database (PostgreSQL / Prisma)
 
-* items[]
-* toggleWishlist()
-* persist localStorage
+- `admins`
+- `categories` → `products` → `product_images`
+- `collections` ↔ `collection_products`
+- `inquiries`
+- `blog_posts`
 
 ---
 
-## A4. Frontend Data Flow
+## Frontend state (Pinia)
 
-```text
-User Action
-   ↓
-Vue Component
-   ↓
-Pinia Store (state)
-   ↓
-Composable / Service
-   ↓
-Backend API
+| Store | Mục đích |
+|-------|----------|
+| `categoryTree` | Cache cây danh mục |
+| `productsCache` | Cache list / detail / related |
+| `collectionsCache` | Cache bộ sưu tập |
+| `blogCache` | Cache blog |
+| `adminAuth` | Token & session admin |
+| `routerLoading` | Spinner chuyển trang |
+| `toast` | Thông báo UI |
+
+Performance: stale-while-revalidate, `KeepAlive` trên view public — xem [docs/performance-optimization.md](./docs/performance-optimization.md).
+
+---
+
+## Chạy local
+
+### Backend
+
+```bash
+cd be
+cp .env.example .env
+# Chỉnh DATABASE_URL trỏ Postgres local
+npm install
+npm run prisma:migrate
+npm run start:dev
 ```
 
----
+API mặc định: `http://localhost:3000`
 
-## A5. SEO & Performance
+### Frontend
 
-* Dynamic meta tags (vue-meta hoặc @vueuse/head)
-* OpenGraph tags
-* Lazy load images
-* Code splitting với dynamic imports
-* CDN assets
-
----
-
-# 🧱 PHẦN B – BACKEND ARCHITECTURE
-
-## B1. Tổng quan Backend
-
-* Framework: **NestJS**
-* Ngôn ngữ: **TypeScript**
-* Kiến trúc: **Module-based**
-* Vai trò:
-
-  * Cung cấp dữ liệu sản phẩm
-  * Lưu lead / inquiry
-  * CMS nội dung
-
----
-
-## B2. Cấu trúc thư mục Backend
-
-```text
-backend/
- └── src/
-      ├── modules/
-      │    ├── product/
-      │    ├── category/
-      │    ├── wishlist/
-      │    ├── cart/
-      │    ├── inquiry/      # lead mua hàng
-      │    ├── promotion/
-      │    ├── inventory/
-      │    ├── cms/
-      │    └── tracking/
-      │
-      ├── shared/
-      │    ├── constants/
-      │    ├── enums/
-      │    ├── dto/
-      │    ├── interfaces/
-      │    ├── types/
-      │    ├── utils/
-      │    ├── exceptions/
-      │    ├── guards/
-      │    ├── decorators/
-      │    ├── interceptors/
-      │    ├── middlewares/
-      │    ├── pipes/
-      │    └── base/
-      │
-      ├── database/
-      └── main.ts
+```bash
+cd fe
+cp .env.example .env
+yarn install
+yarn dev
 ```
 
----
-
-## B3. Nguyên tắc Module Backend
-
-Mỗi module gồm:
-
-* controller
-* service
-* repository
-* dto
-* entity
-
-❌ Không gọi chéo DB giữa các module
-✅ Giao tiếp qua service hoặc event
+App mặc định: `http://localhost:5173` (`VITE_API_BASE_URL` trong `.env.development`).
 
 ---
 
-## B4. Shared Layer – Vai trò
+## Tài liệu liên quan
 
-* Dùng chung cho nhiều module
-* Không chứa business logic
-* Chuẩn hoá:
-
-  * response format
-  * error handling
-  * pagination
-
----
-
-## B5. Backend Data Flow
-
-```text
-HTTP Request
-   ↓
-Controller
-   ↓
-Service
-   ↓
-Repository
-   ↓
-Database
-```
+| File | Nội dung |
+|------|----------|
+| [fe/README.md](./fe/README.md) | Hướng dẫn frontend |
+| [be/README.md](./be/README.md) | Hướng dẫn backend |
+| [fe/docs/DESIGN_SYSTEM.md](./fe/docs/DESIGN_SYSTEM.md) | Design tokens & pattern UI |
+| [docs/deployment-guide.md](./docs/deployment-guide.md) | Deploy Vercel + Render + Supabase |
+| [docs/CHANGELOG.md](./docs/CHANGELOG.md) | Lịch sử thay đổi đáng chú ý |
 
 ---
 
-## B6. Database Overview
+## Roadmap (chưa triển khai)
 
-* PostgreSQL:
-
-  * product
-  * category
-  * inquiry (lead)
-  * cms
-
----
-
-# 🔗 FRONTEND ↔ BACKEND INTERACTION
-
-## API Communication
-
-* REST API
-* JSON
-* Versioning: /api/v1
-
-Frontend gọi:
-
-* product listing
-* product detail
-* inquiry submit
-
----
-
-# ⚠️ Critical Edge Cases
-
-* Người dùng xoá cookie → mất cart & wishlist
-* Giá chỉ mang tính tham khảo
-* Custom sản phẩm → báo giá sau
-* Spam form liên hệ
-
----
-
-# 🚀 Roadmap mở rộng
-
-* Bật đăng nhập / tài khoản
-* Thanh toán online
-* CRM automation
-* Recommendation system
-
----
-
-📌 Tài liệu này dùng làm **README.md / ARCHITECTURE.md** cho dự án.
+- Tài khoản khách hàng
+- Thanh toán online
+- Giỏ hàng / wishlist (nếu chuyển sang e-commerce đầy đủ)
+- CRM automation, gợi ý sản phẩm
